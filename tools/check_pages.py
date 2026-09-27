@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGES = ['index.html', 'notation/index.html'] + [f'{d}/index.html' for d in
+PAGES = ['index.html', 'notation/index.html', 'about/index.html'] + [f'{d}/index.html' for d in
          ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models', 'beyond']]
 BENIGN = ('Canvas2D: Multiple readback operations',)  # browser performance hints, not errors
 

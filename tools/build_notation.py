@@ -79,6 +79,10 @@ PAGE = """<!doctype html>
     </tbody>
   </table>
 </main>
+<footer class="site-footer">
+  <span>© 2026 Ngoc Minh Nguyen · Text <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Code MIT</span>
+  <span><a href="../about/index.html">About &amp; how to cite</a> · <a href="https://github.com/nnm-psd/visual_stochastic_calculus/issues/new?template=error-report.yml">Report an error</a></span>
+</footer>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 <script>

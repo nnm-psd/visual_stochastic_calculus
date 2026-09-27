@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>About · Visual Stochastic Calculus</title>
+<meta name="description" content="About Visual Stochastic Calculus: who made it, how every result is checked, how to report an error, how to cite it, and its licence (CC BY 4.0 text, MIT code).">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/about/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="About · Visual Stochastic Calculus">
+<meta property="og:description" content="About Visual Stochastic Calculus: who made it, how every result is checked, how to report an error, how to cite it, and its licence (CC BY 4.0 text, MIT code).">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/about/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>About</span><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+</header>
+<main class="about">
+  <h1>About this site</h1>
+  <p class="lede">A free, interactive introduction to stochastic calculus, from a jittering particle to the diffusion models behind AI image generators. Every idea has a simulation you can play with.</p>
+
+  <section class="section">
+    <h2>What it is</h2>
+    <p>Eight chapters and 26 sections, each built the same way: a short explanation, a "Predict first" question, one formula with every symbol explained in plain words, an interactive simulation, a precise statement with references, and a short Python program you can edit and run in the browser. Each chapter ends with a recap quiz and can be downloaded as a PDF.</p>
+    <p>It is written for readers with high-school algebra and no probability background. The "Going deeper" panels are there for readers who want the exact theorems.</p>
+  </section>
+
+  <section class="section">
+    <h2>Who made it</h2>
+    <p>Created by <strong>Ngoc Minh Nguyen</strong> (<a href="https://github.com/nnm-psd">github.com/nnm-psd</a>). Built with the help of Claude (Anthropic). Every result on the site is checked by automated tests, described below.</p>
+  </section>
+
+  <section class="section">
+    <h2>How the content is checked</h2>
+    <ul>
+      <li><strong>Every Python program is re-run on every change.</strong> Its output must still match the "Output when we ran it" shown on the page, to the last printed digit. You can check this yourself: an unedited program run in the browser reports "Matches the published output".</li>
+      <li><strong>Every page is loaded in a real browser on every change.</strong> The check fails on any script error, on formulas that did not render, and on broken links.</li>
+      <li><strong>The numbers under each chart are compared with theory.</strong> Each stats line prints the simulated value next to the exact one.</li>
+      <li><strong>References were checked against the sources:</strong> textbook section numbers against published tables of contents, and journal citations against publisher records.</li>
+    </ul>
+    <p>The checks are public: <a href="https://github.com/nnm-psd/visual_stochastic_calculus/actions">see the latest runs</a>.</p>
+  </section>
+
+  <section class="section">
+    <h2>Found a mistake?</h2>
+    <p>Please <a href="https://github.com/nnm-psd/visual_stochastic_calculus/issues/new?template=error-report.yml">report it on GitHub</a> (a free GitHub account is needed). Say which section, and what is wrong or unclear. Suggestions for new sections are welcome there too.</p>
+  </section>
+
+  <section class="section">
+    <h2>How to cite</h2>
+    <p>Ngoc Minh Nguyen (2026). <em>Visual Stochastic Calculus</em> [interactive website]. https://nnm-psd.github.io/visual_stochastic_calculus/</p>
+    <pre><code>@misc{nguyen2026visual,
+  author       = {Nguyen, Ngoc Minh},
+  title        = {Visual Stochastic Calculus},
+  year         = {2026},
+  howpublished = {\url{https://nnm-psd.github.io/visual_stochastic_calculus/}},
+  note         = {Interactive website}
+}</code></pre>
+  </section>
+
+  <section class="section">
+    <h2>Licence</h2>
+    <p>Text, figures and images: <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 (CC BY 4.0)</a>. You may copy, adapt and reuse them, including in courses and slides, as long as you credit "Visual Stochastic Calculus by Ngoc Minh Nguyen" with a link.</p>
+    <p>Code (the simulations and the Python programs): <a href="https://github.com/nnm-psd/visual_stochastic_calculus/blob/main/LICENSE">MIT licence</a>.</p>
+  </section>
+
+  <section class="section">
+    <h2>Privacy</h2>
+    <p>No cookies, no tracking, no accounts. Your theme choice and your progress are stored only in your own browser, and "Reset progress" on the home page erases them. Pressing "Run in browser" downloads Python from the jsDelivr CDN. The formula fonts also load from it.</p>
+  </section>
+
+  <section class="section">
+    <h2>Acknowledgements</h2>
+    <p>The layout follows <a href="https://seeing-theory.brown.edu/">Seeing Theory</a> (Brown University), and the particle simulation is inspired by <a href="https://labs.minutelabs.io/Brownian-Motion/">MinuteLabs</a>. Formulas are rendered by <a href="https://katex.org/">KaTeX</a>, and the in-browser Python is <a href="https://pyodide.org/">Pyodide</a>. The mathematics follows the textbooks and papers cited in each section, especially Shreve's <em>Stochastic Calculus for Finance II</em>, Øksendal's <em>Stochastic Differential Equations</em>, and Mörters &amp; Peres's <em>Brownian Motion</em>.</p>
+  </section>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Ngoc Minh Nguyen · Text <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Code MIT</span>
+  <span><a href="../about/index.html">About &amp; how to cite</a> · <a href="https://github.com/nnm-psd/visual_stochastic_calculus/issues/new?template=error-report.yml">Report an error</a></span>
+</footer>
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>

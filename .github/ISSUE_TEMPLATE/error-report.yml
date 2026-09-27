@@ -1,0 +1,30 @@
+name: Report an error
+description: Something on the site is wrong, unclear or broken.
+title: "[Error] "
+body:
+  - type: markdown
+    attributes:
+      value: Thank you for helping make the site more accurate.
+  - type: input
+    id: where
+    attributes:
+      label: Where
+      description: The page and section, e.g. "Chapter 2, section 2.1 Quadratic Variation".
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong or unclear
+      description: Quote the text, or describe what the chart does.
+    validations:
+      required: true
+  - type: textarea
+    id: fix
+    attributes:
+      label: Suggested correction (optional)
+  - type: input
+    id: device
+    attributes:
+      label: Browser and device (for chart or layout problems)
+      placeholder: e.g. Safari on iPhone 15

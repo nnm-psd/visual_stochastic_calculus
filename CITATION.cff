@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this site in teaching or research, please cite it as below."
+title: "Visual Stochastic Calculus"
+type: software
+authors:
+  - family-names: "Nguyen"
+    given-names: "Ngoc Minh"
+url: "https://nnm-psd.github.io/visual_stochastic_calculus/"
+repository-code: "https://github.com/nnm-psd/visual_stochastic_calculus"
+license:
+  - MIT
+  - CC-BY-4.0
+date-released: 2026-09-27
+keywords:
+  - stochastic calculus
+  - Brownian motion
+  - Itô calculus
+  - interactive visualization
+  - diffusion models

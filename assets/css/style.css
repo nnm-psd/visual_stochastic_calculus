@@ -272,3 +272,48 @@ h2 .done { font-size: 13px; font-weight: 600; color: var(--accent-2); margin-lef
   pre { white-space: pre-wrap; overflow: visible; }
   .formula { background: none; }
 }
+
+/* "Run it here" editor for the code drawers. */
+.code-edit {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  background: var(--viz-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font: 13px/1.5 ui-monospace, "Cascadia Code", Consolas, monospace;
+  overflow-x: auto;
+  white-space: pre;
+  tab-size: 4;
+}
+.code-edit:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.runbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; margin: 10px 0 6px; font-size: 14px; }
+.runbar button {
+  font: inherit; padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--bg); color: var(--fg); cursor: pointer;
+}
+.runbar button.run { border-color: var(--accent); }
+.runbar button:disabled { opacity: 0.55; cursor: default; }
+.run-status { color: var(--muted); }
+.run-output { margin-bottom: 10px !important; }
+
+/* Site footer. */
+.site-footer {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 24px;
+  font-size: 13px;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+.site-footer a { color: var(--muted); }
+.about ul { padding-left: 20px; }
+.about li { margin-bottom: 8px; }
+@media print { .site-footer { border: none; } .site-footer a { color: inherit; } }

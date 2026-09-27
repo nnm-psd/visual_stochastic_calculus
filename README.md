@@ -19,6 +19,9 @@ references, and a short Python version you can run yourself.
 7. **Diffusion Models:** data to noise, the score, the reverse-time SDE, Langevin sampling
 8. **Beyond Brownian Motion:** jumps and fat tails, the Kalman–Bucy filter
 
+Every Python program on the site can be edited and run in the browser (Pyodide: Python and NumPy compiled to
+WebAssembly), and an unedited run reproduces the published output.
+
 Every chapter ends with a short recap quiz and can be downloaded as a PDF (`pdf/`). Progress (sections whose
 prediction you answered and whose chart you tried) is kept in your browser and shown on the home page.
 
@@ -43,3 +46,9 @@ Every push runs `.github/workflows/checks.yml`, which you can also run locally:
 - `python tools/check_pages.py` loads every page in headless Chrome and fails on console errors, unrendered math or broken links.
 - `python tools/build_notation.py` regenerates the notation page. CI fails if it is out of date.
 - `python tools/build_pdfs.py` re-exports the chapter PDFs in `pdf/` (not run in CI; re-run after editing a chapter).
+
+## Licence and citation
+
+- Text, figures and images: [CC BY 4.0](LICENSE-CONTENT.md). Code: [MIT](LICENSE).
+- To cite the site, see [CITATION.cff](CITATION.cff) (GitHub's "Cite this repository" button) or the [About page](https://nnm-psd.github.io/visual_stochastic_calculus/about/).
+- Found a mistake? [Report it](https://github.com/nnm-psd/visual_stochastic_calculus/issues/new?template=error-report.yml).
