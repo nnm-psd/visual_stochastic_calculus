@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Brownian Motion · Visual Stochastic Calculus</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 1 · Definition</span><a href="../notation/index.html">Notation</a></span>
+</header>
+<main>
+  <h1>Brownian Motion</h1>
+  <p class="lede">Before the Itô integral, before Itô's lemma, there is one random object that everything is built on. This chapter shows where it comes from.</p>
+
+  <section id="particle" class="section">
+    <h2>A Jittering Particle</h2>
+    <p>In 1827 the botanist Robert Brown watched tiny particles from pollen grains jitter endlessly in water. In 1905 Einstein explained why: the particle is hit, from random directions, by molecules far too small to see.</p>
+    <div class="predict" data-answer="b" data-explain="Each kick changes a heavy particle&#x27;s velocity less, so it drifts more slowly and smoothly. But the kicks never stop, so neither does the wandering.">
+      <p><strong>Predict first:</strong> Make the particle much heavier (drag the mass ratio up). What will happen to its motion?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">It stops moving</button>
+        <button type="button" data-choice="b">It moves more sluggishly but keeps wandering</button>
+        <button type="button" data-choice="c">It moves faster</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Raise the energy, make the particle heavier, then reveal the molecules. The strip below the box tracks only the particle's horizontal position.</p>
+    <div class="formula">$$\langle \Delta x^2 \rangle = 2Dt$$</div>
+    <dl class="symbols">
+      <dt>$t$</dt><dd>Time elapsed since we started watching.</dd>
+      <dt>$\Delta x$</dt><dd>How far the particle has moved sideways (left or right) from where it started. Positive means right, negative means left. The Greek letter Δ ("delta") just means "change in".</dd>
+      <dt>$\Delta x^2$</dt><dd>That distance multiplied by itself. Squaring makes left and right moves both count as positive, so they can't cancel each other out.</dd>
+      <dt>$\langle \;\cdot\; \rangle$</dt><dd>The average over many particles, or over many repeats of the same experiment.</dd>
+      <dt>$D$</dt><dd>The <em>diffusion coefficient</em>: one number that says how fast the particle spreads out. A hotter fluid (the Energy slider) makes it larger.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> on average, the <em>squared</em> distance grows in step with time, so the distance itself grows only like the square root of time. To get twice as far from the start, the particle needs four times as long. A car at steady speed is different: double the time and it covers double the distance. The particle is slow because its random kicks keep partly undoing each other.</p>
+    <div class="viz">
+      <canvas class="pm-box" role="img" aria-label="A large particle jostled by small molecules, leaving a jagged trail"></canvas>
+      <p class="caption">Horizontal position x over the last 30 seconds (zoomed to fit)</p>
+      <canvas class="pm-strip" role="img" aria-label="Time series of the particle's horizontal position"></canvas>
+    </div>
+    <div class="controls">
+      <label>Energy <input type="range" name="energy" min="0.2" max="3" step="0.1" value="1"><output>1.0</output></label>
+      <label>Mass ratio <input type="range" name="mass" min="1" max="2.6" step="0.01" value="1.3"><output></output></label>
+      <label><input type="checkbox" name="show"> Show molecules</label>
+      <button type="button" class="reset">Reset</button>
+    </div>
+    <p class="caption">Energy is the fluid's temperature: how fast the molecules move. Mass ratio is how many times heavier the particle is than one molecule. A heavier particle is more sluggish, so each kick nudges it less.</p>
+    <p class="takeaway" hidden>No single collision matters. What matters is the sum of countless tiny kicks, each from a random direction and unrelated to the others. That sum produces the square-root-of-time spreading above. The jagged line in the strip is the object the rest of this chapter makes precise: <strong>Brownian motion</strong>.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Einstein's relation.</strong> For a sphere of radius $r$ in a fluid of viscosity $\eta$ at temperature $T$, the diffusion coefficient is $D = \dfrac{k_B T}{6\pi\eta r}$ (the Stokes–Einstein relation), where $k_B$ is Boltzmann's constant. Measuring $D$ therefore measures $k_B$, and with it the size of atoms. Jean Perrin did exactly this around 1908, which helped convince physicists that atoms are real (Nobel Prize 1926).</p>
+<p><strong>Why the strip looks smooth up close.</strong> A heavy particle has momentum, so its velocity is remembered for a short time $m/\gamma$ (mass over friction). The Langevin equation $m\,dv = -\gamma v\,dt + \sqrt{2\gamma k_B T}\,dW_t$ models this. Only on timescales much longer than $m/\gamma$ does the position behave like Brownian motion.</p>
+<p class="ref">References: A. Einstein, <em>Annalen der Physik</em> 17 (1905), 549–560. P. Langevin, <em>Comptes Rendus</em> 146 (1908), 530–533.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(0)
+particles, kicks_per_second, seconds = 2000, 1000, 4
+kick = 0.01                                          # size of one molecular kick
+x = np.cumsum(rng.choice([-kick, kick], size=(particles, kicks_per_second * seconds)), axis=1)
+for t in (1, 2, 4):
+    msd = np.mean(x[:, t * kicks_per_second - 1] ** 2)   # mean squared displacement
+    print(f&quot;t = {t} s: &lt;dx^2&gt; = {msd:.4f}&quot;)              # doubles when t doubles: 2Dt</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>t = 1 s: &lt;dx^2&gt; = 0.0977
+t = 2 s: &lt;dx^2&gt; = 0.1949
+t = 4 s: &lt;dx^2&gt; = 0.3985</code></pre>
+    </details>
+  </section>
+
+  <section id="random-walk" class="section">
+    <h2><span class="num">1.1</span>From Random Walk to Brownian Motion</h2>
+    <p>Replace the molecules with a coin. Flip it: heads, step up by 1; tails, step down by 1. This is a <em>random walk</em>. Now squeeze <em>n</em> flips into one unit of time and shrink every step, so the path stays on screen however many flips we make.</p>
+    <div class="predict" data-answer="c" data-explain="Shrinking every step by 1/√n exactly balances taking more steps: the variance stays 1, and the end points settle into the N(0, 1) bell curve.">
+      <p><strong>Predict first:</strong> As you drag n up, what will happen to the spread of the end points at t = 1?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">It grows without limit</button>
+        <button type="button" data-choice="b">It shrinks to zero</button>
+        <button type="button" data-choice="c">It settles at a fixed width</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>How much should each step shrink? After <em>n</em> flips the walk is typically about $\sqrt n$ steps from where it started, not <em>n</em>, because heads and tails partly cancel. So we divide by $\sqrt n$. The typical distance then stays about 1 whatever <em>n</em> is. Divide by <em>n</em> instead and the path flattens to a straight line at 0. Don't divide at all and it flies off the screen.</p>
+    <p>Drag <em>n</em> up. The staircases turn into rough curves, and the places where the walks end up (the bars on the right) pile into a bell shape.</p>
+    <div class="formula">$$W^{(n)}_t = \frac{1}{\sqrt n}\, S_{\lfloor nt \rfloor} \;\longrightarrow\; W_t, \qquad W_1 \sim N(0,1)$$</div>
+    <dl class="symbols">
+      <dt>$n$</dt><dd>Number of coin flips per unit of time. The slider sets it.</dd>
+      <dt>$S_k$</dt><dd>The walk's position after $k$ flips: the running total of +1s and −1s. For example, heads, heads, tails gives $S_3 = 1 + 1 - 1 = 1$.</dd>
+      <dt>$\lfloor nt \rfloor$</dt><dd>How many whole flips have happened by time $t$. The brackets mean "round down". With $n = 10$ and $t = 0.37$ that is $\lfloor 3.7 \rfloor = 3$ flips.</dd>
+      <dt>$\frac{1}{\sqrt n}$</dt><dd>The shrink factor applied to every step, explained above.</dd>
+      <dt>$W^{(n)}_t$</dt><dd>The shrunken walk's height at time $t$: one point on the orange path.</dd>
+      <dt>$\longrightarrow$</dt><dd>"Gets closer and closer to, as $n$ grows without limit."</dd>
+      <dt>$W_t$</dt><dd><em>Brownian motion</em>: the random path the walks settle into. The letter W honours Norbert Wiener, who first put it on a rigorous footing.</dd>
+      <dt>$W_1 \sim N(0,1)$</dt><dd>"Where the path ends at time 1 follows the standard bell curve." The $\sim$ reads "is distributed as". $N(0,1)$ is the <em>normal</em> (bell-shaped) distribution centred at 0, with average squared distance from 0 equal to 1.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> take a coin-flip walk, make the flips faster and the steps smaller in exactly the right balance ($\sqrt n$), and the jagged staircase turns into one specific random curve, Brownian motion. At any moment, its height is a bell-curve random number. The bell shape is no coincidence: adding up many small, independent random pieces always produces it. This is the <em>central limit theorem</em>.</p>
+    <div class="viz">
+      <canvas class="rw-canvas" role="img" aria-label="Rescaled random walks on the left, histogram of their endpoints on the right"></canvas>
+    </div>
+    <div class="controls">
+      <label>Steps <em>n</em> <input type="range" name="n" min="1" max="4" step="0.01" value="1"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats rw-stats"></p>
+    <p class="caption">The <em>mean</em> is the average ending point. The <em>variance</em> is the average squared distance from that mean, the same "average of squares" as in Einstein's formula above.</p>
+    <p class="takeaway" hidden>Shrink the steps by $1/\sqrt n$ and the random walk turns into Brownian motion. Mathematicians call this Donsker's theorem. The coin doesn't matter: any fair random steps (ones that average out to zero) give Brownian motion too, at most stretched vertically. That is why Brownian motion turns up everywhere, from pollen grains to stock prices.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Donsker's invariance principle (1951).</strong> Let $X_1, X_2, \dots$ be independent, identically distributed steps with mean 0 and variance 1, and let $S_k = X_1 + \dots + X_k$. Join the points $(k/n,\, S_k/\sqrt n)$ with straight lines to get a random continuous function $W^{(n)}$ on $[0, 1]$. Then $W^{(n)}$ converges in distribution, as a random <em>function</em>, to standard Brownian motion.</p>
+<p>At a single time $t$ this is just the central limit theorem. Donsker's theorem is stronger: it also covers features of the whole path, such as its maximum, so random-walk answers carry over to Brownian motion (section 2.3 uses this).</p>
+<p class="ref">Reference: P. Mörters &amp; Y. Peres, <em>Brownian Motion</em> (Cambridge, 2010), ch. 5.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(1)
+walks = 10_000
+for n in (10, 100, 10_000):
+    S_n = 2 * rng.binomial(n, 0.5, size=walks) - n   # sum of n coin flips (+1 or -1)
+    W1 = S_n / np.sqrt(n)                              # shrink every step by 1/sqrt(n)
+    print(f&quot;n = {n:&gt;6}: mean {W1.mean():+.3f}, variance {W1.var():.3f}&quot;)   # -&gt; 0 and 1</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>n =     10: mean +0.004, variance 1.006
+n =    100: mean +0.016, variance 0.989
+n =  10000: mean +0.011, variance 1.025</code></pre>
+    </details>
+  </section>
+
+  <section id="increments" class="section">
+    <h2><span class="num">1.2</span>Defining Properties</h2>
+    <p>Section 1.1 built Brownian motion as a limit. Mathematicians usually go the other way and <em>define</em> it by a short list of rules. The most important rules are about <em>increments</em>: how much the path rises (or falls) between two moments in time.</p>
+    <div class="predict" data-answer="b" data-explain="Overlapping intervals share a piece of the path, so a big rise over one tends to come with a big rise over the other. The correlation becomes overlap / √(|A|·|B|).">
+      <p><strong>Predict first:</strong> Slide interval B until it overlaps interval A. How will the cloud of dots change?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">It stays an untilted blob</button>
+        <button type="button" data-choice="b">It tilts upward</button>
+        <button type="button" data-choice="c">It tilts downward</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>The chart on the left shows 100 of 500 simulated paths, with one in orange. Each shaded band is a stretch of time. For every path, the scatter plot on the right puts one dot at (its rise over A, its rise over B). Stretch a band by dragging its edge and watch the cloud widen in that direction. Then slide one band on top of the other and watch the cloud tilt.</p>
+    <div class="formula">$$W_t - W_s \sim N(0,\; t-s) \qquad \text{rises over non-overlapping intervals are independent}$$</div>
+    <dl class="symbols">
+      <dt>$s,\ t$</dt><dd>Two moments in time, with $s$ earlier than $t$. On the chart they are the left and right edges of a band.</dd>
+      <dt>$W_t - W_s$</dt><dd>The <em>increment</em>: where the path is at time $t$ minus where it was at time $s$. It is positive if the path rose over that stretch, negative if it fell.</dd>
+      <dt>$\sim N(0,\; t-s)$</dt><dd>"Follows a bell curve centred at 0, with <em>variance</em> $t - s$." Variance is the average squared size of the rise, so a band twice as long gives rises whose squares are twice as large on average.</dd>
+      <dt>independent</dt><dd>Knowing one of the two rises tells you nothing about the other. In the scatter plot, the cloud has no tilt.</dd>
+      <dt>correlation</dt><dd>A number from −1 to 1 measuring how much two quantities tend to move together. 0 means no tilt, 1 means a perfect upward line. Printed below the chart.</dd>
+      <dt>dashed ellipse</dt><dd>Where theory says about 95% of the dots should land. Its width and height come from the variances, its tilt from the correlation.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> Brownian motion has no memory. How the path moves during one stretch of time says nothing about how it moves during another, separate stretch. The only thing that controls how much it moves is how long you wait: the average squared rise equals the elapsed time, the same rule as Einstein's formula above. Together with two small housekeeping rules (the path starts at 0, and it has no jumps), that is the complete definition.</p>
+    <div class="viz viz-row">
+      <canvas class="inc-paths" tabindex="0" role="application" aria-label="Brownian paths with two draggable time intervals A and B. Press A or B to pick an interval, left and right arrows to slide it, up and down arrows to resize it."></canvas>
+      <canvas class="inc-scatter" role="img" aria-label="Scatter plot of each path's rise over interval A against its rise over interval B"></canvas>
+    </div>
+    <p class="caption">Drag an edge of a band to resize it, or its middle to slide it. Keyboard: Tab to the chart, press A or B to pick an interval, ← → to slide it, ↑ ↓ to resize it (hold Shift for bigger steps). The orange dot on the right is the orange path.</p>
+    <div class="controls">
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats inc-stats"></p>
+    <p class="takeaway" hidden>Longer interval, bigger spread: the variance of the rise equals the interval's length. Separate intervals give an untilted cloud, because the path has no memory. Overlap them and the cloud tilts, since both rises now share the overlapping piece of path. In fact the correlation equals the overlap divided by $\sqrt{|A|\cdot|B|}$, where $|A|$ and $|B|$ are the two bands' lengths.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Definition.</strong> A standard Brownian motion is a random process $(W_t)_{t \ge 0}$ with (i) $W_0 = 0$; (ii) independent increments: for $t_0 &lt; t_1 &lt; \dots &lt; t_k$, the rises $W_{t_1} - W_{t_0}, \dots, W_{t_k} - W_{t_{k-1}}$ are independent; (iii) $W_t - W_s \sim N(0, t - s)$ for $s &lt; t$; (iv) continuous paths.</p>
+<p><strong>Equivalent form.</strong> Brownian motion is the Gaussian process with mean 0 and covariance $\operatorname{Cov}(W_s, W_t) = \min(s, t)$. The overlap rule in this section follows from it: $\operatorname{Cov}(\text{rise over } A, \text{rise over } B) = \lvert A \cap B \rvert$.</p>
+<p>That such a process exists at all is a theorem (Wiener, 1923). Section 1.3 uses Lévy's construction, which builds the path by repeatedly filling in midpoints.</p>
+<p class="ref">References: S. Shreve, <em>Stochastic Calculus for Finance II</em> (Springer, 2004), §3.3. Mörters &amp; Peres, <em>Brownian Motion</em>, ch. 1.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(2)
+paths, steps = 5000, 100
+dW = rng.normal(0, np.sqrt(1 / steps), (paths, steps))
+W = np.concatenate([np.zeros((paths, 1)), np.cumsum(dW, axis=1)], axis=1)
+rise = lambda s, t: W[:, round(t * steps)] - W[:, round(s * steps)]
+A, B = rise(0.15, 0.35), rise(0.55, 0.85)            # two separate intervals
+print(f&quot;var A {A.var():.3f} (0.20)  var B {B.var():.3f} (0.30)  corr {np.corrcoef(A, B)[0, 1]:+.3f} (0)&quot;)
+C = rise(0.15, 0.45)                                   # overlaps A by 0.20
+print(f&quot;corr(A, C) {np.corrcoef(A, C)[0, 1]:.3f} (theory {0.2 / np.sqrt(0.2 * 0.3):.3f})&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>var A 0.200 (0.20)  var B 0.309 (0.30)  corr -0.010 (0)
+corr(A, C) 0.816 (theory 0.816)</code></pre>
+    </details>
+  </section>
+
+  <section id="rough" class="section">
+    <h2><span class="num">1.3</span>Rough Paths</h2>
+    <p>Ordinary calculus rests on one idea: zoom in far enough on a smooth curve and it looks like a straight line. The steepness of that line is the curve's <em>derivative</em>, its rate of change at a single instant. Speed, for example, is the derivative of position.</p>
+    <div class="predict" data-answer="c" data-explain="Brownian motion is self-similar: stretch time by c and height by √c and you get Brownian motion again. No amount of zooming makes it straighten out.">
+      <p><strong>Predict first:</strong> Zoom in a million times. What will the Brownian path look like?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">A straight line</button>
+        <button type="button" data-choice="b">A smooth, gentle curve</button>
+        <button type="button" data-choice="c">Just as rough as before</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Drag the zoom slider, or press Play. Both panels zoom toward the same moment, $t = 0.5$ (the thin vertical line), up to a million times. Each panel stretches vertically so the curve always fills the frame. Watch which one straightens out.</p>
+    <div class="formula">$$\lvert W_{t+h} - W_t \rvert \approx \sqrt h \quad\Longrightarrow\quad \left\lvert \frac{W_{t+h} - W_t}{h} \right\rvert \approx \frac{1}{\sqrt h} \;\longrightarrow\; \infty \ \text{ as } h \to 0$$</div>
+    <dl class="symbols">
+      <dt>$h$</dt><dd>The width of the time window you are looking at. Zooming in makes $h$ smaller. At ×1,000, $h = 0.001$.</dd>
+      <dt>$W_{t+h} - W_t$</dt><dd>How much the path rises across the window: the increment from section 1.2.</dd>
+      <dt>$\lvert \;\cdot\; \rvert$</dt><dd>The size of a number, ignoring its sign. So $\lvert -3 \rvert = 3$.</dd>
+      <dt>$\approx \sqrt h$</dt><dd>"Is typically about $\sqrt h$". Section 1.2 showed the <em>squared</em> rise averages $h$, so the rise itself is typically about $\sqrt h$. For a small window that is much bigger than $h$: with $h = 0.01$ the rise is about $0.1$, ten times the window's width.</dd>
+      <dt>$\Longrightarrow$</dt><dd>"Therefore".</dd>
+      <dt>$\frac{W_{t+h} - W_t}{h}$</dt><dd>The slope across the window: rise divided by run, the steepness of the straight line joining the window's two ends. For a smooth curve it settles down to the derivative as $h$ shrinks. The panels show the same idea as "height ÷ width".</dd>
+      <dt>$\to \infty$</dt><dd>"Grows without limit."</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> in a small window of width $h$, a Brownian path moves by about $\sqrt h$, which is far more than $h$. So its slope, roughly $\sqrt h / h = 1/\sqrt h$, gets <em>steeper</em> the closer you look instead of settling down. Zoom in 100 times and the slope grows about 10 times. Zoom in 10,000 times and it grows about 100 times. The smooth curve's "height ÷ width" settles to one number (about 5.8 here, its derivative at $t = 0.5$). The Brownian path's keeps climbing.</p>
+    <div class="viz viz-row even">
+      <canvas class="rp-smooth" role="img" aria-label="A smooth curve at the current zoom level"></canvas>
+      <canvas class="rp-rough" role="img" aria-label="A Brownian path at the current zoom level"></canvas>
+    </div>
+    <div class="controls">
+      <label>Zoom <input type="range" name="zoom" min="0" max="6" step="0.01" value="0"><output></output></label>
+      <button type="button" class="play">Play zoom</button>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="takeaway" hidden>The smooth curve turns into a straight line. The Brownian path looks just as rough at ×1,000,000 as at ×1: every zoom level looks statistically the same, a property called <em>self-similarity</em>. Its slope never settles, so it has no derivative at any point (Paley, Wiener and Zygmund proved this in 1933). Ordinary calculus is built on derivatives, so it cannot handle Brownian motion. The rest of this site builds the calculus that can: Itô calculus. The first clue is in Chapter 2: squared changes, which were the problem here, turn out to behave perfectly.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Theorem (Paley, Wiener &amp; Zygmund, 1933).</strong> With probability 1, a Brownian path is differentiable at <em>no</em> time $t$.</p>
+<p><strong>Scaling.</strong> For any $c &gt; 0$, the process $c^{-1/2} W_{ct}$ is again a standard Brownian motion. This is the precise meaning of "every zoom level looks the same".</p>
+<p><strong>How rough, exactly?</strong> Lévy's modulus of continuity says that over a short window of width $h$ the largest change is about $\sqrt{2h\log(1/h)}$. That is slightly more than $\sqrt h$, and far more than the $h$ a differentiable function would allow. Brownian paths are Hölder continuous of every order below ½, but not of order ½.</p>
+<p class="ref">Reference: Mörters &amp; Peres, <em>Brownian Motion</em>, ch. 1.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(3)
+f = lambda t: 0.8 * np.sin(2 * np.pi * 1.3 * t) + 0.4 * np.sin(2 * np.pi * 3.1 * t + 1)
+for h in (1e-2, 1e-4, 1e-6):
+    smooth = abs(f(0.5 + h) - f(0.5)) / h
+    brown = np.mean(np.abs(rng.normal(0, np.sqrt(h), 10_000))) / h   # typical |rise| / h
+    print(f&quot;h = {h:.0e}: smooth slope {smooth:.2f}, Brownian slope {brown:,.0f} (0.8/sqrt(h) = {0.8 / np.sqrt(h):,.0f})&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>h = 1e-02: smooth slope 4.85, Brownian slope 8 (0.8/sqrt(h) = 8)
+h = 1e-04: smooth slope 5.81, Brownian slope 79 (0.8/sqrt(h) = 80)
+h = 1e-06: smooth slope 5.82, Brownian slope 787 (0.8/sqrt(h) = 800)</code></pre>
+    </details>
+  </section>
+
+  <nav class="chapter-nav">
+    <span></span>
+    <a href="../variation/index.html">Chapter 2: Variation &amp; Martingales →</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/particle.js"></script>
+<script src="../assets/js/random-walk.js"></script>
+<script src="../assets/js/increments.js"></script>
+<script src="../assets/js/rough-paths.js"></script>
+</body>
+</html>

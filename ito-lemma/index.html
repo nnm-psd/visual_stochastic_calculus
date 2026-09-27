@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Itô's Lemma · Visual Stochastic Calculus</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 4 · The calculus</span><a href="../notation/index.html">Notation</a></span>
+</header>
+<main>
+  <h1>Itô's Lemma</h1>
+  <p class="lede">Ordinary calculus has the <em>chain rule</em>: how a function of a changing quantity changes. Itô's lemma is the chain rule for functions of Brownian motion. It has one extra term, and this chapter shows exactly where that term comes from.</p>
+
+  <section id="taylor" class="section">
+    <h2><span class="num">4.1</span>The Surviving Second-Order Term</h2>
+    <p>Take a function $f$, such as $e^x$, and follow $f(W_t)$ along a Brownian path. Over one small piece of time, the change in $f$ can be split into a sum of simpler terms: a first-order term using the slope $f'$, a second-order term using the curvature $f''$, and so on. Add each kind of term up over all $n$ pieces. The bars show the totals along one path.</p>
+    <div class="predict" data-answer="a" data-explain="Squared rises add up to elapsed time rather than 0 (section 2.1), so the second-order total settles to ½∫f″(W)dt. Cubed rises are too small and vanish.">
+      <p><strong>Predict first:</strong> As the pieces shrink, which total will NOT shrink to 0 (apart from the first-order one)?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The second-order total</button>
+        <button type="button" data-choice="b">The third-order total</button>
+        <button type="button" data-choice="c">Both will shrink to 0</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Drag $n$ up. In ordinary calculus, every term beyond the first would shrink to nothing. Watch which ones do here.</p>
+    <div class="formula">$$f(W_{t+\Delta t}) - f(W_t) \;=\; f'(W_t)\,\Delta W \;+\; \tfrac12 f''(W_t)\,(\Delta W)^2 \;+\; \tfrac16 f'''(W_t)\,(\Delta W)^3 \;+\; \cdots$$</div>
+    <dl class="symbols">
+      <dt>$f$</dt><dd>Any smooth function, chosen below: $e^x$, $\sin x$ or $x^3$.</dd>
+      <dt>$f',\ f'',\ f'''$</dt><dd>Its first, second and third <em>derivatives</em>. $f'$ is the slope, $f''$ is how fast the slope changes (curvature), and $f'''$ is how fast the curvature changes. For $x^3$: $f' = 3x^2$, $f'' = 6x$, $f''' = 6$.</dd>
+      <dt>$\Delta t,\ \Delta W$</dt><dd>The length of one small piece of time, and the path's rise across it.</dd>
+      <dt>$\cdots$</dt><dd>Higher-order terms, which use fourth and higher derivatives. They shrink even faster than the third-order term.</dd>
+      <dt>Taylor expansion</dt><dd>The name of this recipe: a change in $f$ is the slope × the step, plus a curvature correction × the step squared, and so on.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> for a smooth curve, a step of size $\Delta t$ makes the squared term about $(\Delta t)^2$. Summed over $n = 1/\Delta t$ pieces, that totals about $\Delta t$, which vanishes. For Brownian motion the step is $\Delta W \approx \sqrt{\Delta t}$, so $(\Delta W)^2 \approx \Delta t$. Summed over all the pieces, that is a fixed amount that does <em>not</em> vanish: section 2.1's quadratic variation again. The cubed term is about $(\Delta t)^{3/2}$ per piece and does vanish in total. So exactly one extra term survives: the second-order one.</p>
+    <div class="viz">
+      <canvas class="ty-canvas" role="img" aria-label="Bar chart of Taylor-term totals along one Brownian path"></canvas>
+    </div>
+    <div class="controls">
+      <label>Pieces <em>n</em> <input type="range" name="k" min="1" max="16" step="1" value="3"><output></output></label>
+      <span class="radio-group" role="radiogroup" aria-label="Function">
+        <label><input type="radio" name="fn" value="exp" checked> $e^x$</label>
+        <label><input type="radio" name="fn" value="sin"> $\sin x$</label>
+        <label><input type="radio" name="fn" value="cube"> $x^3$</label>
+      </span>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats ty-stats"></p>
+    <p class="takeaway" hidden>As the pieces shrink, the third-order bar disappears. The second-order bar settles to $\tfrac12\int_0^1 f''(W_t)\,dt$ (the dashed tick), and "first + second" matches the exact change. Replacing $(\Delta W)^2$ by $\Delta t$, the rule $(dW)^2 = dt$, is all it takes to turn the second-order term into an ordinary time integral.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Sketch of the proof of Itô's lemma.</strong> Write $f(W_t) - f(W_0) = \sum_i [f(W_{t_{i+1}}) - f(W_{t_i})]$ and expand each term with Taylor's theorem. Three facts finish the proof as the partition is refined:</p>
+<ul>
+<li>$\sum_i f'(W_{t_i})\,\Delta W_i \to \int_0^t f'(W_s)\,dW_s$ by the definition of the Itô integral.</li>
+<li>$\sum_i f''(W_{t_i})\,(\Delta W_i)^2 \to \int_0^t f''(W_s)\,ds$, a weighted version of quadratic variation (section 2.1).</li>
+<li>The remainder is at most a constant × $\max_i \lvert \Delta W_i \rvert \cdot \sum_i (\Delta W_i)^2 \to 0 \cdot t = 0$.</li>
+</ul>
+<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, §4.4.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(10)
+N = 2 ** 16
+W = np.concatenate([[0], np.cumsum(rng.normal(0, np.sqrt(1 / N), N))])
+f = d1 = d2 = d3 = np.exp                            # f(x) = e^x is its own derivative
+for n in (8, 2 ** 16):
+    x, dW = W[:-1:N // n], np.diff(W[::N // n])
+    t1, t2, t3 = np.sum(d1(x) * dW), np.sum(d2(x) * dW ** 2) / 2, np.sum(d3(x) * dW ** 3) / 6
+    print(f&quot;n = {n:&gt;5}: first {t1:.3f}  second {t2:.3f}  third {t3:+.4f}  &quot;
+          f&quot;first+second {t1 + t2:.3f}  exact {f(W[-1]) - f(0):.3f}&quot;)
+print(f&quot;half the integral of f&#x27;&#x27; dt = {np.mean(d2(W[:-1])) / 2:.3f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>n =     8: first -1.026  second 0.435  third -0.0908  first+second -0.592  exact -0.668
+n = 65536: first -0.937  second 0.269  third -0.0000  first+second -0.668  exact -0.668
+half the integral of f&#x27;&#x27; dt = 0.267</code></pre>
+    </details>
+  </section>
+
+  <section id="lemma" class="section">
+    <h2><span class="num">4.2</span>Itô's Lemma in Action</h2>
+    <p>Section 4.1 gives the new chain rule. The chart tests it. Along one Brownian path, the thick grey curve is the true $f(W_t)$. The two thin curves rebuild it from scratch by adding up small changes: orange uses Itô's lemma, purple uses the ordinary chain rule. Switch between functions.</p>
+    <div class="predict" data-answer="c" data-explain="The naive rule misses +½f″ dt = +dt at every step, which adds up to +1 by t = 1. So the naive curve ends about 1 below the true W₁².">
+      <p><strong>Predict first:</strong> For f(x) = x², where will the purple naive chain-rule curve end up compared with the truth?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">On top of it</button>
+        <button type="button" data-choice="b">Above it</button>
+        <button type="button" data-choice="c">Below it</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <div class="formula">$$df(W_t) \;=\; f'(W_t)\,dW_t \;+\; \tfrac12 f''(W_t)\,dt$$</div>
+    <dl class="symbols">
+      <dt>$d$</dt><dd>"A tiny change in". $df(W_t)$ is the tiny change in $f(W_t)$ over a tiny time step $dt$, and $dW_t$ is the tiny rise of the path over it. Adding up these tiny changes means taking an integral.</dd>
+      <dt>$f'(W_t)\,dW_t$</dt><dd>The ordinary chain-rule term: slope × change. Added up, it is an Itô integral (Chapter 3).</dd>
+      <dt>$\tfrac12 f''(W_t)\,dt$</dt><dd>The extra Itô term: half the curvature × the time step. Added up, it is an ordinary integral over time.</dd>
+      <dt>chain rule</dt><dd>Ordinary calculus's rule $df(x) = f'(x)\,dx$: the change in $f$ is its slope × the change in $x$. It is correct for smooth paths, and it misses the second term for Brownian ones.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> when $f$ curves upward ($f'' &gt; 0$), jiggling back and forth doesn't cancel out. A step up raises $f$ by more than an equal step down lowers it. So $f(W)$ creeps upward on average, at rate $\tfrac12 f''$. The ordinary chain rule can't see this because it assumes paths are smooth. For $f(x) = x^2$, Itô's lemma says $d(W^2) = 2W\,dW + dt$. The "$+\,dt$" is the upward drift of $W^2$ you saw in section 2.2.</p>
+    <div class="viz">
+      <canvas class="lm-canvas" role="img" aria-label="True f of W, the Itô reconstruction and the naive chain-rule reconstruction along one path"></canvas>
+    </div>
+    <div class="controls">
+      <span class="radio-group" role="radiogroup" aria-label="Function">
+        <label><input type="radio" name="fn2" value="sq" checked> $x^2$</label>
+        <label><input type="radio" name="fn2" value="exp"> $e^x$</label>
+        <label><input type="radio" name="fn2" value="sin"> $\sin x$</label>
+      </span>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats lm-stats"></p>
+    <p class="takeaway" hidden>Itô's rebuild lies right on top of the truth, while the naive chain rule drifts away by exactly $\tfrac12\int f''(W)\,dt$. This is <strong>Itô's lemma</strong>, the central tool of stochastic calculus. Everything that follows (solving random equations, pricing options) is Itô's lemma applied to the right function.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Itô–Doeblin formula, general form.</strong> If $dX_t = a_t\,dt + b_t\,dW_t$ and $f(t, x)$ is smooth, then
+$$df(t, X_t) = \Big(\partial_t f + a_t\,\partial_x f + \tfrac12 b_t^2\,\partial_{xx} f\Big)dt + b_t\,\partial_x f\,dW_t.$$
+The bookkeeping rules are $dt\cdot dt = 0$, $dt\cdot dW = 0$ and $dW\cdot dW = dt$.</p>
+<p><strong>History.</strong> Kiyosi Itô published the formula in 1951. Wolfgang Doeblin had derived it independently in 1940, in a sealed envelope sent to the French Academy of Sciences shortly before his death in the war. The envelope was opened only in 2000, which is why the formula is increasingly called Itô–Doeblin.</p>
+<p class="ref">References: Shreve, <em>Stochastic Calculus for Finance II</em>, §4.4. Øksendal, <em>Stochastic Differential Equations</em>, ch. 4.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(11)
+steps = 16_384
+dt = 1 / steps
+W = np.concatenate([[0], np.cumsum(rng.normal(0, np.sqrt(dt), steps))])
+x, dW = W[:-1], np.diff(W)
+naive = np.sum(2 * x * dW)                   # chain rule for f(x) = x^2: df = 2x dx
+ito = naive + steps * dt                     # Ito adds 1/2 f&#x27;&#x27;(x) dt = dt at every step
+print(f&quot;true W_1^2 = {W[-1] ** 2:.3f}   Ito = {ito:.3f}   naive = {naive:.3f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>true W_1^2 = 0.577   Ito = 0.576   naive = -0.424</code></pre>
+    </details>
+  </section>
+
+  <section id="strat" class="section">
+    <h2><span class="num">4.3</span>Itô vs Stratonovich</h2>
+    <p>Section 3.1 showed two popular reading rules: Itô (left end) and Stratonovich (midpoint). They give different integrals, so the "same" equation means different things under each. Here, the same Brownian path drives the equation "$X$ changes by $X$ × the rise of $W$", read both ways. Then tick the box to add a correction term to the Itô version.</p>
+    <div class="predict" data-answer="b" data-explain="Stratonovich solves to e^(W_t), Itô to e^(W_t − t/2): the same path, but Itô is lower by the factor e^(−t/2). The conversion drift restores it.">
+      <p><strong>Predict first:</strong> Before you tick the box: which curve will end higher?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Itô</button>
+        <button type="button" data-choice="b">Stratonovich</button>
+        <button type="button" data-choice="c">They will coincide</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <div class="formula">$$dX_t = X_t \circ dW_t \quad\Longleftrightarrow\quad dX_t = \tfrac12 X_t\,dt + X_t\,dW_t$$</div>
+    <dl class="symbols">
+      <dt>$X_t$</dt><dd>A quantity that grows or shrinks in proportion to itself, starting at $X_0 = 1$: a price moving in percentage terms, for example.</dd>
+      <dt>$\circ\, dW_t$</dt><dd>The circle marks the Stratonovich reading: $X$ is read at the midpoint of each small step, like $\theta = \tfrac12$ in section 3.1.</dd>
+      <dt>$dW_t$ (no circle)</dt><dd>The Itô reading: $X$ is read at the start of each step.</dd>
+      <dt>$\Longleftrightarrow$</dt><dd>"Describes exactly the same process as".</dd>
+      <dt>$\tfrac12 X_t\,dt$</dt><dd>The <em>conversion drift</em>: the amount you must add to an Itô equation to make it match the Stratonovich one.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> reading $X$ at the midpoint means it has already reacted to half of the current step's rise, which quietly adds a little growth each step. On average that is $\tfrac12 X\,dt$, the same "peeking" effect as in section 3.1. So the Stratonovich equation grows like $e^{W_t}$, while the Itô equation without the correction grows like $e^{W_t - t/2}$. Add the drift to the Itô version and the two become identical. Neither reading is wrong. They are two languages, and the drift term translates between them.</p>
+    <div class="viz">
+      <canvas class="st-canvas" role="img" aria-label="Itô and Stratonovich solutions of the same equation driven by the same noise"></canvas>
+    </div>
+    <div class="controls">
+      <label><input type="checkbox" name="drift"> Add the conversion drift ½X dt to Itô</label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats st-stats"></p>
+    <p class="takeaway" hidden>Same noise, same-looking equation, different answers, until the conversion drift is added. Physicists often prefer Stratonovich, because the ordinary chain rule works for it. Finance uses Itô, because you can't trade on a price you haven't seen yet. The rest of this site uses Itô.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>General conversion rule.</strong> For a smooth coefficient $b(x)$:
+$$dX = a(X)\,dt + b(X)\circ dW \quad\Longleftrightarrow\quad dX = \big(a(X) + \tfrac12\,b(X)\,b'(X)\big)dt + b(X)\,dW.$$
+In this section $a = 0$ and $b(x) = x$, so the extra drift is $\tfrac12 x$.</p>
+<p><strong>Why physicists like Stratonovich: the Wong–Zakai theorem.</strong> If you replace $W$ by a smooth approximation (real noise always has some tiny correlation time), solve the ordinary differential equation, and then let the approximation become rough, the solutions converge to the <em>Stratonovich</em> solution. Stratonovich calculus also obeys the ordinary chain rule.</p>
+<p class="ref">References: E. Wong &amp; M. Zakai, <em>Ann. Math. Statist.</em> 36 (1965), 1560–1564. Øksendal, <em>Stochastic Differential Equations</em>, ch. 3.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(12)
+steps = 2_000
+dt = 1 / steps
+dW = rng.normal(0, np.sqrt(dt), steps)
+ito, ito_drift, strat = 1.0, 1.0, 1.0
+for d in dW:
+    ito += ito * d                                   # dX = X dW, read at the left end
+    ito_drift += 0.5 * ito_drift * dt + ito_drift * d   # the same plus the conversion drift
+    guess = strat + strat * d                        # Stratonovich: Heun (midpoint) step
+    strat += 0.5 * (strat + guess) * d
+W1 = dW.sum()
+print(f&quot;Ito {ito:.3f} (e^(W - 1/2) = {np.exp(W1 - 0.5):.3f})   Ito + drift {ito_drift:.3f}   &quot;
+      f&quot;Stratonovich {strat:.3f} (e^W = {np.exp(W1):.3f})&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>Ito 1.027 (e^(W - 1/2) = 1.036)   Ito + drift 1.693   Stratonovich 1.708 (e^W = 1.708)</code></pre>
+    </details>
+  </section>
+
+  <section id="correlated" class="section">
+    <h2><span class="num">4.4</span>Two Brownian Motions</h2>
+    <p>Real models rarely have just one source of randomness. Two stock prices, or a price and its volatility, are driven by two Brownian motions that tend to move together (or against each other) without being identical. The slider $\rho$ ("rho") sets how strongly the blue and purple paths move together.</p>
+    <div class="predict" data-answer="b" data-explain="Each product of rises averages ρ × (time step), so the running sum settles on the line ρt: here 0.8 at t = 1. It is the two-path version of quadratic variation.">
+      <p><strong>Predict first:</strong> Set ρ = 0.8. The running sum of (rise of W₁) × (rise of W₂) will…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Settle at 0</button>
+        <button type="button" data-choice="b">Settle near 0.8</button>
+        <button type="button" data-choice="c">Grow forever</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Drag $\rho$ from −1 to 1. Watch the paths, their shape in the plane, and the running sum at the bottom.</p>
+    <div class="formula">$$dW^{(1)}_t\,dW^{(2)}_t = \rho\,dt \qquad\Longrightarrow\qquad d(XY) = X\,dY + Y\,dX + dX\,dY$$</div>
+    <dl class="symbols">
+      <dt>$W^{(1)},\ W^{(2)}$</dt><dd>Two Brownian motions, blue and purple. Each one on its own is an ordinary Brownian motion (Chapter 1).</dd>
+      <dt>$\rho$</dt><dd>Their <em>correlation</em>, from −1 to 1 (section 1.2): 1 means they move in lockstep, 0 means independently, −1 means they are mirror images.</dd>
+      <dt>$dW^{(1)}\,dW^{(2)} = \rho\,dt$</dt><dd>Multiplying their tiny rises and adding up gives $\rho$ × elapsed time. With $\rho = 1$ this is section 2.1's $(dW)^2 = dt$, and with $\rho = 0$ the products cancel out to 0.</dd>
+      <dt>$X,\ Y$</dt><dd>Any two processes built from these Brownian motions. Here simply $X = W^{(1)}$ and $Y = W^{(2)}$.</dd>
+      <dt>$d(XY)$</dt><dd>The tiny change in the product $X \times Y$.</dd>
+      <dt>$dX\,dY$</dt><dd>The extra term of the <em>Itô product rule</em>. In ordinary calculus it vanishes. Here it equals $\rho\,dt$.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> you build a pair with correlation $\rho$ by mixing: $W^{(2)}$ takes a share $\rho$ of $W^{(1)}$'s kicks plus a share $\sqrt{1-\rho^2}$ of its own independent kicks. Their rises then multiply to $\rho\,dt$ on average, and just as in section 2.1 the sum of those products is not random at all: it is exactly $\rho t$. That is why the ordinary product rule $d(XY) = X\,dY + Y\,dX$ gains a third term, $dX\,dY$. It is Itô's lemma for a function of two variables.</p>
+    <div class="viz viz-row">
+      <canvas class="cr-paths" role="img" aria-label="Two correlated Brownian paths over time" style="flex:3 1 300px;width:auto;min-width:0"></canvas>
+      <canvas class="cr-plane" role="img" aria-label="The pair of paths drawn as one path in the plane" style="flex:2 1 200px;width:auto;min-width:0;max-width:300px"></canvas>
+    </div>
+    <div class="viz" style="margin-top:12px">
+      <canvas class="cr-cross" role="img" aria-label="Running sum of products of rises compared with the line rho times t"></canvas>
+    </div>
+    <p class="caption">Top right: the point (W₁, W₂) wanders in the plane. With ρ near ±1 it is squeezed onto a diagonal, with ρ = 0 it spreads out equally in every direction. Bottom: the running sum settles on the dashed line ρt.</p>
+    <div class="controls">
+      <label>Correlation ρ <input type="range" name="rho" min="-1" max="1" step="0.05" value="0.6"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats cr-stats"></p>
+    <p class="takeaway" hidden>Two correlated Brownian motions have a <em>cross-variation</em> $\rho t$, and it adds the extra $\rho\,dt$ to the product rule. With this, Itô's lemma extends to any number of Brownian motions. That is what pricing an option on two assets, or a stock whose volatility is itself random (the Heston model), requires.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Construction.</strong> If $B^{(1)}, B^{(2)}$ are independent Brownian motions, then $W^{(1)} = B^{(1)}$ and $W^{(2)} = \rho B^{(1)} + \sqrt{1-\rho^2}\,B^{(2)}$ are Brownian motions with $\operatorname{Cov}(W^{(1)}_t, W^{(2)}_t) = \rho t$ and cross-variation $[W^{(1)}, W^{(2)}]_t = \rho t$. In $d$ dimensions, a correlation matrix $C$ is factored as $C = LL^{\top}$ (the Cholesky factorisation) and one sets $W = LB$.</p>
+<p><strong>Multivariable Itô formula.</strong> For smooth $f(x, y)$:
+$$df(X,Y) = f_x\,dX + f_y\,dY + \tfrac12 f_{xx}\,(dX)^2 + f_{xy}\,dX\,dY + \tfrac12 f_{yy}\,(dY)^2,$$
+using $dW^{(i)}dW^{(j)} = \rho_{ij}\,dt$ and $dt\cdot dW = dt \cdot dt = 0$. The product rule is the case $f(x, y) = xy$.</p>
+<p><strong>Lévy's characterisation, two dimensions.</strong> Two continuous martingales starting at 0 with $[M^{(1)}]_t = [M^{(2)}]_t = t$ and $[M^{(1)}, M^{(2)}]_t = 0$ are independent Brownian motions.</p>
+<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, §4.6.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(19)
+rho, steps = 0.6, 100_000
+dt = 1 / steps
+dB1, dB2 = rng.normal(0, np.sqrt(dt), (2, steps))     # two independent noises
+dW1 = dB1
+dW2 = rho * dB1 + np.sqrt(1 - rho ** 2) * dB2          # correlated with dW1
+W1 = np.concatenate([[0], np.cumsum(dW1)])
+W2 = np.concatenate([[0], np.cumsum(dW2)])
+print(f&quot;sum of dW1 * dW2 = {np.sum(dW1 * dW2):.3f}   (theory: rho = {rho})&quot;)
+integrals = np.sum(W1[:-1] * dW2) + np.sum(W2[:-1] * dW1)   # Ito integrals, left-end rule
+print(f&quot;W1 * W2 = {W1[-1] * W2[-1]:.3f}   integrals = {integrals:.3f}   integrals + rho = {integrals + rho:.3f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>sum of dW1 * dW2 = 0.598   (theory: rho = 0.6)
+W1 * W2 = -0.063   integrals = -0.660   integrals + rho = -0.060</code></pre>
+    </details>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../ito-integral/index.html">← Chapter 3: The Itô Integral</a>
+    <a href="../sde/index.html">Chapter 5: Stochastic Differential Equations →</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/taylor-terms.js"></script>
+<script src="../assets/js/ito-lemma.js"></script>
+<script src="../assets/js/ito-stratonovich.js"></script>
+<script src="../assets/js/correlated.js"></script>
+</body>
+</html>

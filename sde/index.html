@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Stochastic Differential Equations · Visual Stochastic Calculus</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 5 · Dynamics</span><a href="../notation/index.html">Notation</a></span>
+</header>
+<main>
+  <h1>Stochastic Differential Equations</h1>
+  <p class="lede">A <em>differential equation</em> describes how something changes from moment to moment: a rule like "the population grows by 3% per year". A <em>stochastic</em> differential equation (SDE) adds a random push to that rule at every instant. SDEs model stock prices, interest rates, molecules and neurons, and they are what Itô calculus was built to handle.</p>
+
+  <section id="euler" class="section">
+    <h2><span class="num">5.1</span>Euler–Maruyama</h2>
+    <p>Most SDEs can't be solved with a formula, so computers solve them step by step: from where you are now, add the predictable part of the change, add a random kick, repeat. This recipe is the <em>Euler–Maruyama</em> method. To check it, we use an SDE that <em>can</em> be solved exactly (a model of a stock price) and compare the two, driven by the same Brownian path.</p>
+    <div class="predict" data-answer="b" data-explain="The error shrinks like √Δt, so halving it needs Δt four times smaller: 4× the steps.">
+      <p><strong>Predict first:</strong> To cut the average error in half, how many times more steps will you need?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">2×</button>
+        <button type="button" data-choice="b">4×</button>
+        <button type="button" data-choice="c">10×</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Drag the number of steps. Left: the exact solution (thick grey) and the step-by-step one (orange). Right: the average error over 500 paths for every step count.</p>
+    <div class="formula">$$X_{k+1} = X_k + a(X_k)\,\Delta t + b(X_k)\,\Delta W_k \qquad \text{here: } a(x) = \mu x,\;\; b(x) = \sigma x$$</div>
+    <dl class="symbols">
+      <dt>$X_k$</dt><dd>The computed value after $k$ steps (the orange dots). It starts at $X_0 = 1$.</dd>
+      <dt>$\Delta t$</dt><dd>The size of one time step: $1/N$ for $N$ steps.</dd>
+      <dt>$a(x)$</dt><dd>The <em>drift</em>: the predictable part of the change per unit of time. Here $a(x) = \mu x$ with $\mu = 0.2$: growth of 20% per unit of time, like interest.</dd>
+      <dt>$b(x)$</dt><dd>The <em>volatility</em>: how strongly the random kicks act. Here $b(x) = \sigma x$ with $\sigma = 0.8$: kicks proportional to the current value, so the price moves in percentage terms.</dd>
+      <dt>$\Delta W_k$</dt><dd>The Brownian path's rise during step $k$: a bell-curve random number with variance $\Delta t$ (section 1.2).</dd>
+      <dt>exact solution</dt><dd>For this model Itô's lemma gives a formula: $X_t = e^{(\mu - \sigma^2/2)t + \sigma W_t}$. The $-\sigma^2/2$ is the Itô correction from Chapter 4.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> each step freezes the drift and the volatility at their values at the start of the step. That is Itô's left-end rule again (section 3.1), which is why this method matches Itô equations. Freezing them makes a small error per step. More, smaller steps shrink the total error, but slowly: the average error falls like $\sqrt{\Delta t}$, so you need <strong>4×</strong> the steps to halve it. The dashed line on the right shows that rate.</p>
+    <div class="viz viz-row">
+      <canvas class="em-path" role="img" aria-label="Exact solution and Euler–Maruyama approximation along one path" style="flex:3 1 300px;width:auto;min-width:0"></canvas>
+      <canvas class="em-err" role="img" aria-label="Average error versus number of steps on log-log axes" style="flex:2 1 220px;width:auto;min-width:0"></canvas>
+    </div>
+    <p class="caption">Right panel: horizontal axis is the number of steps, doubling each tick. The orange dot is your current choice.</p>
+    <div class="controls">
+      <label>Steps <em>N</em> <input type="range" name="k" min="1" max="10" step="1" value="3"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats em-stats"></p>
+    <p class="takeaway" hidden>Euler–Maruyama converges to the true solution as the steps shrink, with error proportional to $\sqrt{\Delta t}$ (called "strong order ½"). It is the workhorse behind almost every simulation of an SDE, including every other chart on this page.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Convergence orders.</strong> If the coefficients $a$ and $b$ are Lipschitz, Euler–Maruyama has <em>strong</em> order ½, meaning $\mathbb E\lvert X_T - X^{(N)}_T \rvert \le C\,\Delta t^{1/2}$ (what the chart measures). It has <em>weak</em> order 1, meaning $\lvert \mathbb E f(X_T) - \mathbb E f(X^{(N)}_T) \rvert \le C\,\Delta t$ for smooth $f$. If you only need averages, as in option pricing, the method is more accurate than this chart suggests.</p>
+<p><strong>Doing better: the Milstein scheme.</strong> Add the next Itô–Taylor term, $\tfrac12\, b(X_k)\, b'(X_k)\,\big((\Delta W_k)^2 - \Delta t\big)$, and the strong order rises to 1. The correction contains $(\Delta W)^2 - \Delta t$: section 2.1 once more.</p>
+<p class="ref">References: P. Kloeden &amp; E. Platen, <em>Numerical Solution of Stochastic Differential Equations</em> (Springer, 1992). D. Higham, <em>SIAM Review</em> 43 (2001), 525–546.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(13)
+mu, sigma, paths, fine = 0.2, 0.8, 2_000, 1024
+dW = rng.normal(0, np.sqrt(1 / fine), (paths, fine))
+exact = np.exp((mu - sigma ** 2 / 2) + sigma * dW.sum(axis=1))   # exact GBM value at t = 1
+for N in (8, 32, 128, 512):
+    X = np.ones(paths)
+    for incr in dW.reshape(paths, N, -1).sum(axis=2).T:   # N coarse steps, same noise
+        X += mu * X / N + sigma * X * incr
+    print(f&quot;N = {N:&gt;3}: average error {np.mean(np.abs(X - exact)):.4f}&quot;)   # about halves per 4x N</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>N =   8: average error 0.1595
+N =  32: average error 0.0848
+N = 128: average error 0.0412
+N = 512: average error 0.0203</code></pre>
+    </details>
+  </section>
+
+  <section id="zoo" class="section">
+    <h2><span class="num">5.2</span>A Zoo of Diffusions</h2>
+    <p>Every SDE is a choice of drift $a$ and volatility $b$. Three choices appear everywhere. Pick a model and drag its two settings. All three are driven by the same fixed random kicks, so what you see changing is the model, not the luck.</p>
+    <div class="predict" data-answer="b" data-explain="The long-run spread is σ/√(2θ), so 4× the pull gives √4 = 2× narrower.">
+      <p><strong>Predict first:</strong> In the OU model, make the pull strength θ four times larger. What will happen to the long-run spread?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">4× narrower</button>
+        <button type="button" data-choice="b">2× narrower</button>
+        <button type="button" data-choice="c">Unchanged</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <div class="formula">$$dX_t = a(X_t)\,dt + b(X_t)\,dW_t$$</div>
+    <dl class="symbols">
+      <dt>$dX_t$</dt><dd>The tiny change in $X$ over a tiny time step $dt$ (section 4.2).</dd>
+      <dt>$a(X_t)\,dt$</dt><dd>Drift: the predictable push, which depends on where $X$ is now.</dd>
+      <dt>$b(X_t)\,dW_t$</dt><dd>Noise: a random kick whose size depends on where $X$ is now.</dd>
+      <dt>GBM</dt><dd><em>Geometric Brownian motion</em>, $a = \mu x$, $b = \sigma x$. Grows and wobbles in percentage terms, never below 0. The standard model of a stock price.</dd>
+      <dt>OU</dt><dd><em>Ornstein–Uhlenbeck</em>, $a = \theta(0 - x)$, $b = \sigma$. A pull back toward 0 that gets stronger the further away $X$ is, like a spring. Models velocities, interest rates and anything "mean-reverting".</dd>
+      <dt>CIR</dt><dd><em>Cox–Ingersoll–Ross</em>, $a = \kappa(1 - x)$, $b = \sigma\sqrt{x}$. Pulled toward 1, and the noise fades near 0. Models interest rates and volatility, which should not go negative.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> the drift decides where the paths want to go, and the volatility decides how wildly they get there. In GBM both scale with the value itself, so paths fan out upward. In OU the spring balances the noise, and the spread stops growing at a fixed width, $\sigma/\sqrt{2\theta}$. In CIR the noise shrinks near 0, so if the pull is strong enough compared with the noise ($2\kappa \ge \sigma^2$, the <em>Feller condition</em>), paths never reach 0 at all.</p>
+    <div class="viz">
+      <canvas class="zoo-canvas" role="img" aria-label="Fan of simulated paths for the chosen model with the distribution of end values"></canvas>
+    </div>
+    <p class="caption">Grey: 60 of 200 paths (one in orange). Blue bars: where all 200 end at t = 2. Black curve: the exact end-value distribution, shown for GBM and OU where it has a simple formula.</p>
+    <div class="controls">
+      <span class="radio-group" role="radiogroup" aria-label="Model">
+        <label><input type="radio" name="model" value="gbm" checked> GBM</label>
+        <label><input type="radio" name="model" value="ou"> OU</label>
+        <label><input type="radio" name="model" value="cir"> CIR</label>
+      </span>
+      <label><span class="p1-label"></span> <input type="range" name="p1"><output></output></label>
+      <label><span class="p2-label"></span> <input type="range" name="p2"><output></output></label>
+    </div>
+    <p class="stats zoo-stats"></p>
+    <p class="takeaway" hidden>Three one-line equations give three very different kinds of randomness: exploding (GBM), settling (OU) and positive-with-a-floor (CIR). Choosing $a$ and $b$ to match what you are modelling is most of the art of applied stochastic calculus.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Exact solutions.</strong> GBM: $X_t = X_0 \exp\big((\mu - \tfrac12\sigma^2)t + \sigma W_t\big)$ (from Itô's lemma applied to $\log X$). OU: $X_t = X_0 e^{-\theta t} + \sigma\int_0^t e^{-\theta(t-s)}\,dW_s$, which is normally distributed with the mean and variance drawn on the chart. CIR has no elementary formula, but $X_t$ follows a scaled non-central chi-square distribution.</p>
+<p><strong>When does an SDE have a solution?</strong> If $a$ and $b$ are Lipschitz and grow at most linearly, there is exactly one solution (Itô's theorem). CIR's $\sqrt x$ is not Lipschitz at 0, and uniqueness there needs a finer result (Yamada–Watanabe). The Feller condition $2\kappa m \ge \sigma^2$ (here $m = 1$) is exactly what keeps 0 from ever being reached.</p>
+<p class="ref">References: Øksendal, <em>Stochastic Differential Equations</em>, ch. 5. G. Uhlenbeck &amp; L. Ornstein, <em>Phys. Rev.</em> 36 (1930). J. Cox, J. Ingersoll &amp; S. Ross, <em>Econometrica</em> 53 (1985).</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(14)
+paths, steps, T = 5_000, 400, 2.0
+dt = T / steps
+models = {   # name: (drift a(x), volatility b(x), start, lowest allowed value)
+    &quot;GBM&quot;: (lambda x: 0.3 * x, lambda x: 0.4 * x, 1.0, -np.inf),
+    &quot;OU&quot;: (lambda x: 1.0 * (0 - x), lambda x: 0.6, 2.0, -np.inf),
+    &quot;CIR&quot;: (lambda x: 1.0 * (1 - x), lambda x: 0.5 * np.sqrt(x), 1.0, 0.0),
+}
+for name, (a, b, x0, floor) in models.items():
+    X = np.full(paths, x0)
+    for _ in range(steps):
+        X = np.maximum(X + a(X) * dt + b(X) * rng.normal(0, np.sqrt(dt), paths), floor)
+    print(f&quot;{name}: mean at t = 2 is {X.mean():.3f}, spread {X.std():.3f}&quot;)
+# theory: GBM mean e^0.6 = 1.822; OU mean 2e^-2 = 0.271, spread 0.420; CIR mean 1.000</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>GBM: mean at t = 2 is 1.820, spread 1.147
+OU: mean at t = 2 is 0.268, spread 0.415
+CIR: mean at t = 2 is 1.000, spread 0.350</code></pre>
+    </details>
+  </section>
+
+  <section id="fp" class="section">
+    <h2><span class="num">5.3</span>Paths ↔ Densities (Fokker–Planck)</h2>
+    <p>There are two ways to describe an SDE. You can follow individual random <em>paths</em>, as above. Or you can describe the whole crowd at once with a <em>density</em>: a curve showing how likely each position is at each time. The density obeys an ordinary (non-random) equation, the <em>Fokker–Planck equation</em>. Here 3,000 particles follow the OU equation from near $x = 2$, while the computer separately solves the Fokker–Planck equation. Scrub the time or press Play.</p>
+    <div class="predict" data-answer="b" data-explain="The drift pulls the centre back toward 0 (like 2e^(−t)), and the noise widens it until the spring balances it at spread σ/√(2θ) ≈ 0.71: a steady bell curve.">
+      <p><strong>Predict first:</strong> The crowd starts as a narrow spike near x = 2. What shape will it have at t = 3?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Still a narrow spike near 2</button>
+        <button type="button" data-choice="b">A wide bell curve centred near 0</button>
+        <button type="button" data-choice="c">Flat, spread out everywhere</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <div class="formula">$$\frac{\partial p}{\partial t} \;=\; -\frac{\partial}{\partial x}\big(a(x)\,p\big) \;+\; \frac12\,\frac{\partial^2}{\partial x^2}\big(b(x)^2\,p\big)$$</div>
+    <dl class="symbols">
+      <dt>$p(t, x)$</dt><dd>The <em>density</em>: how crowded position $x$ is at time $t$. The area under the curve between two positions is the fraction of particles between them.</dd>
+      <dt>$\frac{\partial p}{\partial t}$</dt><dd>How fast the density at one fixed position is changing over time. The curly ∂ ("partial") means only one variable changes while the others are held fixed.</dd>
+      <dt>$\frac{\partial}{\partial x}$, $\frac{\partial^2}{\partial x^2}$</dt><dd>The slope, and the curvature, of a curve drawn across positions at a fixed time.</dd>
+      <dt>$a(x)$, $b(x)$</dt><dd>The drift and volatility from section 5.2. Here (OU): $a(x) = -x$, $b(x) = 1$.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> the first term <em>moves</em> the crowd: drift carries density along like a current, here back toward 0. The second term <em>spreads</em> it: noise smooths out peaks the way heat spreads through a metal bar. Density flows out of crowded, peaked regions (negative curvature) into sparse ones. Together they give one equation that predicts the shape of a crowd of 3,000 random paths without simulating any of them. The black curve (the equation) and the blue bars (the particles) should track each other at every moment.</p>
+    <div class="viz">
+      <canvas class="fp-canvas" role="img" aria-label="Particle paths over time and their histogram against the Fokker–Planck density"></canvas>
+    </div>
+    <p class="caption">Left: 40 of the 3,000 particles up to the current time (orange line). Right: histogram of all 3,000 particles now (blue) and the Fokker–Planck solution (black).</p>
+    <div class="controls">
+      <label>Time <em>t</em> <input type="range" name="t" min="0" max="3" step="0.02" value="0.2"><output></output></label>
+      <button type="button" class="play">Play</button>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats fp-stats"></p>
+    <p class="takeaway" hidden>Random paths and a smooth equation tell the same story from two sides. This bridge between probability and differential equations runs through all of applied mathematics. The last section of this site, Feynman–Kac, crosses it in the opposite direction.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Derivation from Itô's lemma.</strong> For any smooth test function $\varphi$, Itô's lemma and taking averages give $\frac{d}{dt}\mathbb E\,\varphi(X_t) = \mathbb E\big[a(X_t)\varphi'(X_t) + \tfrac12 b(X_t)^2 \varphi''(X_t)\big]$. Write both sides as integrals against the density $p(t, x)$ and integrate by parts. Since $\varphi$ was arbitrary, the Fokker–Planck equation follows. It is also called the <em>forward Kolmogorov equation</em>.</p>
+<p><strong>Steady state.</strong> Setting $\partial_t p = 0$ for OU gives the normal density $N\big(0,\ \sigma^2/2\theta\big)$, the bell curve the crowd settles into. The <em>backward</em> Kolmogorov equation, its mirror image, is the equation behind Feynman–Kac (section 6.3).</p>
+<p class="ref">References: H. Risken, <em>The Fokker–Planck Equation</em> (2nd ed., Springer, 1989). Øksendal, <em>Stochastic Differential Equations</em>, ch. 8.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(15)
+theta, sigma, x0, T = 1.0, 1.0, 2.0, 1.0
+X = x0 + 0.15 * rng.normal(size=20_000)              # particles
+for _ in range(200):                                 # 200 Euler-Maruyama steps of 0.005
+    X += -theta * X * 0.005 + sigma * np.sqrt(0.005) * rng.normal(size=X.size)
+x = np.linspace(-4, 5, 181)                           # Fokker-Planck on a grid
+dx, dt = x[1] - x[0], 0.001
+p = np.exp(-0.5 * ((x - x0) / 0.15) ** 2) / (0.15 * np.sqrt(2 * np.pi))
+for _ in range(1000):                                # dp/dt = d/dx(theta x p) + 1/2 sigma^2 d2p/dx2
+    flux = theta * x * p
+    p[1:-1] += dt * ((flux[2:] - flux[:-2]) / (2 * dx) + 0.5 * sigma ** 2 * (p[2:] - 2 * p[1:-1] + p[:-2]) / dx ** 2)
+print(f&quot;t = 1: particle mean {X.mean():.3f}, PDE mean {np.sum(x * p) * dx:.3f}, exact {x0 * np.exp(-theta * T):.3f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>t = 1: particle mean 0.738, PDE mean 0.735, exact 0.736</code></pre>
+    </details>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../ito-lemma/index.html">← Chapter 4: Itô's Lemma</a>
+    <a href="../applications/index.html">Chapter 6: Applications →</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/euler-maruyama.js"></script>
+<script src="../assets/js/diffusion-zoo.js"></script>
+<script src="../assets/js/fokker-planck.js"></script>
+</body>
+</html>

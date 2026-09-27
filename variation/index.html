@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Variation &amp; Martingales · Visual Stochastic Calculus</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 2 · Properties</span><a href="../notation/index.html">Notation</a></span>
+</header>
+<main>
+  <h1>Variation &amp; Martingales</h1>
+  <p class="lede">Chapter 1 ended with bad news: a Brownian path is too rough to have a slope anywhere. This chapter finds what <em>does</em> behave well, and it is exactly what the new calculus will be built on.</p>
+
+  <section id="qv" class="section">
+    <h2><span class="num">2.1</span>Quadratic Variation</h2>
+    <p>Cut the time from 0 to 1 into <em>n</em> equal pieces. In each piece, measure how much the path rises or falls. Then add up those changes in two ways: their sizes, and their squares.</p>
+    <div class="predict" data-answer="c" data-explain="Each squared rise averages 1/n, so n of them average 1. With so many independent pieces, the randomness averages out and the sum locks onto exactly t = 1.">
+      <p><strong>Predict first:</strong> As the ruler gets finer, what will happen to the sum of squared rises?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">It grows forever</button>
+        <button type="button" data-choice="b">It shrinks to 0</button>
+        <button type="button" data-choice="c">It settles at 1</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>The grey curve is one Brownian path. The orange line is our "ruler": straight segments joining the path's values at the cut points. Drag <em>n</em> up. The path never changes, only the ruler gets finer. Watch the two totals below it.</p>
+    <div class="formula">$$\sum_{i=1}^{n} \lvert \Delta W_i \rvert \;\longrightarrow\; \infty, \qquad \sum_{i=1}^{n} (\Delta W_i)^2 \;\longrightarrow\; t \qquad \text{as } n \to \infty$$</div>
+    <dl class="symbols">
+      <dt>$n$</dt><dd>The number of equal pieces the time interval is cut into. The slider sets it.</dd>
+      <dt>$\Delta W_i$</dt><dd>The rise of the path across piece number $i$: its value at the piece's right end minus its value at the left end. It is negative if the path fell.</dd>
+      <dt>$\sum_{i=1}^{n}$</dt><dd>"Add up, for $i = 1, 2, \dots, n$": one term for every piece. The Greek letter Σ ("sigma") stands for <em>sum</em>.</dd>
+      <dt>$\lvert \Delta W_i \rvert$</dt><dd>The size of the rise, ignoring whether it went up or down. Adding these up measures how much ground the path covers. For a curve, that is its total up-and-down travel, called its <em>total variation</em>.</dd>
+      <dt>$(\Delta W_i)^2$</dt><dd>The rise multiplied by itself. Adding these up gives the <em>quadratic variation</em> ("quadratic" means "squared").</dd>
+      <dt>$t$</dt><dd>The length of the time interval, here $t = 1$.</dd>
+      <dt>$\longrightarrow \infty$, $\longrightarrow t$</dt><dd>"Grows without limit" and "settles down to exactly $t$" as the pieces get finer.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> each piece has width $1/n$, so by section 1.3 its rise is about $\sqrt{1/n}$. That is much bigger than $1/n$. Add up $n$ of those sizes and you get about $\sqrt n$, which grows forever: a Brownian path is infinitely long, so its length can't even be measured. Squares tell a different story. Each squared rise averages exactly $1/n$ (section 1.2), so $n$ of them average exactly 1. And because there are so many independent pieces, their random ups and downs cancel out, the same way many coin flips average out to half heads. So a <em>random</em> path gives a sum of squares that is <em>not random at all</em>: exactly $t$.</p>
+    <div class="viz">
+      <canvas class="qv-path" role="img" aria-label="A Brownian path with straight segments joining it at the partition points"></canvas>
+    </div>
+    <div class="viz viz-row even" style="margin-top:12px">
+      <canvas class="qv-tv" role="img" aria-label="Running sum of the sizes of the rises, growing as the partition gets finer"></canvas>
+      <canvas class="qv-qv" role="img" aria-label="Running sum of the squared rises, approaching the diagonal line y equals t"></canvas>
+    </div>
+    <p class="caption">Each panel adds up its sum from left to right, so its height at time $t$ is the total up to $t$. The purple panel rescales to fit, so read its "total" label. The blue panel has a fixed scale, and the dashed diagonal marks the value $t$.</p>
+    <div class="controls">
+      <label>Pieces <em>n</em> <input type="range" name="k" min="0" max="16" step="1" value="2"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats qv-stats"></p>
+    <p class="takeaway" hidden>The sum of squared rises converges to exactly the elapsed time. Mathematicians write this in shorthand as $(dW)^2 = dt$: over a tiny time step $dt$, the squared change of Brownian motion is $dt$ itself. For a smooth curve, squared changes are so small that they add up to 0 (see the comparison above), so ordinary calculus can ignore them. For Brownian motion they add up to something that can't be ignored. That one fact is the difference between ordinary calculus and Itô calculus.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Theorem.</strong> For partitions $0 = t_0 &lt; t_1 &lt; \dots &lt; t_n = t$ whose largest gap tends to 0, $\sum_i (W_{t_{i+1}} - W_{t_i})^2 \to t$. The convergence holds in mean square, and with probability 1 if the gaps shrink fast enough, as with the halving partitions used here. We write $[W]_t = t$.</p>
+<p><strong>Proof sketch.</strong> The sum has mean $\sum_i (t_{i+1} - t_i) = t$. Because the pieces are independent, its variance is $\sum_i 2(t_{i+1} - t_i)^2 \le 2t \cdot \max_i (t_{i+1} - t_i) \to 0$. A quantity whose variance tends to 0 converges to its mean.</p>
+<p>By contrast, the total variation $\sum_i \lvert W_{t_{i+1}} - W_{t_i} \rvert$ tends to infinity with probability 1. That is why the Riemann–Stieltjes integral of ordinary calculus can't be used with $dW$.</p>
+<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, §3.4.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(4)
+N = 2 ** 16
+W = np.concatenate([[0], np.cumsum(rng.normal(0, np.sqrt(1 / N), N))])   # one path on [0, 1]
+for n in (4, 256, 65_536):
+    dW = np.diff(W[:: N // n])                        # rises over n equal pieces
+    print(f&quot;n = {n:&gt;6}: sum |dW| = {np.abs(dW).sum():8.2f}   sum dW^2 = {(dW ** 2).sum():.4f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>n =      4: sum |dW| =     1.90   sum dW^2 = 1.0518
+n =    256: sum |dW| =    12.22   sum dW^2 = 0.9188
+n =  65536: sum |dW| =   204.54   sum dW^2 = 0.9988</code></pre>
+    </details>
+  </section>
+
+  <section id="martingale" class="section">
+    <h2><span class="num">2.2</span>Martingales</h2>
+    <p>Suppose you have watched a Brownian path up to some moment <em>s</em>. What is your best forecast for where it will be later? Freeze the orange path at time <em>s</em>, and let the computer play out 400 possible futures from that point (60 are drawn in grey). The thick blue line is their average.</p>
+    <div class="predict" data-answer="b" data-explain="W² drifts upward by exactly the time remaining: the average of W₁² given the history is W_s² + (1 − s). Subtracting t removes that drift.">
+      <p><strong>Predict first:</strong> Switch to W². Where will the average of the futures go?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">It stays flat at the frozen value</button>
+        <button type="button" data-choice="b">It rises</button>
+        <button type="button" data-choice="c">It falls</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Drag <em>s</em> anywhere. Then switch to $W^2$, and finally to $W^2 - t$.</p>
+    <div class="formula">$$\mathbb{E}\big[\, W_t \;\big|\; \mathcal{F}_s \big] = W_s \quad\text{and}\quad \mathbb{E}\big[\, W_t^2 - t \;\big|\; \mathcal{F}_s \big] = W_s^2 - s \qquad (s \le t)$$</div>
+    <dl class="symbols">
+      <dt>$s,\ t$</dt><dd>"Now" ($s$, the freeze time) and a later time $t$. The chart runs to $t = 1$.</dd>
+      <dt>$\mathbb{E}[\;\cdot\;]$</dt><dd>The <em>expected value</em>: the average over all possible futures. The blue line estimates it with 400 simulated futures.</dd>
+      <dt>$\big|\ \mathcal{F}_s$</dt><dd>"Given everything that has happened up to time $s$". The bar means "given", and $\mathcal{F}_s$ stands for the whole history of the path so far (the orange part).</dd>
+      <dt>$W_s$</dt><dd>Where the path is at the freeze time: the orange dot.</dd>
+      <dt>$W_t^2 - t$</dt><dd>The path's value squared, minus the time. Squares are never negative, so $W^2$ tends to drift upward. It drifts at exactly rate 1 (section 1.2: the average squared rise equals elapsed time), and subtracting $t$ cancels that drift.</dd>
+      <dt>martingale</dt><dd>A random process whose best forecast of any future value is simply its current value: $\mathbb{E}[\text{later} \mid \text{history}] = \text{now}$.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> Brownian motion is a <em>fair game</em>. Whatever path it took to get here, its next move is as likely to be up as down, so on average the futures stay exactly where you are now: the blue line runs flat along the dashed line. $W^2$ is <em>not</em> fair: it tilts upward by exactly the time remaining. Subtract the time, and $W^2 - t$ is fair again. That "minus $t$" is the quadratic variation from section 2.1 showing up in disguise.</p>
+    <div class="viz">
+      <canvas class="mg-canvas" role="img" aria-label="A path frozen at time s with many possible futures fanning out and their average"></canvas>
+    </div>
+    <p class="caption">Orange: the history up to $s$. Grey: possible futures. Blue: their average. Dashed: the frozen value carried forward.</p>
+    <div class="controls">
+      <label>Freeze time <em>s</em> <input type="range" name="s" min="0" max="0.95" step="0.01" value="0.4"><output></output></label>
+      <span class="radio-group" role="radiogroup" aria-label="Process shown">
+        <label><input type="radio" name="proc" value="w" checked> $W$</label>
+        <label><input type="radio" name="proc" value="w2"> $W^2$</label>
+        <label><input type="radio" name="proc" value="w2t"> $W^2 - t$</label>
+      </span>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats mg-stats"></p>
+    <p class="takeaway" hidden>$W$ and $W^2 - t$ are martingales: their best forecast is their current value. $W^2$ is not, because it drifts up at rate 1. Martingales are the "fair games" of probability, and in Chapter 3 the Itô integral turns out to be one. That is why it has no drift of its own.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Definition.</strong> A process $M_t$ is a <em>martingale</em> with respect to the history (filtration) $\mathcal F_t$ if it depends only on the history up to time $t$, has $\mathbb E\lvert M_t \rvert &lt; \infty$, and satisfies $\mathbb E[M_t \mid \mathcal F_s] = M_s$ for all $s \le t$.</p>
+<p><strong>Examples from Brownian motion:</strong> $W_t$, $W_t^2 - t$, and $\exp(\lambda W_t - \tfrac12 \lambda^2 t)$ for any number $\lambda$. The last one reappears as the Girsanov weight in section 6.2.</p>
+<p><strong>Lévy's characterisation.</strong> A continuous martingale $M$ with $M_0 = 0$ for which $M_t^2 - t$ is also a martingale must be a Brownian motion. The two martingales in this section are therefore enough to pin Brownian motion down completely.</p>
+<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, ch. 2–3.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(5)
+s, W_s = 0.4, 0.3                                    # freeze time and the value there
+W_1 = W_s + rng.normal(0, np.sqrt(1 - s), 100_000)   # possible values at t = 1
+print(f&quot;E[W_1]       = {W_1.mean():.3f}  (W_s = {W_s})&quot;)
+print(f&quot;E[W_1^2]     = {(W_1 ** 2).mean():.3f}  (W_s^2 + 1 - s = {W_s ** 2 + 1 - s:.3f})&quot;)
+print(f&quot;E[W_1^2 - 1] = {(W_1 ** 2 - 1).mean():.3f}  (W_s^2 - s = {W_s ** 2 - s:.3f})&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>E[W_1]       = 0.301  (W_s = 0.3)
+E[W_1^2]     = 0.689  (W_s^2 + 1 - s = 0.690)
+E[W_1^2 - 1] = -0.311  (W_s^2 - s = -0.310)</code></pre>
+    </details>
+  </section>
+
+  <section id="reflection" class="section">
+    <h2><span class="num">2.3</span>Reflection Principle</h2>
+    <p>How likely is a Brownian path to reach a level $a$ at some point before time 1? Counting that directly seems hard, because you'd have to watch every moment. The <em>reflection principle</em> turns it into an easy question about where the path <em>ends</em>.</p>
+    <div class="predict" data-answer="b" data-explain="About 15.9% of paths end above 1 (the bell-curve area beyond 1), and the reflection principle doubles that: about 31.7% reach the level at some point.">
+      <p><strong>Predict first:</strong> Drag the level to a = 1. About what fraction of paths reach it before t = 1?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">About 16%</button>
+        <button type="button" data-choice="b">About 32%</button>
+        <button type="button" data-choice="c">About 50%</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Drag the level $a$. Grey paths never reach it, blue paths do. When the orange path first touches the level, its future is mirrored in the level (dashed): every rise becomes a fall and every fall a rise.</p>
+    <div class="formula">$$P\Big(\max_{s \le t} W_s \ge a\Big) \;=\; 2\,P\big(W_t \ge a\big) \qquad (a > 0)$$</div>
+    <dl class="symbols">
+      <dt>$a$</dt><dd>The level, above the starting point 0. The slider sets it.</dd>
+      <dt>$\max_{s \le t} W_s$</dt><dd>The highest point the path reaches at any time $s$ up to $t$ (here $t = 1$).</dd>
+      <dt>$P(\;\cdot\;)$</dt><dd>The <em>probability</em>: the fraction of all possible paths for which the statement in brackets is true. The stats line estimates it by counting 3,000 simulated paths.</dd>
+      <dt>$P(\max \ge a)$</dt><dd>The fraction of paths that reach the level at some point: the blue ones.</dd>
+      <dt>$P(W_t \ge a)$</dt><dd>The fraction of paths that <em>end</em> at or above the level. This is easy to compute, because $W_t$ follows a bell curve (section 1.1). It is the area under the bell curve to the right of $a$.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> take any path that reaches the level but ends <em>below</em> it. Mirror everything after its first touch, and you get a path that ends <em>above</em> the level. From the moment of first touch, the path's future is a fresh Brownian motion that ignores its past (section 1.2), and rises and falls are symmetric. So the mirrored future is exactly as likely as the original one. So the paths that reach the level split evenly into two equal-sized groups: those ending above it, and their mirror twins ending below. Counting only the paths that end above the level and doubling the count gives all the paths that reached it.</p>
+    <div class="viz">
+      <canvas class="rf-canvas" role="img" aria-label="Brownian paths and a horizontal level; one path mirrored in the level after first touching it"></canvas>
+    </div>
+    <p class="caption">The level is checked at 2,000 time points per path, so a path that brushes the level between two checks is missed. That makes "reached" read slightly low, typically by about one percentage point, which is about the size of the random noise.</p>
+    <div class="controls">
+      <label>Level <em>a</em> <input type="range" name="a" min="0.1" max="2.5" step="0.05" value="0.8"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats rf-stats"></p>
+    <p class="takeaway" hidden>The chance of <em>ever</em> reaching a level is exactly twice the chance of <em>ending</em> above it. A question about the whole path became a question about one bell-curve number. The same mirror trick prices "barrier options" in finance, contracts that pay out only if a price touches a certain level.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Precise statement.</strong> Let $M_t = \max_{s \le t} W_s$. For $a &gt; 0$ and $b \le a$: $P(M_t \ge a,\ W_t \le b) = P(W_t \ge 2a - b)$. Setting $b = a$ and adding $P(W_t \ge a)$ gives the formula in this section.</p>
+<p><strong>Why it works: the strong Markov property.</strong> At the first hitting time $\tau_a = \min\{t : W_t = a\}$, which is a random time, the future $W_{\tau_a + s} - a$ is a fresh Brownian motion, independent of everything before $\tau_a$. Its mirror image is therefore just as likely.</p>
+<p><strong>A surprising consequence.</strong> $\tau_a$ has density $\dfrac{a}{\sqrt{2\pi t^3}}\, e^{-a^2/2t}$. Every level is reached eventually, with probability 1, yet the <em>average</em> waiting time is infinite.</p>
+<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, §3.7.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import erf, sqrt
+rng = np.random.default_rng(6)
+paths, steps, a = 10_000, 1_000, 1.0
+W = np.cumsum(rng.normal(0, sqrt(1 / steps), (paths, steps)), axis=1)
+reached = (W.max(axis=1) &gt;= a).mean()                 # ever touched level a
+ended_above = (W[:, -1] &gt;= a).mean()
+theory = 2 * (1 - 0.5 * (1 + erf(a / sqrt(2))))
+print(f&quot;reached a: {reached:.3f}   2 x ended above: {2 * ended_above:.3f}   theory: {theory:.3f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>reached a: 0.302   2 x ended above: 0.314   theory: 0.317</code></pre>
+    </details>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../brownian-motion/index.html">← Chapter 1: Brownian Motion</a>
+    <a href="../ito-integral/index.html">Chapter 3: The Itô Integral →</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/quadratic-variation.js"></script>
+<script src="../assets/js/martingale.js"></script>
+<script src="../assets/js/reflection.js"></script>
+</body>
+</html>

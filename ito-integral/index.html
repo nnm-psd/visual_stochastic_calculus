@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Itô Integral · Visual Stochastic Calculus</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 3 · Definition of the integral</span><a href="../notation/index.html">Notation</a></span>
+</header>
+<main>
+  <h1>The Itô Integral</h1>
+  <p class="lede">An <em>integral</em> adds up infinitely many tiny contributions. Here, each contribution is "something × a tiny rise of Brownian motion". This chapter shows why defining that needs a rule, which rule Itô chose, and the two facts that make it work.</p>
+
+  <section id="eval-point" class="section">
+    <h2><span class="num">3.1</span>Where You Evaluate Matters</h2>
+    <p>In ordinary calculus, an integral is built from thin rectangles: cut time into $n$ pieces, and in each piece multiply the height of a curve by the width. It doesn't matter <em>where</em> inside a piece you read off the height (left end, middle, right end). As the pieces shrink, every choice gives the same answer.</p>
+    <div class="predict" data-answer="b" data-explain="The limit is ½W_t² + (θ − ½)t, so moving θ from 0 to 1 adds exactly t (here 1). For a smooth curve the reading point would make no difference.">
+      <p><strong>Predict first:</strong> Move the reading point from the left end (θ = 0) to the right end (θ = 1). How will the limit change?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">It stays the same</button>
+        <button type="button" data-choice="b">It goes up by t</button>
+        <button type="button" data-choice="c">It goes down by t</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Try the same with Brownian motion. In each piece, multiply the path's value $W$ by the piece's rise $\Delta W$, and add everything up. The slider $\theta$ ("theta") chooses where inside each piece $W$ is read: $\theta = 0$ is the left end, $\theta = 1$ the right end. Drag it, then make the pieces finer.</p>
+    <div class="formula">$$\sum_{i=1}^{n} W_{t_i^{\theta}}\,\Delta W_i \;\longrightarrow\; \tfrac12 W_t^2 + \big(\theta - \tfrac12\big)\,t \qquad \text{as } n \to \infty$$</div>
+    <dl class="symbols">
+      <dt>$\theta$</dt><dd>Where inside each piece the path is read: 0 for the left end, ½ for the middle, 1 for the right end.</dd>
+      <dt>$t_i^{\theta}$</dt><dd>The reading point in piece $i$: a fraction $\theta$ of the way from its left end to its right end. The orange dots mark them.</dd>
+      <dt>$W_{t_i^{\theta}}$</dt><dd>The path's value at that reading point: the "height" of the rectangle.</dd>
+      <dt>$\Delta W_i$</dt><dd>The rise of the path across piece $i$ (section 2.1): the "width" of the rectangle, measured in rises of $W$ instead of in time.</dd>
+      <dt>$\tfrac12 W_t^2$</dt><dd>The answer ordinary calculus would give: the rule $\int x\,dx = \tfrac12 x^2$, with $W$ in place of $x$.</dd>
+      <dt>$(\theta - \tfrac12)\,t$</dt><dd>An extra amount that depends on the reading point. For a smooth curve it would be 0. Here it isn't.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> reading $W$ later inside a piece means reading it after part of that piece's rise has already happened. So the height and the width are no longer independent: both include the same bit of movement. Each piece then contributes a little extra, on average $\theta$ times the piece's squared rise. By section 2.1, squared rises add up to $t$ instead of vanishing, so the total extra is $\theta\,t$. Different reading points give genuinely different answers, and we must pick a rule.</p>
+    <div class="viz">
+      <canvas class="ep-path" role="img" aria-label="A Brownian path with evaluation points marked in each piece"></canvas>
+      <canvas class="ep-sum" role="img" aria-label="Running sum compared with the Itô and ordinary-calculus answers" style="margin-top:12px"></canvas>
+    </div>
+    <div class="controls">
+      <label>Reading point θ <input type="range" name="theta" min="0" max="1" step="0.0625" value="0"><output></output></label>
+      <label>Pieces <em>n</em> <input type="range" name="k" min="1" max="12" step="1" value="6"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats ep-stats"></p>
+    <p class="takeaway" hidden><strong>Itô's rule is $\theta = 0$: always read at the left end.</strong> It is the only choice that never peeks at the future. If $W$ is a price and the height is how much you hold, you must decide your holding <em>before</em> the price moves. With that rule, $\int_0^t W\,dW = \tfrac12 W_t^2 - \tfrac12 t$. That extra $-\tfrac12 t$ is the first glimpse of Itô calculus. (The middle point, $\theta = \tfrac12$, is also used. It is called the <em>Stratonovich</em> integral, and it keeps the ordinary-calculus answer. We return to it in Chapter 4.)</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>The two named integrals.</strong> Itô ($\theta = 0$): $\int_0^t W\,dW = \tfrac12 W_t^2 - \tfrac12 t$. Stratonovich ($\theta = \tfrac12$): $\int_0^t W \circ dW = \tfrac12 W_t^2$.</p>
+<p><strong>Why the left end is special.</strong> Only with $\theta = 0$ is each term $W_{t_i}\,\Delta W_i$ an unknown future rise multiplied by something already known. That makes the Itô integral a martingale with mean 0 (section 3.2). For $\theta &gt; 0$ the sum has mean $\theta t$.</p>
+<p><strong>Why a choice is needed at all.</strong> Ordinary (Riemann–Stieltjes) integrals $\int f\,dg$ are defined for integrators $g$ of finite total variation. Brownian motion has infinite total variation (section 2.1), so the sums need not agree, and here they don't.</p>
+<p class="ref">References: Shreve, <em>Stochastic Calculus for Finance II</em>, §4.3. B. Øksendal, <em>Stochastic Differential Equations</em> (6th ed., Springer, 2003), ch. 3.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(7)
+N = 2 ** 16
+W = np.concatenate([[0], np.cumsum(rng.normal(0, np.sqrt(1 / N), N))])
+n = 2 ** 12
+k = N // n                                           # fine steps per piece
+for theta in (0, 0.5, 1):
+    read = W[np.arange(n) * k + round(theta * k)]    # W at the reading point of each piece
+    total = np.sum(read * np.diff(W[::k]))
+    print(f&quot;theta = {theta}: sum = {total:.3f}   theory = {0.5 * W[-1] ** 2 + theta - 0.5:.3f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>theta = 0: sum = -0.396   theory = -0.385
+theta = 0.5: sum = 0.120   theory = 0.115
+theta = 1: sum = 0.627   theory = 0.615</code></pre>
+    </details>
+  </section>
+
+  <section id="betting" class="section">
+    <h2><span class="num">3.2</span>Building the Integral</h2>
+    <p>The clearest way to think about the Itô integral is as <em>trading gains</em>. $W$ is the price of something. Time is split into 8 periods, and at the start of each period you choose how many units to hold (the bars): positive means you bet on a rise, negative means you bet on a fall. Your gain in a period is the number of units held × the price's rise.</p>
+    <div class="predict" data-answer="b" data-explain="Each bet is fixed before its period&#x27;s rise, and every rise averages 0, so every bet × rise averages 0. Only the spread of your gains depends on your bets.">
+      <p><strong>Predict first:</strong> Whatever bets you choose, what will your average final gain be across all the price paths?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Positive if you bet on rises more than falls</button>
+        <button type="button" data-choice="b">Always 0</button>
+        <button type="button" data-choice="c">It depends on the bets</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Drag across the bars to set your bets. The orange line shows your running gains along one price path. The histogram shows your final gains across 2,000 different price paths.</p>
+    <div class="formula">$$\int_0^1 H_t\,dW_t \;=\; \sum_{j=1}^{8} H_j\,\big(W_{t_{j}} - W_{t_{j-1}}\big)$$</div>
+    <dl class="symbols">
+      <dt>$\int_0^1 \cdots\, dW_t$</dt><dd>The <em>Itô integral</em> from time 0 to time 1: the total of "holding × rise", added up over all the time.</dd>
+      <dt>$H_t$</dt><dd>Your holding at time $t$: the height of the bar for the period that contains $t$. It is chosen at the start of the period, before the price moves (Itô's left-end rule from section 3.1).</dd>
+      <dt>$H_j$</dt><dd>The holding during period $j$.</dd>
+      <dt>$t_{j-1},\ t_j$</dt><dd>The start and end of period $j$. Here, $t_j = j/8$.</dd>
+      <dt>$W_{t_j} - W_{t_{j-1}}$</dt><dd>How much the price rises during period $j$.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> for bets that stay fixed within each period, the integral is just the sum above: bet × rise, period by period. The full Itô integral allows the holding to change continuously, and even to depend on what the price has done so far (the next section does exactly that). It is defined as what these sums settle down to as the periods get shorter and shorter. The one rule that never changes: each holding is fixed <em>before</em> the move it bets on.</p>
+    <div class="viz">
+      <canvas class="bt-bars" tabindex="0" role="application" aria-label="Eight bars setting the bet size in each period. Drag to change, or use left and right arrows to pick a period and up and down arrows to change its bet." style="touch-action:none"></canvas>
+    </div>
+    <div class="viz viz-row" style="margin-top:12px">
+      <canvas class="bt-lines" role="img" aria-label="The price path and the running gains of the chosen bets" style="flex:3 1 300px;width:auto;min-width:0"></canvas>
+      <canvas class="bt-hist" role="img" aria-label="Histogram of final gains over 2,000 price paths" style="flex:2 1 220px;width:auto;min-width:0"></canvas>
+    </div>
+    <p class="caption">Keyboard: Tab to the bars, ← → to pick a period, ↑ ↓ to change its bet. The histogram's curve is the bell curve that theory predicts, centred at 0.</p>
+    <div class="controls">
+      <button type="button" class="reset">All bets = 1</button>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats bt-stats"></p>
+    <p class="takeaway" hidden>Whatever bets you choose, your average gain is 0. Betting on Brownian motion is a fair game (section 2.2), and the Itô integral inherits that: it is a martingale. The spread of your gains depends only on how big your bets are: the variance equals "bet² × time", added up. The next section shows this rule holds even for bets that react to the price.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Simple processes.</strong> A process $H_t = \sum_j H_j\, \mathbf 1_{(t_{j-1}, t_j]}(t)$ where each $H_j$ depends only on the history up to $t_{j-1}$. For these, $\int_0^t H\,dW$ is defined as the finite sum in this section.</p>
+<p><strong>General integrands.</strong> Any process $H$ that uses only past information and has $\mathbb E \int_0^t H_s^2\,ds &lt; \infty$ can be approximated by simple processes $H^{(n)}$. $\int H\,dW$ is defined as the limit of $\int H^{(n)}\,dW$, and the Itô isometry (section 3.3) guarantees that limit exists.</p>
+<p><strong>Properties.</strong> The result is a continuous martingale in $t$, linear in $H$, with mean 0 and quadratic variation $\int_0^t H_s^2\,ds$.</p>
+<p class="ref">References: Shreve, <em>Stochastic Calculus for Finance II</em>, §4.2–4.3. Øksendal, <em>Stochastic Differential Equations</em>, ch. 3.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(8)
+bets = np.array([1, 2, 0.5, -1, -1, 0, 1.5, 1])       # holding in each of 8 periods
+rises = rng.normal(0, np.sqrt(1 / 8), (100_000, 8))   # price rise per period, per path
+gains = rises @ bets                                   # sum of bet x rise: the Ito integral
+print(f&quot;mean {gains.mean():+.4f} (0)   variance {gains.var():.3f} (sum bet^2 / 8 = {np.sum(bets ** 2) / 8:.3f})&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>mean +0.0022 (0)   variance 1.322 (sum bet^2 / 8 = 1.312)</code></pre>
+    </details>
+  </section>
+
+  <section id="isometry" class="section">
+    <h2><span class="num">3.3</span>Itô Isometry</h2>
+    <p>Now let the bet depend on the price itself. With $H = W$ you hold more the higher the price has gone. With $H = \operatorname{sign}(W)$ you hold +1 when the price is above its start and −1 when below. For each rule, the computer trades along 10,000 price paths. The chart shows three averages as more and more paths are included.</p>
+    <div class="predict" data-answer="b" data-explain="By the isometry it equals the average of ∫W_s² ds = ∫s ds = ½, because W_s² averages s.">
+      <p><strong>Predict first:</strong> For the rule H = W, what number will the squared gains average to?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">1</button>
+        <button type="button" data-choice="b">½</button>
+        <button type="button" data-choice="c">0</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <div class="formula">$$\mathbb{E}\Big[\Big(\int_0^t H_s\,dW_s\Big)^2\Big] \;=\; \mathbb{E}\Big[\int_0^t H_s^2\,ds\Big], \qquad \mathbb{E}\Big[\int_0^t H_s\,dW_s\Big] = 0$$</div>
+    <dl class="symbols">
+      <dt>$\int_0^t H_s\,dW_s$</dt><dd>Your total trading gains up to time $t$ (section 3.2). Here $t = 1$.</dd>
+      <dt>$\mathbb{E}[\;\cdot\;]$</dt><dd>The average over all possible price paths (section 2.2). The chart estimates it with up to 10,000 paths.</dd>
+      <dt>$\big(\int H\,dW\big)^2$</dt><dd>Your gains squared: a measure of how big your gain or loss is, whichever way it went.</dd>
+      <dt>$\int_0^t H_s^2\,ds$</dt><dd>An ordinary integral over time: the size of your holding, squared, added up over time. It measures how much risk you carried.</dd>
+      <dt>$\operatorname{sign}(W)$</dt><dd>+1 if $W$ is above 0, −1 if below.</dd>
+      <dt>isometry</dt><dd>"Same size". The size of the random gains (left side) equals the size of the holdings (right side).</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> the random, hard-to-predict quantity on the left (your squared gains) has the same average as a plain accumulation of squared holdings over time on the right. The reason is sections 1.2 and 2.1 again: rises in different periods don't interact, so only each period's own squared rise counts, and a squared rise averages the elapsed time. That is why $(dW)^2 = dt$ reappears here as "$H^2 dt$". Meanwhile the gains themselves average 0, whatever rule you use.</p>
+    <div class="viz">
+      <canvas class="is-canvas" role="img" aria-label="Running averages of gains, squared gains and integrated squared holdings versus number of paths"></canvas>
+    </div>
+    <p class="caption">Horizontal axis: number of paths averaged (log scale). Dashed line: theory for the two orange and blue averages.</p>
+    <div class="controls">
+      <span class="radio-group" role="radiogroup" aria-label="Betting rule">
+        <label><input type="radio" name="rule" value="one" checked> $H = 1$</label>
+        <label><input type="radio" name="rule" value="w"> $H = W$</label>
+        <label><input type="radio" name="rule" value="sign"> $H = \operatorname{sign}(W)$</label>
+      </span>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats is-stats"></p>
+    <p class="takeaway" hidden>The squared gains and the accumulated squared holdings converge to the same number, and the gains converge to 0. For $H = W$ that number is $\int_0^1 s\,ds = \tfrac12$, because $W_s^2$ averages $s$. These two facts, "mean zero" and "the isometry", are what make the Itô integral usable: they turn questions about a random integral into ordinary calculus.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Itô isometry.</strong> For any process $H$ that uses only past information with $\mathbb E\int_0^t H_s^2\,ds &lt; \infty$: $\mathbb E\big[(\int_0^t H_s\,dW_s)^2\big] = \mathbb E\int_0^t H_s^2\,ds$. More generally, $\mathbb E\big[\int H\,dW \cdot \int K\,dW\big] = \mathbb E\int H_s K_s\,ds$.</p>
+<p><strong>Proof for simple processes.</strong> Square $\sum_j H_j \Delta W_j$. Cross terms $H_i H_j \Delta W_i \Delta W_j$ with $i &lt; j$ average 0, because $\Delta W_j$ is independent of everything before it. The square terms average $\mathbb E[H_j^2]\,\Delta t_j$. The name "isometry" means the integral preserves the natural sizes: mean square on the left, integrated mean square on the right.</p>
+<p>This identity is also what makes the definition in section 3.2 work: it turns convergence of $H^{(n)}$ into convergence of $\int H^{(n)} dW$.</p>
+<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, §4.3.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(9)
+paths, steps = 20_000, 200
+dt = 1 / steps
+dW = rng.normal(0, np.sqrt(dt), (paths, steps))
+W = np.concatenate([np.zeros((paths, 1)), np.cumsum(dW, axis=1)[:, :-1]], axis=1)   # W at left ends
+for name, H in ((&quot;1&quot;, np.ones_like(W)), (&quot;W&quot;, W), (&quot;sign(W)&quot;, np.sign(W))):
+    I = np.sum(H * dW, axis=1)                        # Ito integral, left-end rule
+    risk = np.sum(H ** 2 * dt, axis=1)
+    print(f&quot;H = {name:8} E[I] = {I.mean():+.3f}   E[I^2] = {np.mean(I ** 2):.3f}   E[int H^2 dt] = {risk.mean():.3f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>H = 1        E[I] = +0.001   E[I^2] = 1.006   E[int H^2 dt] = 1.000
+H = W        E[I] = +0.003   E[I^2] = 0.505   E[int H^2 dt] = 0.499
+H = sign(W)  E[I] = +0.009   E[I^2] = 0.990   E[int H^2 dt] = 0.995</code></pre>
+    </details>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../variation/index.html">← Chapter 2: Variation &amp; Martingales</a>
+    <a href="../ito-lemma/index.html">Chapter 4: Itô's Lemma →</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/evaluation-point.js"></script>
+<script src="../assets/js/betting.js"></script>
+<script src="../assets/js/isometry.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diffusion Models · Visual Stochastic Calculus</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 7 · Generative AI</span><a href="../notation/index.html">Notation</a></span>
+</header>
+<main>
+  <h1>Diffusion Models</h1>
+  <p class="lede"><em>Diffusion models</em>, the technique behind AI image generators such as Stable Diffusion, apply almost everything on this site. An SDE turns data into noise (Chapter 5). A <em>score</em> describes the noised data. A reverse-time SDE turns noise back into brand-new data. Here the "data" is one-dimensional: numbers drawn from two bumps. An image model does the same with every pixel at once.</p>
+
+  <section id="forward" class="section">
+    <h2><span class="num">7.1</span>Forward: Data to Noise</h2>
+    <p>A diffusion model learns to create data by first watching how data is destroyed. Take the data samples (here, numbers clustered in two bumps) and let each one follow an SDE that slowly erases it into pure random noise.</p>
+    <div class="predict" data-answer="b" data-explain="The drift shrinks every sample toward 0 by a factor e^(−t), while the noise tops the spread back up toward 1. By t = 3 only e^(−3) ≈ 5% of the original signal is left, so the data has become almost pure N(0, 1) noise.">
+      <p><strong>Predict first:</strong> By t = 3, what will the histogram look like?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Still two bumps, just blurrier</button>
+        <button type="button" data-choice="b">A single standard bell curve, N(0, 1)</button>
+        <button type="button" data-choice="c">Flat</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Scrub the time or press Play. The black curve is the exact distribution of the noised data. The dashed curve is pure noise.</p>
+    <div class="formula">$$dX_t = -X_t\,dt + \sqrt2\,dW_t \quad\Longrightarrow\quad X_t = e^{-t}X_0 + \sqrt{1 - e^{-2t}}\;Z$$</div>
+    <dl class="symbols">
+      <dt>$X_0$</dt><dd>One data sample: a number from one of the two bumps.</dd>
+      <dt>$X_t$</dt><dd>The same sample after being noised for time $t$.</dd>
+      <dt>$-X_t\,dt$</dt><dd>A drift pulling every sample toward 0. This is the Ornstein–Uhlenbeck process of section 5.2.</dd>
+      <dt>$\sqrt2\,dW_t$</dt><dd>Random kicks. The $\sqrt2$ is chosen so the pull and the kicks balance at a long-run spread of exactly 1.</dd>
+      <dt>$Z$</dt><dd>A fresh standard bell-curve number, drawn from $N(0, 1)$.</dd>
+      <dt>$e^{-t}$</dt><dd>How much of the original sample survives: 37% at $t = 1$, 5% at $t = 3$.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> noising is "shrink a little, add a little noise", repeated. The formula on the right shows the result can be computed in one jump: keep a fraction $e^{-t}$ of the sample and add bell-curve noise. After enough time, where a sample started no longer matters, and every dataset ends up as the same featureless $N(0,1)$. That direction is easy. The useful direction is the reverse: start from noise and produce <em>new</em> data. That is what sections 7.2 and 7.3 build.</p>
+    <div class="viz">
+      <canvas class="fw-canvas" role="img" aria-label="Data samples turning into noise over time, with the current distribution"></canvas>
+    </div>
+    <p class="caption">Left: 40 of the 3,000 samples being noised, up to the current time. Right: histogram of all samples now (blue), the exact noised distribution (black), and pure noise N(0, 1) (dashed).</p>
+    <div class="controls">
+      <label>Time <em>t</em> <input type="range" name="t" min="0" max="3" step="0.02" value="0"><output></output></label>
+      <button type="button" class="play">Play</button>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats fw-stats"></p>
+    <p class="takeaway" hidden>The forward process needs no learning: any data, however complicated, becomes the same $N(0,1)$ noise. In an image model this happens to every pixel at once, and the end result looks like TV static.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>The general forward SDE.</strong> Song et al. (2021) use the "variance-preserving" SDE $dX = -\tfrac12\beta(t)X\,dt + \sqrt{\beta(t)}\,dW$ with a noise schedule $\beta(t)$. This page is the constant case $\beta = 2$. Its solution is $X_t = a_t X_0 + \sqrt{1 - a_t^2}\,Z$ with $a_t = e^{-\frac12\int_0^t \beta(s)\,ds}$.</p>
+<p><strong>The discrete version (DDPM).</strong> Ho, Jain &amp; Abbeel (2020) use steps $x_k = \sqrt{1 - \beta_k}\,x_{k-1} + \sqrt{\beta_k}\,z_k$, a discretisation of the same SDE (compare Euler–Maruyama, section 5.1). The idea of learning to reverse a noising process goes back to Sohl-Dickstein et al. (2015).</p>
+<p class="ref">References: J. Sohl-Dickstein et al., <em>ICML</em> (2015). J. Ho, A. Jain &amp; P. Abbeel, <em>NeurIPS</em> (2020). Y. Song et al., "Score-Based Generative Modeling through Stochastic Differential Equations", <em>ICLR</em> (2021).</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(20)
+w, m, s = np.array([0.35, 0.65]), np.array([-2.0, 1.5]), np.array([0.3, 0.5])   # the &quot;data&quot;: two bumps
+k = rng.choice(2, size=100_000, p=w)
+x0 = rng.normal(m[k], s[k])
+for t in (0.0, 0.5, 1.0, 3.0):
+    xt = np.exp(-t) * x0 + np.sqrt(1 - np.exp(-2 * t)) * rng.normal(size=x0.size)   # exact noising to time t
+    print(f&quot;t = {t}: mean {xt.mean():+.3f}, spread {xt.std():.3f}, share left of the valley {np.mean(xt &lt; -0.25):.3f}&quot;)
+# pure noise N(0, 1): mean 0, spread 1, share left of -0.25 = 0.401</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>t = 0.0: mean +0.281, spread 1.724, share left of the valley 0.349
+t = 0.5: mean +0.166, spread 1.317, share left of the valley 0.363
+t = 1.0: mean +0.099, spread 1.124, share left of the valley 0.375
+t = 3.0: mean +0.014, spread 1.003, share left of the valley 0.397</code></pre>
+    </details>
+  </section>
+
+  <section id="score" class="section">
+    <h2><span class="num">7.2</span>The Score</h2>
+    <p>To run the movie backward, one thing is needed at every noise level $t$ and every position $x$: which direction makes a sample <em>more likely</em>, and how strongly. That is the <em>score</em>. The top panel shows the noised density at the chosen $t$. The bottom panel shows its score, as a curve and as arrows.</p>
+    <div class="predict" data-answer="b" data-explain="Pure noise N(0, 1) has density proportional to e^(−x²/2), so log p = −x²/2 + a constant, and its slope is −x. Every arrow points to 0, and the further out it starts, the longer it is.">
+      <p><strong>Predict first:</strong> Drag t up to a lot of noise. What will the score become?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Zero everywhere</button>
+        <button type="button" data-choice="b">A straight line, −x, pointing everything to the centre</button>
+        <button type="button" data-choice="c">More and more jagged</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Drag the noise level. Near $t = 0$ the arrows point into each bump, and the valley between them pushes samples out toward one bump or the other.</p>
+    <div class="formula">$$s(t, x) \;=\; \frac{\partial}{\partial x}\log p(t, x) \;=\; \frac{\partial p(t,x)/\partial x}{p(t, x)}$$</div>
+    <dl class="symbols">
+      <dt>$p(t, x)$</dt><dd>The density of the noised data at time $t$ (section 5.3): the black curve of section 7.1, and the blue curve here.</dd>
+      <dt>$\log p$</dt><dd>The natural logarithm of the density. Taking the log makes the score equally informative in crowded and sparse regions.</dd>
+      <dt>$\frac{\partial}{\partial x}$</dt><dd>The slope as $x$ changes, with $t$ held fixed (section 5.3).</dd>
+      <dt>$s(t, x)$</dt><dd>The <em>score</em>. Positive means "more likely to the right", negative means "more likely to the left", and its size says how steeply.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> the score is a compass pointing uphill on the density. Because it is the slope divided by the height, it stays strong even far out where the density is tiny: a lost sample always knows the way home. With little noise, the compass points into the nearest bump. With a lot of noise, everything looks like one bell curve and the compass simply points to 0. A real diffusion model does not know $p$. It trains a neural network to predict the score from noisy examples. Here the data is a known pair of bumps, so the score can be computed exactly.</p>
+    <div class="viz">
+      <canvas class="sc-canvas" role="img" aria-label="Noised density on top and its score, as a curve and arrows, below"></canvas>
+    </div>
+    <div class="controls">
+      <label>Noise level <em>t</em> <input type="range" name="t" min="0" max="3" step="0.01" value="0.1"><output></output></label>
+    </div>
+    <p class="stats sc-stats"></p>
+    <p class="takeaway" hidden>Knowing the score at every noise level is as good as knowing the data distribution itself. And a neural network can learn it from examples alone, by learning to <em>denoise</em>: the Going deeper panel explains why denoising and the score are the same thing.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Tweedie's formula: the score is a denoiser.</strong> For $X_t = a X_0 + \sqrt{1 - a^2}\,Z$ with $a = e^{-t}$: $\;\mathbb E[X_0 \mid X_t = x] = \big(x + (1 - a^2)\,s(t, x)\big)/a$. The best guess of the clean sample is the noisy one, nudged along the score and scaled back up.</p>
+<p><strong>Denoising score matching.</strong> A network $s_\theta(t, x)$ is trained to minimise $\mathbb E\,\big\lvert s_\theta(t, X_t) + \tfrac{X_t - aX_0}{1 - a^2} \big\rvert^2$, averaged over data $X_0$, times $t$ and noise. The target uses only the <em>known</em> noise that was added, yet the minimiser is the true score $s(t, x)$ (Vincent, 2011), a consequence of Tweedie's formula. This is how every diffusion model is trained.</p>
+<p class="ref">References: A. Hyvärinen, <em>J. Machine Learning Research</em> 6 (2005), 695–709. P. Vincent, <em>Neural Computation</em> 23 (2011), 1661–1674. B. Efron, "Tweedie's formula and selection bias", <em>J. Amer. Statist. Assoc.</em> 106 (2011), 1602–1614.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+w, m, s = np.array([0.35, 0.65]), np.array([-2.0, 1.5]), np.array([0.3, 0.5])
+
+def score(t, x):                                     # d/dx log p(t, x) for the noised two-bump data
+    mean, var = m * np.exp(-t), s ** 2 * np.exp(-2 * t) + 1 - np.exp(-2 * t)
+    dens = w * np.exp(-(x - mean) ** 2 / (2 * var)) / np.sqrt(2 * np.pi * var)
+    return np.sum(dens * -(x - mean) / var) / np.sum(dens)
+
+for t in (0.05, 1.0, 5.0):
+    print(f&quot;t = {t}: &quot; + &quot;  &quot;.join(f&quot;s({x:+.0f}) = {score(t, x):+.2f}&quot; for x in (-3, 0, 3)))
+print(&quot;pure noise N(0, 1) has score -x: +3, 0, -3&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>t = 0.05: s(-3) = +6.21  s(+0) = +4.43  s(+3) = -4.90
+t = 1.0: s(-3) = +2.62  s(+0) = +0.15  s(+3) = -2.73
+t = 5.0: s(-3) = +3.00  s(+0) = +0.00  s(+3) = -3.00
+pure noise N(0, 1) has score -x: +3, 0, -3</code></pre>
+    </details>
+  </section>
+
+  <section id="reverse" class="section">
+    <h2><span class="num">7.3</span>Noise to Data: the Reverse-Time SDE</h2>
+    <p>Now start from pure noise and run time backward. Anderson's theorem (1982) says the backward-running process is again an SDE, with one new ingredient: the score. Every particle starts as a random $N(0,1)$ number at $t = 3$ and is steered, step by step, back to $t = 0$.</p>
+    <div class="predict" data-answer="c" data-explain="Without the score, the reversed drift pushes every particle away from 0 while the noise keeps adding spread, so the spread grows like e^t. The score term is the only thing that steers particles toward the data.">
+      <p><strong>Predict first:</strong> Delete the score term from the reverse equation. What will the particles end up as?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The two bumps, just blurrier</button>
+        <button type="button" data-choice="b">One bump in the middle</button>
+        <button type="button" data-choice="c">A huge spread, far wider than the data</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Choose a method. The paths run from noise (left, $t = 3$) to generated samples (right, $t = 0$). The histogram shows where all 3,000 particles end, against the true data (black).</p>
+    <div class="formula">$$dX_t = \big[-X_t - 2\,s(t, X_t)\big]\,dt + \sqrt2\,d\overline{W}_t \qquad \text{(run with time going backward, } t: 3 \to 0\text{)}$$</div>
+    <dl class="symbols">
+      <dt>time going backward</dt><dd>Each step moves $t$ down by a small amount, so $dt$ is negative.</dd>
+      <dt>$-X_t\,dt$</dt><dd>The forward drift of section 7.1. Run backward it pushes <em>away</em> from 0.</dd>
+      <dt>$-2\,s(t, X_t)\,dt$</dt><dd>The score correction. Because $dt$ is negative, it moves each particle <em>along</em> the score arrows of section 7.2, toward more likely places.</dd>
+      <dt>$d\overline{W}_t$</dt><dd>Fresh random kicks for the backward run.</dd>
+      <dt>probability-flow ODE</dt><dd>The same equation with half the score term and no noise: $dX = [-X - s(t, X)]\,dt$. Each noise sample then maps to one data sample, with no randomness along the way.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> playing the forward movie backward naively goes wrong. The pull toward 0 becomes a push away from 0, and the noise keeps spreading. The score term is precisely the correction that makes the backward movie statistically identical to the forward one played in reverse. It gathers the noise into the right bumps, in the right proportions. The ODE version reaches the same distribution along smooth, deterministic paths, using the Fokker–Planck equation of section 5.3 to trade randomness for drift.</p>
+    <div class="viz">
+      <canvas class="rv-canvas" role="img" aria-label="Particles run backward from noise to generated samples, with their final distribution against the data"></canvas>
+    </div>
+    <div class="controls">
+      <span class="radio-group" role="radiogroup" aria-label="Reverse method">
+        <label><input type="radio" name="mode" value="sde" checked> Reverse SDE</label>
+        <label><input type="radio" name="mode" value="ode"> Probability-flow ODE</label>
+        <label><input type="radio" name="mode" value="none"> Reverse SDE without the score</label>
+      </span>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats rv-stats"></p>
+    <p class="takeaway" hidden>With the score, pure noise becomes new samples with the right bumps, in the right proportions (35% and 65%), at the right places and widths, without copying a single data point. This is how diffusion image generators draw a picture. They start from static and follow the reverse-time SDE (or its ODE) with a neural-network score, in millions of dimensions instead of one.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Anderson's theorem (1982).</strong> If $dX = f(t, X)\,dt + g(t)\,dW$ has densities $p_t$, then the same process run backward in time solves $dX = \big[f(t, X) - g(t)^2\,\partial_x \log p_t(X)\big]dt + g(t)\,d\overline W$, where $\overline W$ is a Brownian motion running backward. Here $f = -x$ and $g = \sqrt2$, which gives the equation above.</p>
+<p><strong>Probability-flow ODE.</strong> The ODE $\dot x = f - \tfrac12 g^2\,\partial_x \log p_t$ has the same densities $p_t$ at every time. Substituting it into the Fokker–Planck equation (section 5.3) shows its drift term reproduces the diffusion term exactly. It enables fast deterministic sampling and exact likelihoods.</p>
+<p><strong>In practice.</strong> The score is a trained network. Sampling uses a few dozen to a thousand steps of an SDE or ODE solver, often in a compressed "latent" space (Stable Diffusion) and steered by a text prompt ("guidance").</p>
+<p class="ref">References: B. Anderson, "Reverse-time diffusion equation models", <em>Stoch. Proc. Appl.</em> 12 (1982), 313–326. Song et al., <em>ICLR</em> (2021). R. Rombach et al., "High-Resolution Image Synthesis with Latent Diffusion Models", <em>CVPR</em> (2022).</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(21)
+w, m, s = np.array([0.35, 0.65]), np.array([-2.0, 1.5]), np.array([0.3, 0.5])
+
+def score(t, x):                                     # exact score of the noised data, for many x at once
+    mean, var = m * np.exp(-t), s ** 2 * np.exp(-2 * t) + 1 - np.exp(-2 * t)
+    dens = w * np.exp(-(x[:, None] - mean) ** 2 / (2 * var)) / np.sqrt(2 * np.pi * var)
+    return np.sum(dens * -(x[:, None] - mean) / var, axis=1) / np.sum(dens, axis=1)
+
+T, steps = 3.0, 600
+h = T / steps
+x = rng.normal(size=20_000)                          # start from pure noise
+for i in range(steps):                               # run time backward from T to 0
+    x = x + h * (x + 2 * score(T - i * h, x)) + np.sqrt(2 * h) * rng.normal(size=x.size)
+left = x &lt; -0.25
+print(f&quot;left bump {left.mean():.3f} (data 0.35); centres {x[left].mean():.2f}, {x[~left].mean():.2f} (data -2, 1.5)&quot;)
+print(f&quot;widths {x[left].std():.2f}, {x[~left].std():.2f} (data 0.30, 0.50)&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>left bump 0.352 (data 0.35); centres -2.00, 1.50 (data -2, 1.5)
+widths 0.31, 0.50 (data 0.30, 0.50)</code></pre>
+    </details>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../applications/index.html">← Chapter 6: Applications</a>
+    <a href="../index.html">Back to all chapters</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/diffusion-common.js"></script>
+<script src="../assets/js/forward-noise.js"></script>
+<script src="../assets/js/score.js"></script>
+<script src="../assets/js/reverse-sde.js"></script>
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Applications · Visual Stochastic Calculus</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 6 · Applications</span><a href="../notation/index.html">Notation</a></span>
+</header>
+<main>
+  <h1>Applications</h1>
+  <p class="lede">Three results that put the whole toolkit to work: pricing an option by removing its risk, removing a drift by changing the odds, and solving a differential equation by averaging random paths.</p>
+
+  <section id="hedge" class="section">
+    <h2><span class="num">6.1</span>Black–Scholes by Hedging</h2>
+    <p>A <em>call option</em> is a contract that pays $\max(S_T - K,\,0)$ in one year: the amount by which the stock price $S$ ends above an agreed price $K$, or nothing. What is a fair price for it today? Black, Scholes and Merton's answer: sell the option, then trade the stock so that your holdings always move exactly like the option. If that works, the risk cancels and the fair price is whatever it costs to run this <em>hedge</em>.</p>
+    <div class="predict" data-answer="b" data-explain="The hedging error shrinks like 1/√(number of rebalances): √12 ≈ 3.5.">
+      <p><strong>Predict first:</strong> Rebalance 12× more often (from 21 times a year to daily, 252). How much tighter will the profit/loss spread get?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">About 12× tighter</button>
+        <button type="button" data-choice="b">About 3.5× tighter</button>
+        <button type="button" data-choice="c">No tighter</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <p>Here you sell the option for the Black–Scholes price and hedge it along 1,000 simulated stock paths. Drag how often you rebalance.</p>
+    <div class="formula">$$dV_t = \Delta_t\,dS_t, \qquad \Delta_t = \frac{\partial C}{\partial S}(t, S_t) = N(d_1)$$</div>
+    <dl class="symbols">
+      <dt>$S_t$</dt><dd>The stock price, modelled as geometric Brownian motion (section 5.2), starting at 100 with 20% volatility.</dd>
+      <dt>$K$</dt><dd>The <em>strike</em>: the agreed price, here 100.</dd>
+      <dt>$C(t, S)$</dt><dd>The Black–Scholes value of the option at time $t$ when the stock is at $S$ (thick grey line).</dd>
+      <dt>$V_t$</dt><dd>Your hedge portfolio: the money received for the option, plus gains from trading the stock (orange line).</dd>
+      <dt>$\Delta_t$</dt><dd>"Delta": how many shares to hold, equal to how much the option's value changes when the stock moves by 1. $N(d_1)$ is its formula, a bell-curve area like $P(W_t \ge a)$ in section 2.3.</dd>
+      <dt>$dV_t = \Delta_t\,dS_t$</dt><dd>Your portfolio changes by (shares held) × (change in stock price): an Itô integral (section 3.2), with the stock as the "price".</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> by Itô's lemma (Chapter 4), the option's value changes by $\Delta \times$ (the stock's change), plus a predictable, non-random term in $dt$. Holding $\Delta$ shares cancels the random part exactly. Black and Scholes chose the price so that the predictable part cancels too. Hedge continuously and the portfolio ends up exactly equal to the option's payoff on <em>every</em> path. In practice you rebalance only now and then, so a small error is left, and it shrinks as you trade more often. Notice that the stock's expected growth (here 10% a year) never enters the price: the hedge removes it.</p>
+    <div class="viz viz-row">
+      <canvas class="hd-value" role="img" aria-label="Option value and hedge portfolio value along one stock path" style="flex:3 1 300px;width:auto;min-width:0"></canvas>
+      <canvas class="hd-hist" role="img" aria-label="Histogram of final profit or loss of the hedged position over 1,000 paths" style="flex:2 1 220px;width:auto;min-width:0"></canvas>
+    </div>
+    <p class="caption">Left: one stock path. Vertical lines mark rebalancing dates (hidden when frequent). Right: final profit/loss of "sold option + hedge" across all 1,000 paths. Interest rate set to 0 for simplicity.</p>
+    <div class="controls">
+      <label>Rebalance <input type="range" name="n" min="0" max="9" step="1" value="2"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats hd-stats"></p>
+    <p class="takeaway" hidden>The more often you rebalance, the tighter the profit/loss clusters around 0, and the orange portfolio tracks the grey option value. In the limit, the option's risk is <em>replicated</em> away completely, so its price must be the cost of the hedge: the Black–Scholes formula. This argument earned Scholes and Merton the 1997 Nobel prize in economics (Black had died in 1995).</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>The Black–Scholes PDE.</strong> Apply Itô's lemma to $C(t, S_t)$ with $dS = \mu S\,dt + \sigma S\,dW$. Hold $\Delta = \partial_S C$ shares so the $dW$ terms cancel, and require the riskless remainder to earn the interest rate $r$. The result is
+$$\partial_t C + \tfrac12\sigma^2 S^2\,\partial_{SS} C + rS\,\partial_S C - rC = 0, \qquad C(T, S) = \max(S - K, 0).$$
+Its solution is $C = S\,N(d_1) - K e^{-r\tau} N(d_2)$, with $d_{1,2} = \big[\ln(S/K) + (r \pm \tfrac12\sigma^2)\tau\big] / (\sigma\sqrt\tau)$. The drift $\mu$ has disappeared.</p>
+<p><strong>Discrete hedging.</strong> With $N$ rebalances, the standard deviation of the hedging error shrinks like $1/\sqrt N$ (Boyle &amp; Emanuel, 1980), matching the chart.</p>
+<p class="ref">References: F. Black &amp; M. Scholes, <em>J. Political Economy</em> 81 (1973). R. Merton, <em>Bell J. Economics</em> 4 (1973). Shreve, <em>Stochastic Calculus for Finance II</em>, §4.5.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+def Phi(z):                                          # bell-curve area N(z), Abramowitz &amp; Stegun 7.1.26
+    t = 1 / (1 + 0.3275911 * np.abs(z) / np.sqrt(2))
+    poly = t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))))
+    erf = 1 - poly * np.exp(-z * z / 2)
+    return 0.5 * (1 + np.sign(z) * erf)
+
+S0 = K = 100.0
+sigma, mu, days, paths = 0.2, 0.1, 252, 2_000
+
+def call(S, tau):                                    # Black-Scholes value and delta, rate 0
+    d1 = (np.log(S / K) + 0.5 * sigma ** 2 * tau) / (sigma * np.sqrt(tau))
+    return S * Phi(d1) - K * Phi(d1 - sigma * np.sqrt(tau)), Phi(d1)
+
+rng = np.random.default_rng(16)
+steps = (mu - sigma ** 2 / 2) / days + sigma * np.sqrt(1 / days) * rng.normal(size=(paths, days))
+S = S0 * np.exp(np.concatenate([np.zeros((paths, 1)), np.cumsum(steps, axis=1)], axis=1))
+price = float(call(S0, 1.0)[0])
+for rebalances in (4, 21, 252):
+    every, V = days // rebalances, np.full(paths, price)
+    for i in range(days):
+        if i % every == 0:
+            delta = call(S[:, i], 1 - i / days)[1]
+        V += delta * (S[:, i + 1] - S[:, i])        # gains from holding delta shares
+    pnl = V - np.maximum(S[:, -1] - K, 0)
+    print(f&quot;price {price:.3f}, rebalance {rebalances:&gt;3}x a year: P&amp;L spread {pnl.std():.3f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>price 7.966, rebalance   4x a year: P&amp;L spread 3.315
+price 7.966, rebalance  21x a year: P&amp;L spread 1.448
+price 7.966, rebalance 252x a year: P&amp;L spread 0.445</code></pre>
+    </details>
+  </section>
+
+  <section id="girsanov" class="section">
+    <h2><span class="num">6.2</span>Change of Measure (Girsanov)</h2>
+    <p>These paths drift upward at rate $\lambda$ ("lambda"): $X_t = W_t + \lambda t$. There are two ways to remove a drift. You can move the paths, or you can keep the paths and change <em>how likely each one is</em>. Tick "reweight": each path gets a weight, shown by how strongly it is drawn. Paths that drifted up a lot become rare, and paths that stayed low become common.</p>
+    <div class="predict" data-answer="b" data-explain="The Girsanov weights make the drifting paths behave exactly like drift-free Brownian motion, whose average stays at 0.">
+      <p><strong>Predict first:</strong> With λ = 1, turn on reweighting. Where will the weighted average path end at t = 1?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">At 1, unchanged</button>
+        <button type="button" data-choice="b">At 0</button>
+        <button type="button" data-choice="c">At −1</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <div class="formula">$$\frac{dQ}{dP} = e^{-\lambda W_1 - \frac12 \lambda^2} \quad\Longrightarrow\quad \text{under } Q,\;\; X_t = W_t + \lambda t \text{ is a Brownian motion}$$</div>
+    <dl class="symbols">
+      <dt>$P$</dt><dd>The original probabilities: every simulated path equally likely.</dd>
+      <dt>$Q$</dt><dd>New probabilities for the same set of paths: a re-weighting.</dd>
+      <dt>$\frac{dQ}{dP}$</dt><dd>The weight each path gets: how much more (or less) likely it is under $Q$ than under $P$. It is called the <em>Radon–Nikodym derivative</em>. Weights average to 1, so they only shift likelihood between paths.</dd>
+      <dt>$W_1$</dt><dd>Where the underlying Brownian path ends at $t = 1$. The weight depends only on that.</dd>
+      <dt>$\lambda$</dt><dd>The drift rate, set by the slider.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> a path that ends high is typical when there's an upward drift, and rare when there isn't. Girsanov's theorem gives the exact weight that makes the drifting paths look statistically identical to drift-free Brownian motion: the average path goes flat, and the end values follow $N(0,1)$. Nothing about any individual path changes. Only the odds change.</p>
+    <div class="viz">
+      <canvas class="gs-canvas" role="img" aria-label="Drifting Brownian paths, shaded by weight, with the weighted average path and a histogram of end values"></canvas>
+    </div>
+    <p class="caption">Left: 80 of 2,000 paths. With reweighting on, more strongly drawn means more weight. Orange: the (weighted) average path. Right: (weighted) histogram of end values with the matching bell curve. For large drifts a handful of paths carry most of the weight, so the weighted numbers get noisier.</p>
+    <div class="controls">
+      <label>Drift λ <input type="range" name="lambda" min="-2" max="2" step="0.05" value="1"><output></output></label>
+      <label><input type="checkbox" name="reweight"> Reweight paths</label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats gs-stats"></p>
+    <p class="takeaway" hidden>Changing probabilities can remove a drift exactly. In finance this is <em>risk-neutral pricing</em>. Real stocks drift upward, but reweighting the paths so the stock grows only at the risk-free interest rate lets you price an option as a plain weighted average of its payoff. It gives the same answer as the hedging argument of section 6.1, without building a hedge.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Girsanov's theorem (1960).</strong> Let $\theta_t$ use only past information and satisfy Novikov's condition $\mathbb E\,e^{\frac12\int_0^T \theta_s^2\,ds} &lt; \infty$. Define $Z_T = \exp\big(-\int_0^T \theta_s\,dW_s - \tfrac12\int_0^T \theta_s^2\,ds\big)$ and new probabilities by $Q(A) = \mathbb E[Z_T\,\mathbf 1_A]$. Under $Q$, the process $\widetilde W_t = W_t + \int_0^t \theta_s\,ds$ is a Brownian motion. This section is the constant case $\theta = \lambda$, $T = 1$.</p>
+<p><strong>In finance.</strong> Choose $\theta = (\mu - r)/\sigma$, the <em>market price of risk</em>. Under $Q$ the stock grows at the risk-free rate $r$, and every price is a discounted $Q$-average of the payoff. This gives the same answer as the hedging argument in section 6.1.</p>
+<p class="ref">References: I. Girsanov, <em>Theory Probab. Appl.</em> 5 (1960), 285–301. Shreve, <em>Stochastic Calculus for Finance II</em>, §5.2.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(17)
+lam, paths = 1.0, 200_000
+W1 = rng.normal(size=paths)                          # where each Brownian path ends at t = 1
+X1 = W1 + lam                                        # the drifting paths end here
+Z = np.exp(-lam * W1 - lam ** 2 / 2)                 # Girsanov weight dQ/dP
+mean_q = np.mean(Z * X1)
+print(f&quot;plain mean {X1.mean():.3f} (lambda)   weighted mean {mean_q:.3f} (0)   mean weight {Z.mean():.3f} (1)&quot;)
+print(f&quot;weighted variance {np.mean(Z * X1 ** 2) - mean_q ** 2:.3f} (1)&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>plain mean 1.002 (lambda)   weighted mean 0.007 (0)   mean weight 0.997 (1)
+weighted variance 0.983 (1)</code></pre>
+    </details>
+  </section>
+
+  <section id="fk" class="section">
+    <h2><span class="num">6.3</span>Feynman–Kac</h2>
+    <p>The colour map shows the solution $u(t, x)$ of the <em>heat equation</em>, the equation for how heat spreads along a bar: stronger blue means larger. The equation is fixed by its value at the final time, $u(1, x) = g(x)$: a triangular bump centred on $x = 0$. Click anywhere on the map. Random Brownian paths start from that point, and the average of $g$ at their end points is plotted on the right.</p>
+    <div class="predict" data-answer="b" data-explain="A few of the random paths wander into the bump before t = 1 and pick up a positive g, so the average is small but not 0. That is also why heat spreads out: u is positive everywhere.">
+      <p><strong>Predict first:</strong> Click a point well outside the bump, at x = 2.5 and early time t = 0.1. The average of g there will be…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Exactly 0</button>
+        <button type="button" data-choice="b">Small but positive</button>
+        <button type="button" data-choice="c">About 1</button>
+      </div>
+      <p class="predict-result" hidden></p>
+    </div>
+    <div class="formula">$$u(t, x) = \mathbb{E}\big[\,g(x + W_{1-t})\,\big] \quad\text{solves}\quad \frac{\partial u}{\partial t} + \frac12\,\frac{\partial^2 u}{\partial x^2} = 0, \quad u(1, x) = g(x)$$</div>
+    <dl class="symbols">
+      <dt>$u(t, x)$</dt><dd>The unknown function, with one value for each time $t$ (horizontal) and position $x$ (vertical): the colour map.</dd>
+      <dt>$g(x)$</dt><dd>The known final values at $t = 1$: $g(x) = \max(0,\,1 - \lvert x\rvert)$, a triangle of height 1 over $-1 \le x \le 1$.</dd>
+      <dt>$x + W_{1-t}$</dt><dd>Where a Brownian path started at position $x$ at time $t$ ends up at time 1, after running for the remaining time $1 - t$.</dd>
+      <dt>$\mathbb{E}[\;\cdot\;]$</dt><dd>The average over all such random paths (section 2.2).</dd>
+      <dt>$\frac{\partial u}{\partial t} + \frac12 \frac{\partial^2 u}{\partial x^2} = 0$</dt><dd>A <em>partial differential equation</em> (PDE): the rate of change of $u$ in time is tied to its curvature in space (section 5.3's notation). This one is the heat equation run backward from $t = 1$.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> to find the value of the PDE's solution at any point, start random walkers there, let them wander until the final time, look up $g$ where they land, and average. No grid and no solving are needed: randomness does the calculus. It also works the other way round: the average of a random quantity can be computed by solving a PDE. With a GBM in place of $W$, a call option's payoff as $g$, and discounting at the interest rate, this <em>is</em> the Black–Scholes formula.</p>
+    <div class="viz viz-row">
+      <canvas class="fk-map" tabindex="0" role="application" aria-label="Heat map of the PDE solution. Click, or use the arrow keys, to choose the point random paths start from." style="flex:3 1 300px;width:auto;min-width:0;cursor:crosshair;touch-action:none"></canvas>
+      <canvas class="fk-avg" role="img" aria-label="Running average of g at the path end points converging to the PDE value" style="flex:2 1 220px;width:auto;min-width:0"></canvas>
+    </div>
+    <p class="caption">Left: the solution (stronger blue = larger, from 0 to 1), with 25 of the random paths from your point in orange. Right: running average over 3,000 paths (log scale), against the PDE's value (dashed). Keyboard: Tab to the map and use the arrow keys to move the point.</p>
+    <div class="controls">
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats fk-stats"></p>
+    <p class="takeaway" hidden>Wherever you click, the average over random paths converges to the value the PDE gives there. This is the <strong>Feynman–Kac formula</strong>, the reverse of section 5.3. Fokker–Planck turns paths into a density equation. Feynman–Kac turns a PDE into an average over paths. It is how banks price complex derivatives by Monte Carlo simulation, and it ties together everything on this site: Brownian motion (Ch 1), its rough-but-regular behaviour (Ch 2), the Itô integral and lemma (Ch 3–4) and SDEs (Ch 5).</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Feynman–Kac formula, general form.</strong> If $dX = a(X)\,dt + b(X)\,dW$, then
+$$u(t, x) = \mathbb E\Big[e^{-\int_t^T r(X_s)\,ds}\, g(X_T) \,\Big|\, X_t = x\Big]$$
+solves $\partial_t u + a\,\partial_x u + \tfrac12 b^2\,\partial_{xx} u - r\,u = 0$ with $u(T, x) = g(x)$. This section is the case $a = 0$, $b = 1$, $r = 0$.</p>
+<p><strong>Proof idea.</strong> Apply Itô's lemma to $u(s, X_s)$. The PDE makes the $ds$ terms cancel, so $u(s, X_s)$ is a martingale (section 2.2). Averaging from $s = t$ to $s = T$ gives the formula.</p>
+<p>Mark Kac proved it in 1949, inspired by Richard Feynman's path integrals in quantum mechanics.</p>
+<p class="ref">References: M. Kac, <em>Trans. Amer. Math. Soc.</em> 65 (1949), 1–13. Shreve, <em>Stochastic Calculus for Finance II</em>, §6.4.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import sqrt
+rng = np.random.default_rng(18)
+g = lambda x: np.maximum(0, 1 - np.abs(x))           # final condition u(1, x) = g(x)
+t, x = 0.3, 0.8
+monte_carlo = g(x + sqrt(1 - t) * rng.normal(size=200_000)).mean()
+xs = np.linspace(-6, 6, 601)                         # heat equation, solved backward from t = 1
+dx = xs[1] - xs[0]
+dt = 0.4 * dx ** 2
+u = g(xs)
+for _ in range(round((1 - t) / dt)):
+    u[1:-1] += dt * 0.5 * (u[2:] - 2 * u[1:-1] + u[:-2]) / dx ** 2
+print(f&quot;Monte Carlo {monte_carlo:.4f}   PDE {np.interp(x, xs, u):.4f}&quot;)</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>Monte Carlo 0.2963   PDE 0.2965</code></pre>
+    </details>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../sde/index.html">← Chapter 5: Stochastic Differential Equations</a>
+    <a href="../diffusion-models/index.html">Chapter 7: Diffusion Models →</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/hedging.js"></script>
+<script src="../assets/js/girsanov.js"></script>
+<script src="../assets/js/feynman-kac.js"></script>
+</body>
+</html>
