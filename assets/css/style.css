@@ -214,3 +214,15 @@ details.drawer pre {
 .notation tr.group th { font-size: 15px; color: var(--fg); padding-top: 24px; border-bottom: 2px solid var(--border); }
 .site-header .links { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: flex-end; }
 .site-header .links a { font-weight: 400; color: var(--accent-2); }
+.theme-toggle {
+  font: inherit;
+  font-size: 13px;
+  padding: 2px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--fg);
+  cursor: pointer;
+}
+.theme-toggle:hover { border-color: var(--accent); }
+.site-header .links { align-items: center; }
