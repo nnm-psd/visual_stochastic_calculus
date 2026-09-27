@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGES = ['index.html', 'notation/index.html', 'about/index.html'] + [f'{d}/index.html' for d in
-         ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models', 'beyond']]
+         ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models', 'beyond', 'pricing', 'volatility', 'rates', 'interview']]
 BENIGN = ('Canvas2D: Multiple readback operations',)  # browser performance hints, not errors
 
 
@@ -68,6 +68,12 @@ def main():
         messages, dom = console_and_dom(chrome, page)
         has_math = '$' in page.read_text(encoding='utf-8')
         problems = messages + ([] if not has_math or 'class="katex"' in dom else ['math was not rendered by KaTeX'])
+        # A '$' left in visible text after rendering means an unpaired math delimiter (e.g. a currency sign).
+        visible = re.sub(r'<(script|style|pre|textarea|annotation)\b.*?</\1>', '', dom, flags=re.S)
+        visible = re.sub(r'<[^>]+>', '', visible)
+        if '$' in visible:
+            i = visible.index('$')
+            problems.append('unrendered $ near: ' + ' '.join(visible[max(0, i - 60):i + 40].split()))
         if problems:
             failures += 1
             print(f'FAIL {rel}')
@@ -87,4 +93,5 @@ def main():
 
 
 if __name__ == '__main__':
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # Windows consoles default to cp1252
     sys.exit(main())

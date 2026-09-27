@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pricing Lab · Visual Stochastic Calculus</title>
+<meta name="description" content="The Monte Carlo pricing toolkit: variance reduction, Greeks by simulation (pathwise and likelihood ratio), barrier options with the Brownian-bridge correction, and American options by Longstaff–Schwartz.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/pricing/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Pricing Lab · Visual Stochastic Calculus">
+<meta property="og:description" content="The Monte Carlo pricing toolkit: variance reduction, Greeks by simulation (pathwise and likelihood ratio), barrier options with the Brownian-bridge correction, and American options by Longstaff–Schwartz.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/pricing/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 9 · Pricing Lab</span><a class="pdf-link" href="../pdf/pricing.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+</header>
+<main>
+  <h1>Pricing Lab</h1>
+  <p class="lede">Most derivatives have no formula, so banks price them by simulation. This chapter covers the four problems every Monte Carlo pricer has to solve: making estimates precise, computing sensitivities (the Greeks), handling path-dependent payoffs, and pricing the right to exercise early.</p>
+
+  <section id="mc" class="section">
+    <h2><span class="num">9.1</span>Monte Carlo &amp; Variance Reduction</h2>
+    <p>A price is a discounted average of payoffs over risk-neutral paths (section 6.2), so simulate many paths and average. The catch is precision: the error shrinks only like $1/\sqrt n$, so 100× more paths buy just 10× more accuracy. <em>Variance reduction</em> gets the same accuracy from far fewer paths, by averaging something with the same mean but less noise.</p>
+    <div class="predict" data-answer="c" data-explain="Almost every path of a deep out-of-the-money call pays nothing, so plain Monte Carlo wastes them. Importance sampling moves the paths to where the payoff happens and reweights them, cutting the standard error about eightfold at K = 150.">
+      <p><strong>Predict first:</strong> For a deep out-of-the-money call (strike 150, stock at 100), which method will give the smallest error for the same number of payoff evaluations?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Antithetic variates</button>
+        <button type="button" data-choice="b">Control variate</button>
+        <button type="button" data-choice="c">Importance sampling</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>All four methods use the same 20,000 random numbers. Pick a method and a strike. The band is the 95% confidence interval as more payoffs are averaged, and the dashed line is the exact Black–Scholes price.</p>
+    <div class="formula">$$\hat C = e^{-rT}\,\frac1n \sum_{i=1}^n \big(S_T^{(i)} - K\big)^+, \qquad \text{standard error} = \frac{\operatorname{sd}}{\sqrt n}, \qquad \hat C_{\text{cv}} = \hat C - \beta\big(\bar S_T - S_0 e^{rT}\big)$$</div>
+    <dl class="symbols">
+      <dt>$S_T^{(i)}$</dt><dd>The stock price at maturity on simulated path $i$, drawn from the risk-neutral GBM (growth rate $r = 3\%$, volatility 20%).</dd>
+      <dt>$(S_T - K)^+$</dt><dd>The call's payoff: $S_T - K$ if positive, otherwise 0.</dd>
+      <dt>$e^{-rT}$</dt><dd>Discounting: a payoff in one year is worth less today.</dd>
+      <dt>sd, standard error</dt><dd>sd is the spread of individual payoffs. The standard error, $\text{sd}/\sqrt n$, is the typical error of their average.</dd>
+      <dt>antithetic</dt><dd>Use each random number $Z$ twice, as $Z$ and $-Z$, and average the pair. Their errors partly cancel.</dd>
+      <dt>$\hat C_{\text{cv}}$, $\beta$</dt><dd>Control variate: subtract the known error of something correlated. $S_T$ has known mean $S_0e^{rT}$, so if the sample's $\bar S_T$ came out high, the call estimate probably did too. $\beta$ sets how much to correct.</dd>
+      <dt>importance sampling</dt><dd>Draw $Z$ from a shifted bell curve so paths land near the strike, then multiply each payoff by a likelihood-ratio weight so the average stays unbiased. It is Girsanov's theorem (section 6.2) used as a tool.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> the error of Monte Carlo depends on the spread of what you average. Each trick shrinks that spread without changing the mean. Antithetic pairs cancel noise when the payoff moves steadily with $Z$. A control variate removes the part of the noise you can explain with something whose answer you already know. Importance sampling stops wasting paths where nothing happens. Which one wins depends on the payoff: near the money, the control variate is best, and far out of the money, importance sampling is. At a strike of 150, antithetic pairs don't help at all, because almost every pair pays zero both ways.</p>
+    <div class="viz">
+      <canvas class="mc-canvas" role="img" aria-label="Running Monte Carlo estimate with its confidence band converging to the Black–Scholes price"></canvas>
+    </div>
+    <p class="caption">Horizontal axis: payoff evaluations (log scale). Every method gets the same budget of 20,000.</p>
+    <div class="controls">
+      <span class="radio-group" role="radiogroup" aria-label="Method">
+        <label><input type="radio" name="method" value="plain" checked> Plain</label>
+        <label><input type="radio" name="method" value="anti"> Antithetic</label>
+        <label><input type="radio" name="method" value="cv"> Control variate</label>
+        <label><input type="radio" name="method" value="is"> Importance sampling</label>
+      </span>
+      <label>Strike <em>K</em> <input type="range" name="K" min="70" max="160" step="5" value="100"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats mc-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>Variance reduction is free accuracy: a 5× variance reduction is worth 5× more paths. No method wins everywhere. Pick the one that matches where the payoff's information is. In practice these tricks are combined, and quasi-random numbers (sequences spread out more evenly than random ones) add a further gain for smooth payoffs.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Control variates.</strong> For $Y$ with $\mathbb E[Y]$ unknown and $X$ with $\mathbb E[X]$ known, $Y - \beta(X - \mathbb E X)$ is unbiased for every $\beta$, and its variance $\operatorname{Var}Y - 2\beta\operatorname{Cov}(X, Y) + \beta^2\operatorname{Var}X$ is smallest at $\beta^* = \operatorname{Cov}(X,Y)/\operatorname{Var}X$. There it equals $(1 - \rho_{XY}^2)\operatorname{Var}Y$, so the reduction factor is $1/(1 - \rho^2)$. Estimating $\beta$ from the same sample adds a bias of order $1/n$, which is negligible.</p>
+<p><strong>Antithetic variates.</strong> $\operatorname{Var}\big(\tfrac12(f(Z) + f(-Z))\big) = \tfrac12\operatorname{Var}f(Z)\,(1 + \operatorname{Corr}(f(Z), f(-Z)))$. It helps exactly when $f(Z)$ and $f(-Z)$ are negatively correlated, which is guaranteed for monotone $f$.</p>
+<p><strong>Importance sampling.</strong> If $Z \sim N(0,1)$ is replaced by $Z + \theta$, then $\mathbb E[f(Z)] = \mathbb E\big[f(Z + \theta)\,e^{-\theta(Z + \theta) + \theta^2/2}\big]$. The weight is the Radon–Nikodym derivative of section 6.2. A good $\theta$ puts the sampling mass where $|f|\times$ density is large, and a bad one can increase the variance.</p>
+<p class="ref">Reference: P. Glasserman, <em>Monte Carlo Methods in Financial Engineering</em> (Springer, 2003), ch. 4.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import erf, exp, log, sqrt
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+S0, K, sig, r, T, n = 100.0, 150.0, 0.2, 0.03, 1.0, 20_000   # a deep out-of-the-money call
+d1 = (log(S0 / K) + (r + sig ** 2 / 2) * T) / (sig * sqrt(T))
+exact = S0 * N(d1) - K * exp(-r * T) * N(d1 - sig * sqrt(T))
+Z = np.random.default_rng(25).normal(size=n)
+ST = lambda z: S0 * np.exp((r - sig ** 2 / 2) * T + sig * sqrt(T) * z)
+pay = lambda z: exp(-r * T) * np.maximum(ST(z) - K, 0)
+plain = pay(Z)
+anti = 0.5 * (pay(Z[: n // 2]) + pay(-Z[: n // 2]))           # same 20,000 payoff evaluations
+beta = np.cov(plain, ST(Z))[0, 1] / ST(Z).var()
+control = plain - beta * (ST(Z) - S0 * exp(r * T))            # E[S_T] = S0 e^{rT} is known
+theta = (log(K / S0) - (r - sig ** 2 / 2) * T) / (sig * sqrt(T))
+importance = pay(Z + theta) * np.exp(-theta * (Z + theta) + theta ** 2 / 2)   # Girsanov weight
+print(f"Black-Scholes {exact:.4f}")
+for name, y in [("plain", plain), ("antithetic", anti), ("control", control), ("importance", importance)]:
+    print(f"{name:11} {y.mean():.4f} +- {y.std() / sqrt(len(y)):.4f}")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>Black-Scholes 0.2818
+plain       0.2885 +- 0.0176
+antithetic  0.3057 +- 0.0182
+control     0.2913 +- 0.0162
+importance  0.2835 +- 0.0023</code></pre>
+    </details>
+  </section>
+
+  <section id="greeks" class="section">
+    <h2><span class="num">9.2</span>Greeks by Simulation</h2>
+    <p>Traders need sensitivities as much as prices: delta ($\partial V/\partial S$) sets the hedge (section 6.1), and gamma ($\partial^2 V/\partial S^2$) says how quickly the hedge goes stale. The obvious way is to reprice with the stock bumped up and down and divide by the bump. It works, but only if done carefully, and there are two cleverer ways that need no bump at all.</p>
+    <div class="predict" data-answer="b" data-explain="With independent random numbers, each price has noise of about ±0.1, and dividing that difference by a tiny 2h blows the noise up. Common random numbers, or the pathwise and likelihood-ratio methods, avoid this.">
+      <p><strong>Predict first:</strong> Estimate delta by bumping the stock by a tiny h, repricing each side with its own independent random numbers, and dividing by 2h. The estimate will be…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Very accurate</button>
+        <button type="button" data-choice="b">Extremely noisy</button>
+        <button type="button" data-choice="c">Biased but stable</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Pick delta or gamma and drag the bump size $h$. Each row is one estimator from the same 20,000 paths, drawn as a dot with a ±2 standard error bar. The dashed line is the exact Black–Scholes value.</p>
+    <div class="formula">$$\Delta_{\text{pathwise}} = \mathbb E\Big[e^{-rT}\,\mathbf 1_{\{S_T &gt; K\}}\,\frac{S_T}{S_0}\Big], \qquad \Delta_{\text{LR}} = \mathbb E\Big[e^{-rT}(S_T - K)^+\,\frac{Z}{S_0\,\sigma\sqrt T}\Big]$$</div>
+    <dl class="symbols">
+      <dt>$\Delta$</dt><dd>Delta: how much the option's value changes when the stock moves up by one dollar.</dd>
+      <dt>$h$</dt><dd>The bump size in the finite-difference estimate $\big(V(S_0 + h) - V(S_0 - h)\big)/2h$.</dd>
+      <dt>common random numbers</dt><dd>Reprice both bumped values with the <em>same</em> random draws, so their noise cancels in the difference.</dd>
+      <dt>$\mathbf 1_{\{S_T &gt; K\}}$</dt><dd>1 if the option finishes in the money, 0 otherwise.</dd>
+      <dt>pathwise</dt><dd>Differentiate each path's payoff with respect to $S_0$ and average. Here $\partial S_T/\partial S_0 = S_T/S_0$.</dd>
+      <dt>$Z$</dt><dd>The standard normal number that generated the path: $S_T = S_0 e^{(r - \sigma^2/2)T + \sigma\sqrt T Z}$.</dd>
+      <dt>likelihood ratio (LR)</dt><dd>Leave the payoff alone and differentiate the <em>probability</em> of the path instead. The weight $Z/(S_0\sigma\sqrt T)$ is the derivative of the log density.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> finite differences are a trade-off. A big bump is biased, because the curve isn't straight over it. A small bump divides noise by a small number. Common random numbers remove most of that noise, because both repricings see the same paths. The pathwise method is the most precise but needs a payoff you can differentiate: it works for delta, but a call's payoff has a kink at the strike, so it can't give gamma. The likelihood-ratio method never differentiates the payoff, so it works even for kinked or jumping payoffs such as digitals. It pays for that with more noise. Gamma for a call is exactly the case where finite differences struggle and the likelihood ratio shines.</p>
+    <div class="viz">
+      <canvas class="gk-canvas" role="img" aria-label="Estimates of delta or gamma from four methods with error bars against the exact value"></canvas>
+    </div>
+    <div class="controls">
+      <span class="radio-group" role="radiogroup" aria-label="Greek">
+        <label><input type="radio" name="greek" value="delta" checked> Delta</label>
+        <label><input type="radio" name="greek" value="gamma"> Gamma</label>
+      </span>
+      <label>Bump size <em>h</em> <input type="range" name="h" min="-2" max="1.2" step="0.05" value="0"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats gk-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>For delta, the pathwise estimator is the most precise and needs no bump at all. For gamma of a call, finite differences with a small bump blow up even with common random numbers, while the likelihood ratio stays unbiased. Real risk systems use exactly these ideas, plus automatic differentiation, which computes pathwise Greeks for every input in one extra pass.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Pathwise method.</strong> If the payoff $f$ is Lipschitz continuous (a call is, a digital is not), then $\frac{\partial}{\partial S_0}\mathbb E[f(S_T)] = \mathbb E\big[f'(S_T)\,\partial S_T/\partial S_0\big]$: the derivative can be moved inside the expectation.</p>
+<p><strong>Likelihood ratio.</strong> Write the price as $\int f(s)\,g(s; S_0)\,ds$ with $g$ the density of $S_T$. Then $\partial_{S_0}\,\text{price} = \mathbb E\big[f(S_T)\,\partial_{S_0}\log g(S_T; S_0)\big]$, which works for any integrable $f$. For GBM the score is $Z/(S_0\sigma\sqrt T)$. Gamma uses the second derivative: $\big((Z^2 - 1)/(S_0^2\sigma^2T) - Z/(S_0^2\sigma\sqrt T)\big)$.</p>
+<p><strong>Finite differences.</strong> The central difference has bias $O(h^2)$. With independent samples its variance is $O(1/(nh^2))$ for delta and $O(1/(nh^4))$ for gamma. Common random numbers reduce this to $O(1/n)$ for smooth payoffs. For gamma of a kinked payoff it only improves to $O(1/(nh))$.</p>
+<p class="ref">Reference: Glasserman, <em>Monte Carlo Methods in Financial Engineering</em>, ch. 7.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import erf, exp, log, sqrt, pi
+S0, K, sig, r, T, n = 100.0, 100.0, 0.2, 0.03, 1.0, 100_000
+d1 = (log(S0 / K) + (r + sig ** 2 / 2) * T) / (sig * sqrt(T))
+delta, gamma = 0.5 * (1 + erf(d1 / sqrt(2))), exp(-d1 ** 2 / 2) / sqrt(2 * pi) / (S0 * sig * sqrt(T))
+Z = np.random.default_rng(26).normal(size=n)
+ST = S0 * np.exp((r - sig ** 2 / 2) * T + sig * sqrt(T) * Z)
+payoff = exp(-r * T) * np.maximum(ST - K, 0)
+pathwise = exp(-r * T) * (ST &gt; K) * ST / S0                      # d(payoff)/dS0 along each path
+lr_delta = payoff * Z / (S0 * sig * sqrt(T))                    # payoff x d(log density)/dS0
+lr_gamma = payoff * ((Z ** 2 - 1) / (S0 ** 2 * sig ** 2 * T) - Z / (S0 ** 2 * sig * sqrt(T)))
+se = lambda y: y.std() / sqrt(len(y))
+print(f"delta: exact {delta:.4f}  pathwise {pathwise.mean():.4f} +- {se(pathwise):.4f}  LR {lr_delta.mean():.4f} +- {se(lr_delta):.4f}")
+print(f"gamma: exact {gamma:.5f}  LR {lr_gamma.mean():.5f} +- {se(lr_gamma):.5f}")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>delta: exact 0.5987  pathwise 0.5991 +- 0.0019  LR 0.5964 +- 0.0045
+gamma: exact 0.01933  LR 0.01920 +- 0.00043</code></pre>
+    </details>
+  </section>
+
+  <section id="barrier" class="section">
+    <h2><span class="num">9.3</span>Barrier Options</h2>
+    <p>A <em>down-and-out call</em> is a call that dies if the stock ever touches a barrier below it: here the stock and strike are at 100 and the barrier at 90. Section 2.3's reflection principle gives an exact price when the barrier is watched continuously. A simulation can only check the barrier at discrete dates, and that creates a systematic error.</p>
+    <div class="predict" data-answer="a" data-explain="Between two checks a path can dip below the barrier and come back up unseen. Those paths should have died but are counted as alive, so the simulated price is too high: about 3% with daily checks and 16% with quarterly ones.">
+      <p><strong>Predict first:</strong> If the simulation checks the barrier only once a day, its price for the knock-out option will be…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Too high</button>
+        <button type="button" data-choice="b">Too low</button>
+        <button type="button" data-choice="c">Exact, up to random noise</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Choose how often the barrier is checked. On the left, knocked-out paths turn grey. On the right, orange shows plain Monte Carlo and blue the corrected version, across all checking frequencies, against the exact price (dashed).</p>
+    <div class="formula">$$P\big(\text{path dips below } B \text{ between checks} \;\big|\; x_i,\, x_{i+1}\big) = \exp\!\Big(-\frac{2\,(x_i - \ln B)(x_{i+1} - \ln B)}{\sigma^2\,\Delta t}\Big)$$</div>
+    <dl class="symbols">
+      <dt>$B$</dt><dd>The barrier: 90. If the stock touches it at any moment, the option is worthless.</dd>
+      <dt>$x_i,\ x_{i+1}$</dt><dd>The log stock price at two consecutive checking dates, both above $\ln B$.</dd>
+      <dt>$\Delta t$</dt><dd>The time between checks.</dd>
+      <dt>Brownian bridge</dt><dd>A Brownian path pinned at both ends (section 1.1's bridge construction). Its chance of dipping below a level has the exact formula above.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> the stock moves continuously, but the simulation only looks at it now and then. Between looks a path can cross the barrier and come back, and the simulation never notices. It overprices the knock-out, by +16% with quarterly checks, +11% monthly, +6% weekly and +3% daily, and the error shrinks only like $\sqrt{\Delta t}$. The fix costs almost nothing: between each pair of checks, ask how likely a Brownian bridge with those endpoints was to touch the barrier (the formula above, the reflection principle again), and weight the path by its chance of surviving. That removes the bias at <em>every</em> frequency.</p>
+    <div class="viz">
+      <canvas class="br-canvas" role="img" aria-label="Paths with a barrier, and price against monitoring frequency for plain and corrected Monte Carlo"></canvas>
+    </div>
+    <div class="controls">
+      <label>Barrier checked <input type="range" name="freq" min="0" max="4" step="1" value="3"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats br-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>Discrete monitoring overprices knock-out options, and the error fades only slowly as checks get more frequent. The Brownian-bridge correction fixes it exactly for GBM. The same idea gives the Broadie–Glasserman–Kou rule: a discretely monitored barrier behaves like a continuous one shifted by a factor $e^{\pm 0.5826\,\sigma\sqrt{\Delta t}}$. It matters for real contracts, which specify daily closing prices.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Closed form (continuous monitoring, $B \le K$).</strong> With $\lambda = (r + \sigma^2/2)/\sigma^2$ and $y = \frac{\ln(B^2/(S_0K))}{\sigma\sqrt T} + \lambda\sigma\sqrt T$, the down-and-in call is $C_{\text{di}} = S_0(B/S_0)^{2\lambda}N(y) - Ke^{-rT}(B/S_0)^{2\lambda - 2}N(y - \sigma\sqrt T)$, and down-and-out = vanilla − down-and-in. The derivation reflects paths at their first touch of $B$ (section 2.3), after changing measure to remove the drift (section 6.2).</p>
+<p><strong>Bridge crossing probability.</strong> For Brownian motion with variance $\sigma^2$ per unit time, conditioned on $X_0 = a &gt; b$ and $X_{\Delta t} = c &gt; b$, the probability of touching $b$ is $\exp\!\big(-2(a - b)(c - b)/(\sigma^2\Delta t)\big)$. The drift drops out of the conditioned path.</p>
+<p><strong>Continuity correction.</strong> Broadie, Glasserman &amp; Kou showed that a barrier checked every $\Delta t$ prices like a continuously monitored one moved away from the stock by the factor $e^{\beta\sigma\sqrt{\Delta t}}$, with $\beta = -\zeta(1/2)/\sqrt{2\pi} \approx 0.5826$.</p>
+<p class="ref">References: M. Broadie, P. Glasserman &amp; S. Kou, "A continuity correction for discrete barrier options", <em>Mathematical Finance</em> 7 (1997), 325–349. Glasserman, <em>Monte Carlo Methods in Financial Engineering</em>, ch. 6. Shreve, <em>Stochastic Calculus for Finance II</em>, §7.3.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import erf, exp, log, sqrt
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+S0, K, B, sig, r, T = 100.0, 100.0, 90.0, 0.2, 0.03, 1.0
+v, lam = sig * sqrt(T), (r + sig ** 2 / 2) / sig ** 2
+d1 = (log(S0 / K) + (r + sig ** 2 / 2) * T) / v
+call = S0 * N(d1) - K * exp(-r * T) * N(d1 - v)
+y = log(B ** 2 / (S0 * K)) / v + lam * v
+exact = call - (S0 * (B / S0) ** (2 * lam) * N(y) - K * exp(-r * T) * (B / S0) ** (2 * lam - 2) * N(y - v))
+rng, steps, chunks = np.random.default_rng(27), 252, 5          # checked daily; 5 x 20,000 paths
+dt = T / steps
+plain, fixed = [], []
+for _ in range(chunks):
+    x = np.log(S0) + np.cumsum((r - sig ** 2 / 2) * dt + sig * sqrt(dt) * rng.normal(size=(20_000, steps)), axis=1)
+    x = np.hstack([np.full((20_000, 1), log(S0)), x]) - log(B)    # distance above the barrier, in log terms
+    payoff = exp(-r * T) * np.maximum(np.exp(x[:, -1]) * B - K, 0) * (x &gt; 0).all(axis=1)
+    bridge = np.prod(1 - np.exp(-2 * np.clip(x[:, :-1], 0, None) * np.clip(x[:, 1:], 0, None) / (sig ** 2 * dt)), axis=1)
+    plain.append(payoff); fixed.append(payoff * bridge)
+for name, p in [("daily checks only", np.concatenate(plain)), ("with bridge fix", np.concatenate(fixed))]:
+    print(f"{name:17} {p.mean():.4f} +- {p.std() / sqrt(len(p)):.4f}   (exact {exact:.4f})")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>daily checks only 8.0062 +- 0.0443   (exact 7.7402)
+with bridge fix   7.7793 +- 0.0439   (exact 7.7402)</code></pre>
+    </details>
+  </section>
+
+  <section id="american" class="section">
+    <h2><span class="num">9.4</span>American Options</h2>
+    <p>An <em>American</em> put can be exercised at any moment before maturity, not just at the end. Pricing it means solving an <em>optimal stopping</em> problem: at every moment, is it better to take $K - S$ now or keep the option alive? Trees solve this easily in one dimension. The Longstaff–Schwartz method solves it with simulation, which also scales to many assets.</p>
+    <div class="predict" data-answer="b" data-explain="Exercising early locks in K − S now, and the cash earns interest. When the stock has fallen far enough, that beats waiting. So the American put is worth strictly more than the European one when r > 0: here 6.09 against 5.57.">
+      <p><strong>Predict first:</strong> With a positive interest rate, how does the American put compare with the otherwise identical European put?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Worth exactly the same</button>
+        <button type="button" data-choice="b">Worth strictly more</button>
+        <button type="button" data-choice="c">Worth less, because exercising early wastes time value</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Grey paths end where they are exercised (orange dots). The black curve is the exact exercise boundary from a binomial tree, and the blue dots are the boundary Longstaff–Schwartz discovers. Change the number of paths and the regression basis.</p>
+    <div class="formula">$$V_0 = \sup_{\tau \le T}\,\mathbb E\big[e^{-r\tau}(K - S_\tau)^+\big], \qquad \text{exercise at } t_j \text{ if } (K - S_{t_j})^+ &gt; \widehat{\mathbb E}\big[\text{discounted future cash flow} \mid S_{t_j}\big]$$</div>
+    <dl class="symbols">
+      <dt>$\tau$</dt><dd>A <em>stopping time</em>: an exercise rule that decides using only the prices seen so far.</dd>
+      <dt>$\sup_{\tau}$</dt><dd>The best possible value over all such rules.</dd>
+      <dt>$t_j$</dt><dd>The exercise dates in the simulation: 50 dates over the year.</dd>
+      <dt>$\widehat{\mathbb E}[\,\cdot \mid S_{t_j}]$</dt><dd>The <em>continuation value</em>: what holding on is worth, estimated by a regression of the discounted future cash flows on $1, S, S^2, \dots$ across the simulated paths.</dd>
+      <dt>exercise boundary</dt><dd>The critical stock price below which exercising immediately is optimal. It rises toward $K$ as maturity nears.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> work backwards from maturity. At the last date the choice is obvious. At each earlier date, you need to know what waiting is worth, which depends on the unknown future. Longstaff and Schwartz's idea is to estimate it by regression across paths: among paths with a similar stock price today, the average discounted payoff they went on to receive <em>is</em> the value of waiting. Exercise wherever the immediate payoff beats that estimate. The rule it learns traces out the exercise boundary. Because the rule is only an estimate of the best rule, the price is typically slightly low, so a stronger regression basis or more paths moves it up toward the tree's value.</p>
+    <div class="viz">
+      <canvas class="am-canvas" role="img" aria-label="Simulated paths with early exercise points, exact and estimated exercise boundaries"></canvas>
+    </div>
+    <div class="controls">
+      <label>Paths <input type="range" name="paths" min="3" max="4.7" step="0.05" value="4"><output></output></label>
+      <label>Regression basis <input type="range" name="degree" min="1" max="4" step="1" value="3"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats am-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>The right to exercise early is worth about 0.52 here, 8.5% of the option. Longstaff–Schwartz recovers both the price and the exercise boundary from simulation alone, which is why it is the standard tool for American and Bermudan options on several assets, where trees and PDE grids become impractical. An American <em>call</em> on a stock without dividends is never exercised early: it is worth more alive (Merton's result).</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Optimal stopping.</strong> The price is the Snell envelope $V_t = \operatorname{ess\,sup}_{\tau \ge t}\mathbb E[e^{-r(\tau - t)}(K - S_\tau)^+ \mid \mathcal F_t]$, the smallest supermartingale above the payoff. In PDE form it is a free-boundary problem: $\partial_t V + \tfrac12\sigma^2S^2\partial_{SS}V + rS\partial_SV - rV = 0$ above a boundary $S^*(t)$, with $V = K - S$ below it and $V$ and $\partial_SV$ continuous across it ("smooth pasting").</p>
+<p><strong>Bias.</strong> Any fixed exercise rule applied to fresh paths gives a <em>lower</em> bound, since no rule beats the optimal one. Duality (Rogers; Haugh &amp; Kogan) gives matching upper bounds. Estimating the rule and the price on the same paths can bias the estimate slightly upward, so production code uses separate paths for the two steps.</p>
+<p><strong>Calls.</strong> Without dividends, $C_{\text{Am}} \ge S - Ke^{-r(T-t)} &gt; S - K$ before maturity, so exercising a call early is never optimal (Merton, 1973).</p>
+<p class="ref">References: F. Longstaff &amp; E. Schwartz, "Valuing American options by simulation: a simple least-squares approach", <em>Review of Financial Studies</em> 14 (2001), 113–147. Shreve, <em>Stochastic Calculus for Finance II</em>, ch. 8. Glasserman, <em>Monte Carlo Methods in Financial Engineering</em>, ch. 8.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import exp, sqrt
+S0, K, r, sig, T, dates, n = 100.0, 100.0, 0.05, 0.2, 1.0, 50, 50_000
+h = T / dates
+rng = np.random.default_rng(28)
+S = S0 * np.exp(np.cumsum((r - sig ** 2 / 2) * h + sig * sqrt(h) * rng.normal(size=(n, dates)), axis=1))
+cash = np.maximum(K - S[:, -1], 0.0)                          # value if held to the end
+for j in range(dates - 2, -1, -1):                            # walk backwards through exercise dates
+    cash *= exp(-r * h)
+    itm = S[:, j] &lt; K
+    X = np.vander(S[itm, j] / S0, 4)                          # basis 1, S, S^2, S^3
+    continuation = X @ np.linalg.lstsq(X, cash[itm], rcond=None)[0]
+    exercise = K - S[itm, j] &gt; continuation
+    cash[np.flatnonzero(itm)[exercise]] = (K - S[itm, j])[exercise]
+price = exp(-r * h) * cash
+print(f"Longstaff-Schwartz American put: {price.mean():.3f} +- {price.std() / sqrt(n):.3f}  (binomial tree: 6.090)")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>Longstaff-Schwartz American put: 6.056 +- 0.032  (binomial tree: 6.090)</code></pre>
+    </details>
+  </section>
+
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="b" data-explain="The standard error is sd/√n: 100 times more paths buy only 10 times more accuracy, which is why variance reduction matters.">
+      <p><strong>1.</strong> Plain Monte Carlo with n paths has standard error proportional to…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">1/n</button>
+        <button type="button" data-choice="b">1/√n</button>
+        <button type="button" data-choice="c">1/n²</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="The likelihood-ratio method differentiates the probability density, not the payoff, so it needs no smoothness. The pathwise method fails at jumps.">
+      <p><strong>2.</strong> Which Greek estimator works even for a payoff with a jump, such as a digital option?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Pathwise</button>
+        <button type="button" data-choice="b">Likelihood ratio</button>
+        <button type="button" data-choice="c">Neither</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="a" data-explain="Crossings between checks are missed, so paths that should die survive. The Brownian-bridge correction removes the bias.">
+      <p><strong>3.</strong> Checking a knock-out barrier only daily in a simulation makes the option&#x27;s price…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Too high</button>
+        <button type="button" data-choice="b">Too low</button>
+        <button type="button" data-choice="c">Exact</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../beyond/index.html">← Chapter 8: Beyond Brownian Motion</a>
+    <a href="../volatility/index.html">Chapter 10: Volatility →</a>
+  </nav>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Ngoc Minh Nguyen · Text <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Code MIT</span>
+  <span><a href="../about/index.html">About &amp; how to cite</a> · <a href="https://github.com/nnm-psd/visual_stochastic_calculus/issues/new?template=error-report.yml">Report an error</a></span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/finance.js"></script>
+<script src="../assets/js/mc-variance.js"></script>
+<script src="../assets/js/greeks.js"></script>
+<script src="../assets/js/barrier.js"></script>
+<script src="../assets/js/american.js"></script>
+<script src="../assets/js/runner.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>

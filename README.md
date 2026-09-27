@@ -18,6 +18,11 @@ references, and a short Python version you can run yourself.
 6. **Applications:** Black–Scholes by hedging, Girsanov, Feynman–Kac
 7. **Diffusion Models:** data to noise, the score, the reverse-time SDE, Langevin sampling
 8. **Beyond Brownian Motion:** jumps and fat tails, the Kalman–Bucy filter
+9. **Pricing Lab:** Monte Carlo variance reduction, Greeks by simulation, barrier options, American options (Longstaff–Schwartz)
+10. **Volatility:** implied volatility and the smile, Heston stochastic volatility, variance swaps
+11. **Rates, Control & Data:** Vasicek yield curves, Merton's portfolio problem, a real-data case study (FRED)
+
+**Interview practice:** 30 quant-researcher questions with hints, derivations and simulation checks.
 
 Every Python program on the site can be edited and run in the browser (Pyodide: Python and NumPy compiled to
 WebAssembly), and an unedited run reproduces the published output.
@@ -45,6 +50,7 @@ Every push runs `.github/workflows/checks.yml`, which you can also run locally:
 - `python tools/check_snippets.py` runs all Python snippets and confirms they still print their published output (`--update` rewrites the outputs after an intentional change).
 - `python tools/check_pages.py` loads every page in headless Chrome and fails on console errors, unrendered math or broken links.
 - `python tools/build_notation.py` regenerates the notation page. CI fails if it is out of date.
+- `python tools/check_pages.py` also flags any `$` left unrendered (e.g. a currency sign mistaken for math).
 - `python tools/build_pdfs.py` re-exports the chapter PDFs in `pdf/` (not run in CI; re-run after editing a chapter).
 
 ## Licence and citation

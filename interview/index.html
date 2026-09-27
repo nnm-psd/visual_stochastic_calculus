@@ -1,0 +1,910 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interview Practice · Visual Stochastic Calculus</title>
+<meta name="description" content="Thirty classic quant-researcher interview questions on Brownian motion, Itô calculus, martingales and option pricing, each with a hint, a full derivation and a simulation check.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/interview/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Interview Practice · Visual Stochastic Calculus">
+<meta property="og:description" content="Thirty classic quant-researcher interview questions on Brownian motion, Itô calculus, martingales and option pricing, each with a hint, a full derivation and a simulation check.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/interview/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Interview practice</span><a class="pdf-link" href="../pdf/interview.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+</header>
+<main class="interview">
+  <h1>Interview Practice</h1>
+  <p class="lede">Thirty classic quant-researcher questions on stochastic calculus and derivatives pricing, from warm-ups to hard ones. Each has a hint, a full derivation, a link to the section that explains the idea, and a short simulation that confirms the answer.</p>
+  <p>Practise as in an interview: say your reasoning out loud, derive on paper before opening the hint, and check the answer's limiting cases (what happens as the drift goes to 0, or as time grows?). Then run the check. Being able to verify an answer yourself is half of what interviewers look for.</p>
+  <div class="practice-bar">
+    <span class="solved-count" aria-live="polite"></span>
+    <button type="button" class="random">Random unsolved question</button>
+    <button type="button" class="reset-solved">Reset</button>
+  </div>
+
+  <section id="bm" class="section">
+    <h2>A · Brownian motion</h2>
+    <article class="question" id="q01">
+      <h3><span class="qnum">A1</span> The fourth moment <span class="level easy">easy</span></h3>
+      <p class="q">Let $W$ be a standard Brownian motion. Compute $\mathbb E[W_t^4]$.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Write $W_t = \sqrt t\,Z$ with $Z \sim N(0,1)$. What are the moments of a standard normal?</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$W_t = \sqrt t\,Z$, so $\mathbb E[W_t^4] = t^2\,\mathbb E[Z^4]$. From the moment generating function $\mathbb E[e^{uZ}] = e^{u^2/2} = \sum_k \frac{u^{2k}}{2^k k!}$, the coefficient of $u^4/4!$ gives $\mathbb E[Z^4] = \frac{4!}{2^2\,2!} = 3$. Hence $\boxed{\mathbb E[W_t^4] = 3t^2}$.</p>
+<p><strong>Follow-up:</strong> $\mathbb E[Z^{2k}] = (2k-1)!!$, so $\operatorname{Var}(W_t^2) = 3t^2 - t^2 = 2t^2$. That is where the "$2t^2/n$" in section 2.1 comes from.</p>
+        <p class="ref">Related: <a href="../brownian-motion/index.html#increments">1.2 Defining Properties</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+t = 2.0
+W = np.random.default_rng(101).normal(0, np.sqrt(t), 2_000_000)
+print(f"E[W_t^4] simulated {np.mean(W ** 4):.3f}   formula 3t^2 = {3 * t ** 2:.3f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>E[W_t^4] simulated 11.989   formula 3t^2 = 12.000</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q01"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q02">
+      <h3><span class="qnum">A2</span> Both times positive <span class="level medium">medium</span></h3>
+      <p class="q">Compute $P(W_1 &gt; 0,\ W_2 &gt; 0)$.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Write $W_2 = W_1 + (W_2 - W_1)$: two independent standard normals $X, Y$. Think about angles in the $(X, Y)$ plane.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>With $X = W_1$ and $Y = W_2 - W_1$ independent $N(0,1)$, the pair $(X, Y)$ is rotation-invariant, so a probability is an angle over $2\pi$. $\{X &gt; 0\}$ is a half-plane and $\{X + Y &gt; 0\}$ is another, whose boundary makes an angle of $\pi/4$ with the first. Their intersection is a wedge of angle $\pi - \pi/4 = 3\pi/4$, so the probability is $\frac{3\pi/4}{2\pi} = \boxed{3/8}$.</p>
+<p><strong>General rule:</strong> for standard bivariate normals with correlation $\rho$, $P(\text{both} &gt; 0) = \tfrac14 + \tfrac{\arcsin\rho}{2\pi}$. Here $\rho = \operatorname{Corr}(W_1, W_2) = 1/\sqrt2$, so $\arcsin\rho = \pi/4$.</p>
+        <p class="ref">Related: <a href="../brownian-motion/index.html#increments">1.2 Defining Properties</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng = np.random.default_rng(102)
+W1 = rng.normal(size=2_000_000); W2 = W1 + rng.normal(size=W1.size)   # W_2 = W_1 + independent increment
+print(f"P(W_1 &gt; 0, W_2 &gt; 0) simulated {np.mean((W1 &gt; 0) &amp; (W2 &gt; 0)):.4f}   formula 3/8 = {3 / 8:.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>P(W_1 &gt; 0, W_2 &gt; 0) simulated 0.3753   formula 3/8 = 0.3750</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q02"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q03">
+      <h3><span class="qnum">A3</span> The time average <span class="level medium">medium</span></h3>
+      <p class="q">What is the distribution of $\int_0^1 W_t\,dt$?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>It is a limit of sums of jointly normal variables. Compute its variance using $\mathbb E[W_sW_t] = \min(s,t)$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>A limit of linear combinations of Gaussians is Gaussian, with mean $\int_0^1\mathbb E[W_t]\,dt = 0$. Its variance is $\int_0^1\!\int_0^1\min(s,t)\,ds\,dt = 2\int_0^1\!\int_0^t s\,ds\,dt = 2\int_0^1 \tfrac{t^2}{2}\,dt = \tfrac13$. So $\boxed{\int_0^1 W_t\,dt \sim N(0, 1/3)}$.</p>
+<p><strong>Second route:</strong> integration by parts (question C5) gives $\int_0^1 W_t\,dt = \int_0^1(1-s)\,dW_s$, and the Itô isometry gives $\int_0^1(1-s)^2ds = 1/3$.</p>
+        <p class="ref">Related: <a href="../brownian-motion/index.html#increments">1.2 Defining Properties</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, n, steps = np.random.default_rng(103), 20_000, 500
+W = np.cumsum(rng.normal(0, np.sqrt(1 / steps), (n, steps)), axis=1)
+I = W.mean(axis=1)                                          # Riemann sum for the integral of W over [0, 1]
+print(f"mean {I.mean():+.4f} (0)   variance {I.var():.4f}   formula 1/3 = {1 / 3:.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>mean -0.0031 (0)   variance 0.3317   formula 1/3 = 0.3333</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q03"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q04">
+      <h3><span class="qnum">A4</span> The Brownian bridge <span class="level medium">medium</span></h3>
+      <p class="q">Given $W_1 = 0$, what is the distribution of $W_t$ for $0 &lt; t &lt; 1$?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>$(W_t, W_1)$ is jointly normal. Use the conditional-normal formula.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$\operatorname{Cov}(W_t, W_1) = t$ and $\operatorname{Var}(W_1) = 1$, so $\mathbb E[W_t \mid W_1 = x] = t\,x$ and $\operatorname{Var}(W_t \mid W_1) = t - t^2/1 = t(1-t)$. With $x = 0$: $\boxed{W_t \mid W_1 = 0 \sim N(0,\ t(1-t))}$, largest in the middle at $t = 1/2$.</p>
+<p><strong>Follow-up:</strong> on $[0, T]$ with $W_T = x$, the mean is $tx/T$ and the variance $t(T-t)/T$. The process $W_t - tW_1$ is a Brownian bridge independent of $W_1$. This is the construction behind section 1.3's zoom and 9.3's barrier correction.</p>
+        <p class="ref">Related: <a href="../pricing/index.html#barrier">9.3 Barrier Options</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, n, t = np.random.default_rng(104), 2_000_000, 0.3
+Wt = rng.normal(0, np.sqrt(t), n); W1 = Wt + rng.normal(0, np.sqrt(1 - t), n)
+near = np.abs(W1) &lt; 0.01                                    # condition on W_1 = 0 (approximately)
+print(f"Var(W_t | W_1 = 0) simulated {Wt[near].var():.4f}   formula t(1 - t) = {t * (1 - t):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>Var(W_t | W_1 = 0) simulated 0.2101   formula t(1 - t) = 0.2100</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q04"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q05">
+      <h3><span class="qnum">A5</span> The expected maximum <span class="level medium">medium</span></h3>
+      <p class="q">Compute $\mathbb E\big[\max_{s \le t} W_s\big]$.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>The reflection principle (section 2.3) gives the distribution of the maximum.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>By reflection, $P(M_t \ge a) = 2P(W_t \ge a) = P(|W_t| \ge a)$ for $a \ge 0$, so $M_t$ has the same distribution as $|W_t|$. Therefore $\mathbb E[M_t] = \mathbb E|W_t| = \sqrt t\,\mathbb E|Z| = \boxed{\sqrt{2t/\pi}}$.</p>
+<p><strong>Follow-up:</strong> a simulation on a time grid <em>underestimates</em> the maximum, because it misses peaks between grid points. The bias is about $0.5826\,\sqrt{\Delta t}$, the same constant as the barrier continuity correction in 9.3.</p>
+        <p class="ref">Related: <a href="../variation/index.html#reflection">2.3 Reflection Principle</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, n, steps, t = np.random.default_rng(105), 10_000, 1_000, 1.0
+M = np.maximum(np.cumsum(rng.normal(0, np.sqrt(t / steps), (n, steps)), axis=1).max(axis=1), 0)
+print(f"E[max W] simulated {M.mean():.4f}   formula sqrt(2t/pi) = {np.sqrt(2 * t / np.pi):.4f}  (grid slightly underestimates)")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>E[max W] simulated 0.7718   formula sqrt(2t/pi) = 0.7979  (grid slightly underestimates)</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q05"> I solved this without the solution</label>
+    </article>
+  </section>
+  <section id="stopping" class="section">
+    <h2>B · Hitting times and stopping</h2>
+    <article class="question" id="q06">
+      <h3><span class="qnum">B1</span> Which barrier first? <span class="level easy">easy</span></h3>
+      <p class="q">Starting at 0, what is the probability that Brownian motion hits $+a$ before $-b$ ($a, b &gt; 0$)?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Stop $W$ at the exit time $\tau$ and use that it is a martingale.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$W_{t \wedge \tau}$ is a bounded martingale, so optional stopping gives $\mathbb E[W_\tau] = 0$. With $p = P(\text{hit } a \text{ first})$: $pa - (1-p)b = 0$, so $\boxed{p = \frac{b}{a+b}}$.</p>
+<p><strong>Follow-up:</strong> the symmetric random walk (gambler's ruin, question B5) gives the same answer, since at integer levels it hits exactly.</p>
+        <p class="ref">Related: <a href="../variation/index.html#martingale">2.2 Martingales</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, a, b, walks = np.random.default_rng(106), 3, 2, 20_000   # +-1 random walk approximates BM exactly at integers
+hits = 0
+for _ in range(walks):
+    x = 0
+    while -b &lt; x &lt; a:
+        x += 1 if rng.random() &lt; 0.5 else -1
+    hits += x == a
+print(f"P(hit +{a} before -{b}) simulated {hits / walks:.4f}   formula b/(a+b) = {b / (a + b):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>P(hit +3 before -2) simulated 0.4068   formula b/(a+b) = 0.4000</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q06"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q07">
+      <h3><span class="qnum">B2</span> Expected exit time <span class="level medium">medium</span></h3>
+      <p class="q">Brownian motion starts at 0. What is the expected time until it leaves $(-a, b)$?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Which martingale involves $t$? Combine it with the answer to B1.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$W_t^2 - t$ is a martingale, so $\mathbb E[W_\tau^2] = \mathbb E[\tau]$ (optional stopping, justified because $\tau$ has finite expectation). The upper level $b$ is hit first with probability $\frac{a}{a+b}$, so $\mathbb E[W_\tau^2] = b^2\frac{a}{a+b} + a^2\frac{b}{a+b} = ab$. Hence $\boxed{\mathbb E[\tau] = ab}$.</p>
+<p><strong>Follow-up:</strong> for a one-sided barrier ($a \to \infty$) the expected time is infinite, even though the barrier is reached with probability 1.</p>
+        <p class="ref">Related: <a href="../variation/index.html#martingale">2.2 Martingales</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, a, b, n, dt = np.random.default_rng(107), 1.0, 2.0, 20_000, 1e-3
+x, t, alive = np.zeros(n), np.zeros(n), np.ones(n, bool)
+while alive.any():
+    x[alive] += np.sqrt(dt) * rng.normal(size=alive.sum()); t[alive] += dt
+    alive &amp;= (x &gt; -a) &amp; (x &lt; b)
+print(f"E[exit time of (-{a:.0f}, {b:.0f})] simulated {t.mean():.3f}   formula ab = {a * b:.3f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>E[exit time of (-1, 2)] simulated 2.059   formula ab = 2.000</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q07"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q08">
+      <h3><span class="qnum">B3</span> Which barrier first, with drift <span class="level hard">hard</span></h3>
+      <p class="q">$X_t = \mu t + W_t$. What is the probability that $X$ hits $+a$ before $-b$?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Find $\lambda$ such that $e^{\lambda X_t}$ is a martingale, then stop it.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$e^{\lambda X_t - (\lambda\mu + \lambda^2/2)t}$ is a martingale for every $\lambda$. Choosing $\lambda = -2\mu$ makes the time term vanish: $e^{-2\mu X_t}$ is a martingale. Optional stopping gives $p\,e^{-2\mu a} + (1-p)\,e^{2\mu b} = 1$, so
+$$p = \frac{1 - e^{2\mu b}}{e^{-2\mu a} - e^{2\mu b}}.$$</p>
+<p><strong>Check:</strong> as $\mu \to 0$, L'Hôpital's rule gives $b/(a+b)$, matching B1. With $\mu = 0.5$ and $a = b = 1$, $p \approx 0.731$.</p>
+        <p class="ref">Related: <a href="../applications/index.html#girsanov">6.2 Girsanov</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, mu, a, b, n, dt = np.random.default_rng(108), 0.5, 1.0, 1.0, 20_000, 1e-3
+x, alive = np.zeros(n), np.ones(n, bool)
+while alive.any():
+    x[alive] += mu * dt + np.sqrt(dt) * rng.normal(size=alive.sum())
+    alive &amp;= (x &gt; -b) &amp; (x &lt; a)
+p = (1 - np.exp(2 * mu * b)) / (np.exp(-2 * mu * a) - np.exp(2 * mu * b))
+print(f"P(hit +{a:.0f} before -{b:.0f}), drift {mu}: simulated {np.mean(x &gt;= a):.4f}   formula {p:.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>P(hit +1 before -1), drift 0.5: simulated 0.7371   formula 0.7311</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q08"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q09">
+      <h3><span class="qnum">B4</span> Expected hitting time with drift <span class="level easy">easy</span></h3>
+      <p class="q">$X_t = \mu t + W_t$ with $\mu &gt; 0$. What is the expected time for $X$ to reach $a &gt; 0$?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>$X_t - \mu t$ is a martingale (Wald's identity).</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$X_t - \mu t = W_t$ is a martingale, so $\mathbb E[X_\tau] = \mu\,\mathbb E[\tau]$. Since $X_\tau = a$, $\boxed{\mathbb E[\tau] = a/\mu}$ (to be rigorous: stop at $\tau \wedge n$ and let $n \to \infty$ using $\mu &gt; 0$).</p>
+<p><strong>Follow-up:</strong> by the drift version of the reflection principle, $\tau$ has the inverse Gaussian distribution. As $\mu \to 0$ its mean blows up, consistent with B2's follow-up.</p>
+        <p class="ref">Related: <a href="../variation/index.html#martingale">2.2 Martingales</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, mu, a, n, dt = np.random.default_rng(109), 0.5, 2.0, 20_000, 1e-3
+x, t, alive = np.zeros(n), np.zeros(n), np.ones(n, bool)
+while alive.any():
+    x[alive] += mu * dt + np.sqrt(dt) * rng.normal(size=alive.sum()); t[alive] += dt
+    alive &amp;= x &lt; a
+print(f"E[time to hit {a:.0f}] with drift {mu}: simulated {t.mean():.3f}   formula a/mu = {a / mu:.3f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>E[time to hit 2] with drift 0.5: simulated 4.040   formula a/mu = 4.000</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q09"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q10">
+      <h3><span class="qnum">B5</span> Gambler's ruin <span class="level easy">easy</span></h3>
+      <p class="q">A fair coin moves you $\pm1$, starting at $k$. You stop at $0$ or $N$. What is the chance of reaching $N$, and the expected number of flips?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Two martingales: the position $S_n$, and $S_n^2 - n$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$S_n$ is a martingale: $P(\text{reach } N)\cdot N = k$, so $\boxed{P = k/N}$. $S_n^2 - n$ is a martingale: $\mathbb E[S_\tau^2] = \mathbb E[\tau] + k^2$, and $\mathbb E[S_\tau^2] = N^2\,\tfrac kN = Nk$. So $\boxed{\mathbb E[\tau] = k(N-k)}$.</p>
+<p><strong>Follow-up:</strong> with a biased coin ($p \ne \tfrac12$), use the martingale $(q/p)^{S_n}$: $P = \frac{1 - (q/p)^k}{1 - (q/p)^N}$. That is the discrete version of B3.</p>
+        <p class="ref">Related: <a href="../brownian-motion/index.html#random-walk">1.1 Random Walk</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, k, N, games = np.random.default_rng(110), 3, 10, 20_000
+wins, lengths = 0, []
+for _ in range(games):
+    x, steps = k, 0
+    while 0 &lt; x &lt; N:
+        x += 1 if rng.random() &lt; 0.5 else -1; steps += 1
+    wins += x == N; lengths.append(steps)
+print(f"P(reach {N}) {wins / games:.4f} (k/N = {k / N:.4f})   E[duration] {np.mean(lengths):.2f} (k(N-k) = {k * (N - k)})")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>P(reach 10) 0.2980 (k/N = 0.3000)   E[duration] 20.93 (k(N-k) = 21)</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q10"> I solved this without the solution</label>
+    </article>
+  </section>
+  <section id="ito" class="section">
+    <h2>C · Itô calculus</h2>
+    <article class="question" id="q11">
+      <h3><span class="qnum">C1</span> Itô's lemma for W³ <span class="level easy">easy</span></h3>
+      <p class="q">Compute $d(W_t^3)$.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Apply $df = f'(W)\,dW + \tfrac12 f''(W)\,dt$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>With $f(x) = x^3$: $f' = 3x^2$ and $f'' = 6x$, so $\boxed{d(W_t^3) = 3W_t^2\,dW_t + 3W_t\,dt}$.</p>
+<p><strong>Follow-up:</strong> integrating gives $W_t^3 = 3\int_0^t W^2\,dW + 3\int_0^t W\,ds$. Taking expectations, $0 = 0 + 0$, consistent with $\mathbb E[W_t^3] = 0$.</p>
+        <p class="ref">Related: <a href="../ito-lemma/index.html#lemma">4.2 Itô's Lemma</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, n, steps = np.random.default_rng(111), 20_000, 400
+dt = 1 / steps
+dW = rng.normal(0, np.sqrt(dt), (n, steps)); W = np.cumsum(dW, axis=1) - dW   # W at left ends
+ito = np.sum(3 * W ** 2 * dW + 3 * W * dt, axis=1)          # integral of 3W^2 dW + 3W dt
+print(f"W_1^3 vs Ito rebuild on one path: {(W[0, -1] + dW[0, -1]) ** 3:.4f} vs {ito[0]:.4f}")
+print(f"average squared gap over {n:,} paths: {np.mean(((W[:, -1] + dW[:, -1]) ** 3 - ito) ** 2):.5f} (shrinks as steps grow)")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>W_1^3 vs Ito rebuild on one path: 0.4667 vs 0.5280
+average squared gap over 20,000 paths: 0.02252 (shrinks as steps grow)</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q11"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q12">
+      <h3><span class="qnum">C2</span> Building a martingale <span class="level medium">medium</span></h3>
+      <p class="q">Show that $W_t^3 - 3tW_t$ is a martingale.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Compute its differential and check that the $dt$ terms cancel.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>From C1, $d(W^3) = 3W^2dW + 3W\,dt$, and by the product rule $d(tW) = W\,dt + t\,dW$. So $d(W^3 - 3tW) = (3W^2 - 3t)\,dW + (3W - 3W)\,dt = (3W^2 - 3t)\,dW$. There is no drift, and the integrand is square-integrable, so it is a martingale.</p>
+<p><strong>Follow-up:</strong> these are the Hermite polynomials $H_n(W_t, t)$: $W$, $W^2 - t$, $W^3 - 3tW$, $W^4 - 6tW^2 + 3t^2$, and so on. They are the coefficients of the martingale $e^{\lambda W_t - \lambda^2t/2}$ expanded in $\lambda$.</p>
+        <p class="ref">Related: <a href="../variation/index.html#martingale">2.2 Martingales</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, s, t, n = np.random.default_rng(112), 0.5, 1.0, 2_000_000
+Ws = 0.8                                                    # condition on the value at time s
+Wt = Ws + rng.normal(0, np.sqrt(t - s), n)
+M = lambda w, u: w ** 3 - 3 * u * w
+print(f"E[W_t^3 - 3tW_t | W_s = {Ws}] simulated {M(Wt, t).mean():.4f}   value at s {M(Ws, s):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>E[W_t^3 - 3tW_t | W_s = 0.8] simulated -0.6875   value at s -0.6880</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q12"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q13">
+      <h3><span class="qnum">C3</span> The exponential moment <span class="level easy">easy</span></h3>
+      <p class="q">Compute $\mathbb E[e^{\sigma W_t}]$ and use it to find $\mathbb E[S_T]$ for GBM.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Complete the square in the normal density, or use the moment generating function.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>For $X \sim N(0, v)$, $\mathbb E[e^X] = e^{v/2}$, so $\boxed{\mathbb E[e^{\sigma W_t}] = e^{\sigma^2t/2}}$. For $S_T = S_0e^{(\mu - \sigma^2/2)T + \sigma W_T}$ this gives $\mathbb E[S_T] = S_0e^{\mu T}$: the $-\sigma^2/2$ is exactly the Itô correction that makes the mean grow at rate $\mu$.</p>
+<p><strong>Follow-up:</strong> the median is $S_0e^{(\mu - \sigma^2/2)T}$, below the mean. The typical path underperforms the average (see 11.2).</p>
+        <p class="ref">Related: <a href="../sde/index.html#euler">5.1 Euler–Maruyama</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+sigma, t = 0.8, 2.0
+W = np.random.default_rng(113).normal(0, np.sqrt(t), 4_000_000)
+print(f"E[exp(sigma W_t)] simulated {np.mean(np.exp(sigma * W)):.4f}   formula exp(sigma^2 t / 2) = {np.exp(sigma ** 2 * t / 2):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>E[exp(sigma W_t)] simulated 1.8960   formula exp(sigma^2 t / 2) = 1.8965</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q13"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q14">
+      <h3><span class="qnum">C4</span> Variance of a stochastic integral <span class="level medium">medium</span></h3>
+      <p class="q">Compute $\operatorname{Var}\big(\int_0^t W_s\,dW_s\big)$.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>The Itô isometry, or the closed form of the integral.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>The mean is 0 (it is a martingale). By the isometry, the variance is $\int_0^t\mathbb E[W_s^2]\,ds = \int_0^t s\,ds = \boxed{t^2/2}$.</p>
+<p><strong>Check:</strong> $\int_0^t W\,dW = \tfrac12(W_t^2 - t)$ (section 3.1), so the variance is $\tfrac14\operatorname{Var}(W_t^2) = \tfrac14\cdot 2t^2 = t^2/2$, using A1's follow-up.</p>
+        <p class="ref">Related: <a href="../ito-integral/index.html#isometry">3.3 Itô Isometry</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, n, steps, t = np.random.default_rng(114), 20_000, 250, 2.0
+dt = t / steps
+dW = rng.normal(0, np.sqrt(dt), (n, steps)); W = np.cumsum(dW, axis=1) - dW
+I = np.sum(W * dW, axis=1)                                  # Ito integral of W dW over [0, t]
+print(f"Var(int_0^t W dW) simulated {I.var():.4f}   formula t^2/2 = {t ** 2 / 2:.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>Var(int_0^t W dW) simulated 2.0135   formula t^2/2 = 2.0000</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q14"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q15">
+      <h3><span class="qnum">C5</span> A deterministic integrand <span class="level medium">medium</span></h3>
+      <p class="q">What is the distribution of $\int_0^1 s\,dW_s$? Relate it to $\int_0^1 W_s\,ds$.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>A stochastic integral of a <em>deterministic</em> function is Gaussian. For the relation, apply the product rule to $sW_s$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>With a deterministic integrand the integral is Gaussian with mean 0 and variance $\int_0^1 s^2\,ds = 1/3$: $\boxed{\int_0^1 s\,dW_s \sim N(0, 1/3)}$.</p>
+<p>The product rule $d(sW_s) = W_s\,ds + s\,dW_s$ (no extra term, because $s$ has no randomness) integrates to $W_1 = \int_0^1 W_s\,ds + \int_0^1 s\,dW_s$. So $\int_0^1 W_s\,ds = \int_0^1(1-s)\,dW_s$, which is also $N(0, 1/3)$, matching A3.</p>
+        <p class="ref">Related: <a href="../ito-lemma/index.html#correlated">4.4 Product rule</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, n, steps = np.random.default_rng(115), 20_000, 500
+dt = 1 / steps
+s = np.arange(steps) * dt
+dW = rng.normal(0, np.sqrt(dt), (n, steps))
+I = dW @ s                                                  # integral of s dW_s over [0, 1]
+W1, intW = dW.sum(axis=1), (np.cumsum(dW, axis=1) * dt).sum(axis=1)
+print(f"Var(int s dW) simulated {I.var():.4f}   formula 1/3 = {1 / 3:.4f}")
+print(f"integration by parts: max |int W ds - (W_1 - int s dW)| = {np.max(np.abs(intW - (W1 - I))):.4f} (discretization only)")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>Var(int s dW) simulated 0.3362   formula 1/3 = 0.3333
+integration by parts: max |int W ds - (W_1 - int s dW)| = 0.0000 (discretization only)</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q15"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q16">
+      <h3><span class="qnum">C6</span> Solving the OU equation <span class="level medium">medium</span></h3>
+      <p class="q">Solve $dX_t = -\theta X_t\,dt + \sigma\,dW_t$ and give the mean and variance of $X_t$.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Multiply by the integrating factor $e^{\theta t}$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$d(e^{\theta t}X_t) = e^{\theta t}(dX_t + \theta X_t\,dt) = \sigma e^{\theta t}\,dW_t$, so
+$$X_t = X_0e^{-\theta t} + \sigma\int_0^t e^{-\theta(t-s)}\,dW_s.$$
+It is Gaussian with mean $X_0e^{-\theta t}$ and variance (isometry) $\sigma^2\int_0^te^{-2\theta(t-s)}ds = \frac{\sigma^2}{2\theta}\big(1 - e^{-2\theta t}\big)$.</p>
+<p><strong>Follow-up:</strong> the long-run distribution is $N(0, \sigma^2/2\theta)$ (section 5.2), and the half-life of the mean is $\ln 2/\theta$ (section 11.3).</p>
+        <p class="ref">Related: <a href="../sde/index.html#zoo">5.2 A Zoo of Diffusions</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, theta, sigma, x0, t, n, steps = np.random.default_rng(116), 1.5, 0.8, 2.0, 1.0, 200_000, 400
+dt, x = t / steps, np.full(n, x0)
+for _ in range(steps):
+    x += -theta * x * dt + sigma * np.sqrt(dt) * rng.normal(size=n)
+print(f"mean {x.mean():.4f} (formula {x0 * np.exp(-theta * t):.4f})   variance {x.var():.4f} "
+      f"(formula {sigma ** 2 * (1 - np.exp(-2 * theta * t)) / (2 * theta):.4f})")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>mean 0.4441 (formula 0.4463)   variance 0.2032 (formula 0.2027)</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q16"> I solved this without the solution</label>
+    </article>
+  </section>
+  <section id="measure" class="section">
+    <h2>D · Martingales and change of measure</h2>
+    <article class="question" id="q17">
+      <h3><span class="qnum">D1</span> The exponential martingale <span class="level easy">easy</span></h3>
+      <p class="q">For which $b$ is $e^{aW_t - bt}$ a martingale?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Apply Itô's lemma and set the $dt$ term to zero.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$d\big(e^{aW_t - bt}\big) = e^{aW_t - bt}\big(a\,dW_t + (\tfrac12a^2 - b)\,dt\big)$. It is a martingale exactly when $\boxed{b = a^2/2}$. Equivalently, $\mathbb E[e^{aW_t}] = e^{a^2t/2}$ (C3).</p>
+<p><strong>Follow-up:</strong> this is the Girsanov density of section 6.2, and the object behind B3.</p>
+        <p class="ref">Related: <a href="../applications/index.html#girsanov">6.2 Girsanov</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+a, t = 1.3, 2.0
+W = np.random.default_rng(117).normal(0, np.sqrt(t), 4_000_000)
+for b in (a ** 2 / 2, 0.5):
+    print(f"b = {b:.3f}: E[exp(aW_t - bt)] = {np.mean(np.exp(a * W - b * t)):.4f}   (a martingale needs 1)")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>b = 0.845: E[exp(aW_t - bt)] = 0.9976   (a martingale needs 1)
+b = 0.500: E[exp(aW_t - bt)] = 1.9889   (a martingale needs 1)</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q17"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q18">
+      <h3><span class="qnum">D2</span> A Girsanov expectation <span class="level medium">medium</span></h3>
+      <p class="q">Compute $\mathbb E\big[W_T\,e^{\theta W_T - \theta^2T/2}\big]$.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Either differentiate the moment generating function in $\theta$, or interpret the exponential as a change of measure.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p><strong>Girsanov:</strong> the weight $Z_T = e^{\theta W_T - \theta^2T/2}$ defines $Q$ under which $W_t - \theta t$ is a Brownian motion. So $\mathbb E[W_TZ_T] = \mathbb E_Q[W_T] = \boxed{\theta T}$.</p>
+<p><strong>Direct check:</strong> $\mathbb E[W_Te^{\theta W_T}] = \frac{d}{d\theta}e^{\theta^2T/2} = \theta Te^{\theta^2T/2}$. Multiplying by $e^{-\theta^2T/2}$ gives $\theta T$.</p>
+        <p class="ref">Related: <a href="../applications/index.html#girsanov">6.2 Girsanov</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+theta, T = 0.7, 1.5
+W = np.random.default_rng(118).normal(0, np.sqrt(T), 4_000_000)
+Z = np.exp(theta * W - theta ** 2 * T / 2)                  # Girsanov weight: W becomes BM with drift theta
+print(f"E[W_T Z] simulated {np.mean(W * Z):.4f}   formula theta T = {theta * T:.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>E[W_T Z] simulated 1.0494   formula theta T = 1.0500</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q18"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q19">
+      <h3><span class="qnum">D3</span> Why μ disappears <span class="level easy">easy</span></h3>
+      <p class="q">A stock has real-world drift $\mu$. What is its forward price for delivery at $T$, and why does $\mu$ not appear?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Build the forward from the stock and a loan.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>Buy the stock today for $S_0$, financed by borrowing $S_0$, and repay $S_0e^{rT}$ at $T$. You then own the stock at $T$ having paid $S_0e^{rT}$, so no-arbitrage forces $\boxed{F = S_0e^{rT}}$. A forward struck at $K$ is worth $S_0 - Ke^{-rT}$ today. This replication uses no model at all.</p>
+<p>In risk-neutral language, under $Q$ the stock grows at $r$ ($dS = rS\,dt + \sigma S\,dW^Q$), because $Q$ is <em>defined</em> by making discounted traded assets martingales. $\mu$ is a real-world quantity that the hedge removes (6.1, 6.2).</p>
+        <p class="ref">Related: <a href="../applications/index.html#hedge">6.1 Black–Scholes by Hedging</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+from math import exp, sqrt
+S0, r, mu, sigma, T, K = 100.0, 0.03, 0.12, 0.25, 1.0, 105.0
+Z = np.random.default_rng(119).normal(size=2_000_000)
+ST_Q = S0 * np.exp((r - sigma ** 2 / 2) * T + sigma * sqrt(T) * Z)   # risk-neutral: drift r, not mu
+print(f"forward price E_Q[S_T] {ST_Q.mean():.3f}   formula S0 e^(rT) = {S0 * exp(r * T):.3f}")
+print(f"value of a forward struck at {K}: {exp(-r * T) * (ST_Q - K).mean():.3f}   formula S0 - K e^(-rT) = {S0 - K * exp(-r * T):.3f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>forward price E_Q[S_T] 103.047   formula S0 e^(rT) = 103.045
+value of a forward struck at 105.0: -1.895   formula S0 - K e^(-rT) = -1.897</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q19"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q20">
+      <h3><span class="qnum">D4</span> Correlated Brownian motions <span class="level easy">easy</span></h3>
+      <p class="q">$W^{(1)}, W^{(2)}$ are Brownian motions with correlation $\rho$. What is the distribution of $W^{(1)}_t - W^{(2)}_t$?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Compute the variance of a difference.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>It is Gaussian with mean 0 and variance $t + t - 2\rho t = \boxed{2(1-\rho)t}$. Rescaled, $\big(W^{(1)} - W^{(2)}\big)/\sqrt{2(1-\rho)}$ is itself a Brownian motion (Lévy's characterisation: continuous martingale, quadratic variation $t$).</p>
+<p><strong>Follow-up:</strong> this is the core of spread options and Margrabe's exchange-option formula, with volatility $\sqrt{\sigma_1^2 + \sigma_2^2 - 2\rho\sigma_1\sigma_2}$.</p>
+        <p class="ref">Related: <a href="../ito-lemma/index.html#correlated">4.4 Two Brownian Motions</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+rng, rho, t, n = np.random.default_rng(120), 0.6, 2.0, 2_000_000
+Z1, Z2 = rng.normal(size=n), rng.normal(size=n)
+W1, W2 = np.sqrt(t) * Z1, np.sqrt(t) * (rho * Z1 + np.sqrt(1 - rho ** 2) * Z2)
+print(f"Var(W1 - W2) simulated {(W1 - W2).var():.4f}   formula 2(1 - rho)t = {2 * (1 - rho) * t:.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>Var(W1 - W2) simulated 1.6007   formula 2(1 - rho)t = 1.6000</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q20"> I solved this without the solution</label>
+    </article>
+  </section>
+  <section id="pricing" class="section">
+    <h2>E · Option pricing</h2>
+    <article class="question" id="q21">
+      <h3><span class="qnum">E1</span> The digital call <span class="level easy">easy</span></h3>
+      <p class="q">Price a contract paying one dollar if $S_T &gt; K$ (Black–Scholes).</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Its price is a discounted risk-neutral probability.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>Price $= e^{-rT}Q(S_T &gt; K)$. Under $Q$, $\ln S_T \sim N\big(\ln S_0 + (r - \sigma^2/2)T,\ \sigma^2T\big)$, so $Q(S_T &gt; K) = N(d_2)$ with $d_2 = \frac{\ln(S_0/K) + (r - \sigma^2/2)T}{\sigma\sqrt T}$. Price $= \boxed{e^{-rT}N(d_2)}$.</p>
+<p><strong>Follow-up:</strong> a digital is the negative strike-derivative of a call: $-\partial_KC$. Its delta spikes near expiry at the strike, which makes digitals hard to hedge.</p>
+        <p class="ref">Related: <a href="../pricing/index.html#greeks">9.2 Greeks by Simulation</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+from math import erf, exp, log, sqrt
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+S0, K, r, sigma, T = 100.0, 110.0, 0.03, 0.2, 1.0
+d2 = (log(S0 / K) + (r - sigma ** 2 / 2) * T) / (sigma * sqrt(T))
+ST = S0 * np.exp((r - sigma ** 2 / 2) * T + sigma * sqrt(T) * np.random.default_rng(121).normal(size=4_000_000))
+print(f"digital call: Monte Carlo {exp(-r * T) * np.mean(ST &gt; K):.4f}   formula e^(-rT) N(d2) = {exp(-r * T) * N(d2):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>digital call: Monte Carlo 0.3248   formula e^(-rT) N(d2) = 0.3250</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q21"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q22">
+      <h3><span class="qnum">E2</span> Asset-or-nothing <span class="level medium">medium</span></h3>
+      <p class="q">Price a contract paying $S_T$ if $S_T &gt; K$, and derive the Black–Scholes formula from it.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Change numeraire: use the stock as the unit of account (a Girsanov shift of $\sigma$).</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$e^{-rT}\mathbb E_Q[S_T\mathbf 1_{S_T &gt; K}] = S_0\,\mathbb E_Q\big[\tfrac{S_T}{S_0e^{rT}}\mathbf 1_{S_T &gt; K}\big] = S_0\,Q^S(S_T &gt; K)$, where $\frac{dQ^S}{dQ} = e^{\sigma W_T - \sigma^2T/2}$. Under $Q^S$ the drift of $\ln S$ rises by $\sigma^2$, so the probability is $N(d_1)$ with $d_1 = d_2 + \sigma\sqrt T$. Price $= \boxed{S_0N(d_1)}$.</p>
+<p>A call is "asset-or-nothing minus $K$ digitals": $C = S_0N(d_1) - Ke^{-rT}N(d_2)$.</p>
+        <p class="ref">Related: <a href="../applications/index.html#girsanov">6.2 Girsanov</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+from math import erf, exp, log, sqrt
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+S0, K, r, sigma, T = 100.0, 95.0, 0.03, 0.2, 1.0
+d1 = (log(S0 / K) + (r + sigma ** 2 / 2) * T) / (sigma * sqrt(T))
+ST = S0 * np.exp((r - sigma ** 2 / 2) * T + sigma * sqrt(T) * np.random.default_rng(122).normal(size=4_000_000))
+print(f"asset-or-nothing: Monte Carlo {exp(-r * T) * np.mean(ST * (ST &gt; K)):.4f}   formula S0 N(d1) = {S0 * N(d1):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>asset-or-nothing: Monte Carlo 69.4065   formula S0 N(d1) = 69.3735</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q22"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q23">
+      <h3><span class="qnum">E3</span> The at-the-money rule of thumb <span class="level easy">easy</span></h3>
+      <p class="q">Estimate an at-the-money call price quickly (with $r = 0$).</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Expand $N(x) \approx \tfrac12 + x\,\varphi(0)$ for small $x$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>At the money with $r = 0$, $d_{1,2} = \pm\tfrac12\sigma\sqrt T$, so $C = S\big(N(\tfrac12\sigma\sqrt T) - N(-\tfrac12\sigma\sqrt T)\big) \approx S\varphi(0)\sigma\sqrt T = \frac{S\sigma\sqrt T}{\sqrt{2\pi}} \approx \boxed{0.4\,S\sigma\sqrt T}$.</p>
+<p><strong>Use:</strong> it inverts instantly: an at-the-money option trading at price $C$ implies $\sigma \approx 2.5\,C/(S\sqrt T)$. It is accurate to within about 1% for $\sigma\sqrt T$ up to 0.4.</p>
+        <p class="ref">Related: <a href="../applications/index.html#hedge">6.1 Black–Scholes by Hedging</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>from math import erf, sqrt, pi
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+S, sigma = 100.0, 0.2
+for T in (1 / 12, 0.25, 1.0, 4.0):                          # at the money, r = 0
+    exact = S * (N(sigma * sqrt(T) / 2) - N(-sigma * sqrt(T) / 2))
+    print(f"T = {T:.3f}: exact {exact:.4f}   0.4 S sigma sqrt(T) = {0.4 * S * sigma * sqrt(T):.4f}   S sigma sqrt(T/2pi) = {S * sigma * sqrt(T / (2 * pi)):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>T = 0.083: exact 2.3030   0.4 S sigma sqrt(T) = 2.3094   S sigma sqrt(T/2pi) = 2.3033
+T = 0.250: exact 3.9878   0.4 S sigma sqrt(T) = 4.0000   S sigma sqrt(T/2pi) = 3.9894
+T = 1.000: exact 7.9656   0.4 S sigma sqrt(T) = 8.0000   S sigma sqrt(T/2pi) = 7.9788
+T = 4.000: exact 15.8519   0.4 S sigma sqrt(T) = 16.0000   S sigma sqrt(T/2pi) = 15.9577</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q23"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q24">
+      <h3><span class="qnum">E4</span> Pricing S squared <span class="level medium">medium</span></h3>
+      <p class="q">Price a contract paying $S_T^2$ at $T$ (Black–Scholes).</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Write $S_T^2$ as an exponential of a normal and use C3.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$S_T^2 = S_0^2\,e^{2(r - \sigma^2/2)T + 2\sigma W_T}$, and $\mathbb E_Q[e^{2\sigma W_T}] = e^{2\sigma^2T}$. So $\mathbb E_Q[S_T^2] = S_0^2e^{(2r + \sigma^2)T}$, and the price is $e^{-rT}$ times that: $\boxed{S_0^2e^{(r + \sigma^2)T}}$.</p>
+<p><strong>Follow-up:</strong> power claims depend on volatility even though they have no strike: the payoff is convex, and convexity is worth money (Jensen). By Itô, $S^2$ grows at rate $2r + \sigma^2$.</p>
+        <p class="ref">Related: <a href="../ito-lemma/index.html#lemma">4.2 Itô's Lemma</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+from math import exp, sqrt
+S0, r, sigma, T = 100.0, 0.03, 0.2, 1.0
+ST = S0 * np.exp((r - sigma ** 2 / 2) * T + sigma * sqrt(T) * np.random.default_rng(124).normal(size=4_000_000))
+print(f"price of S_T^2: Monte Carlo {exp(-r * T) * np.mean(ST ** 2):.2f}   formula S0^2 e^((r + sigma^2)T) = {S0 ** 2 * exp((r + sigma ** 2) * T):.2f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>price of S_T^2: Monte Carlo 10722.13   formula S0^2 e^((r + sigma^2)T) = 10725.08</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q24"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q25">
+      <h3><span class="qnum">E5</span> Parity and early exercise <span class="level medium">medium</span></h3>
+      <p class="q">State put–call parity. Why is an American call on a non-dividend stock never exercised early?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Compare $C$ with $S - Ke^{-rT}$ and with $S - K$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>A long call plus a short put pays $S_T - K$, the same as a forward, so $\boxed{C - P = S - Ke^{-r(T-t)}}$. Since $P \ge 0$, $C \ge S - Ke^{-r(T-t)} &gt; S - K$ whenever $r &gt; 0$. The option is always worth more than exercising it, so early exercise is never optimal.</p>
+<p><strong>Follow-up:</strong> for puts the inequality goes the other way. Deep in the money, receiving $K$ now and earning interest beats waiting, so American puts <em>are</em> exercised early (9.4). Dividends can make early exercise of calls optimal just before an ex-dividend date.</p>
+        <p class="ref">Related: <a href="../pricing/index.html#american">9.4 American Options</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>from math import erf, exp, log, sqrt
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+S, K, r, sigma, T = 100.0, 105.0, 0.04, 0.25, 0.75
+d1 = (log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * sqrt(T)); d2 = d1 - sigma * sqrt(T)
+call, put = S * N(d1) - K * exp(-r * T) * N(d2), K * exp(-r * T) * N(-d2) - S * N(-d1)
+print(f"call - put = {call - put:.6f}   S - K e^(-rT) = {S - K * exp(-r * T):.6f}")
+print(f"call {call:.4f} &gt;= S - K e^(-rT) = {S - K * exp(-r * T):.4f} &gt; S - K = {S - K:.4f}: never exercise early")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>call - put = -1.896781   S - K e^(-rT) = -1.896781
+call 7.7865 &gt;= S - K e^(-rT) = -1.8968 &gt; S - K = -5.0000: never exercise early</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q25"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q26">
+      <h3><span class="qnum">E6</span> Why delta is N(d₁) <span class="level medium">medium</span></h3>
+      <p class="q">Show that $\partial C/\partial S = N(d_1)$, not $N(d_1)$ plus correction terms.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Differentiate $C = SN(d_1) - Ke^{-rT}N(d_2)$ and use an identity linking $\varphi(d_1)$ and $\varphi(d_2)$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$\partial_SC = N(d_1) + S\varphi(d_1)\partial_Sd_1 - Ke^{-rT}\varphi(d_2)\partial_Sd_2$. Since $d_2 = d_1 - \sigma\sqrt T$, $\partial_Sd_1 = \partial_Sd_2$. Squaring $d_2$ shows $S\varphi(d_1) = Ke^{-rT}\varphi(d_2)$, so the last two terms cancel: $\boxed{\Delta = N(d_1)}$.</p>
+<p><strong>Interpretation:</strong> $N(d_2)$ is the risk-neutral probability of exercise. $N(d_1)$ is the exercise probability under the stock measure (E2), and it is larger because the stock is used as the unit.</p>
+        <p class="ref">Related: <a href="../applications/index.html#hedge">6.1 Black–Scholes by Hedging</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>from math import erf, exp, log, sqrt
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+def call(S, K=100.0, r=0.03, sigma=0.2, T=1.0):
+    d1 = (log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * sqrt(T))
+    return S * N(d1) - K * exp(-r * T) * N(d1 - sigma * sqrt(T)), N(d1), N(d1 - sigma * sqrt(T))
+h = 1e-4
+fd = (call(100 + h)[0] - call(100 - h)[0]) / (2 * h)
+print(f"finite-difference delta {fd:.6f}   N(d1) = {call(100)[1]:.6f}   N(d2) = {call(100)[2]:.6f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>finite-difference delta 0.598706   N(d1) = 0.598706   N(d2) = 0.519939</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q26"> I solved this without the solution</label>
+    </article>
+  </section>
+  <section id="vol" class="section">
+    <h2>F · Greeks and volatility</h2>
+    <article class="question" id="q27">
+      <h3><span class="qnum">F1</span> The P&amp;L of a delta hedge <span class="level hard">hard</span></h3>
+      <p class="q">You sell an option at implied volatility $\sigma_{\text{imp}}$ and delta-hedge it. The stock actually moves with volatility $\sigma_{\text{real}}$. What is your profit and loss?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Use the Black–Scholes PDE $\Theta + \tfrac12\sigma_{\text{imp}}^2S^2\Gamma = 0$ (with $r = 0$) and Itô's lemma with the realized volatility.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>The option (long) changes by $dV = \Theta\,dt + \Delta\,dS + \tfrac12\Gamma S^2\sigma_{\text{real}}^2dt$. The hedge removes $\Delta\,dS$. Substituting $\Theta = -\tfrac12\sigma_{\text{imp}}^2S^2\Gamma$ gives
+$$d(\text{long option} - \Delta S) = \tfrac12\Gamma S^2\big(\sigma_{\text{real}}^2 - \sigma_{\text{imp}}^2\big)\,dt.$$
+Being long gamma earns money when realized volatility beats implied. The seller loses the same amount.</p>
+<p><strong>Follow-up:</strong> the P&amp;L is path-dependent, since it is weighted by $\Gamma S^2$ along the path. Variance swaps (10.3) remove this dependence.</p>
+        <p class="ref">Related: <a href="../volatility/index.html#varswap">10.3 Variance Swaps</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+from math import erf, exp, log, sqrt, pi
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+S0, K, T, sig_imp, sig_real, steps = 100.0, 100.0, 1.0, 0.2, 0.3, 2000   # r = 0
+def bs(S, tau):
+    d1 = (np.log(S / K) + sig_imp ** 2 / 2 * tau) / (sig_imp * np.sqrt(tau))
+    return S * N_vec(d1) - K * N_vec(d1 - sig_imp * np.sqrt(tau)), N_vec(d1), np.exp(-d1 ** 2 / 2) / np.sqrt(2 * pi) / (S * sig_imp * np.sqrt(tau))
+N_vec = np.vectorize(N)
+rng, dt, S = np.random.default_rng(127), T / steps, S0
+V, pnl, predicted = bs(S0, T)[0], 0.0, 0.0
+for i in range(steps):                                      # sell the option at implied vol, delta-hedge daily
+    price, delta, gamma = bs(S, T - i * dt)
+    S_new = S * np.exp(-sig_real ** 2 / 2 * dt + sig_real * np.sqrt(dt) * rng.normal())
+    pnl += delta * (S_new - S); predicted += 0.5 * gamma * S ** 2 * (sig_real ** 2 - sig_imp ** 2) * dt
+    S = S_new
+pnl = V + pnl - max(S - K, 0)
+print(f"short option + delta hedge P&amp;L {pnl:.3f}   predicted -1/2 sum Gamma S^2 (sig_real^2 - sig_imp^2) dt = {-predicted:.3f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>short option + delta hedge P&amp;L -5.843   predicted -1/2 sum Gamma S^2 (sig_real^2 - sig_imp^2) dt = -6.414</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q27"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q28">
+      <h3><span class="qnum">F2</span> Vega <span class="level medium">medium</span></h3>
+      <p class="q">Compute the vega $\partial C/\partial\sigma$ of a Black–Scholes call and approximate it at the money.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Use the same $\varphi(d_1)$–$\varphi(d_2)$ identity as in E6.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>$\partial_\sigma C = S\varphi(d_1)\partial_\sigma d_1 - Ke^{-rT}\varphi(d_2)\partial_\sigma d_2 = S\varphi(d_1)(\partial_\sigma d_1 - \partial_\sigma d_2) = \boxed{S\sqrt T\,\varphi(d_1)}$. At the money, $\varphi(d_1) \approx \varphi(0) \approx 0.4$, so vega $\approx 0.4\,S\sqrt T$ per unit of volatility.</p>
+<p><strong>Follow-up:</strong> vega is the same for calls and puts (by parity), peaks near the money, and grows like $\sqrt T$. Gamma, by contrast, peaks at short maturities.</p>
+        <p class="ref">Related: <a href="../pricing/index.html#greeks">9.2 Greeks by Simulation</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>from math import erf, exp, log, sqrt, pi
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+def call(S, sigma, K=100.0, r=0.0, T=1.0):
+    d1 = (log(S / K) + (r + sigma ** 2 / 2) * T) / (sigma * sqrt(T))
+    return S * N(d1) - K * exp(-r * T) * N(d1 - sigma * sqrt(T)), d1
+S, sigma, T, h = 100.0, 0.2, 1.0, 1e-5
+fd = (call(S, sigma + h)[0] - call(S, sigma - h)[0]) / (2 * h)
+d1 = call(S, sigma)[1]
+print(f"vega: finite difference {fd:.4f}   S sqrt(T) phi(d1) = {S * sqrt(T) * exp(-d1 ** 2 / 2) / sqrt(2 * pi):.4f}   0.4 S sqrt(T) = {0.4 * S * sqrt(T):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>vega: finite difference 39.6953   S sqrt(T) phi(d1) = 39.6953   0.4 S sqrt(T) = 40.0000</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q28"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q29">
+      <h3><span class="qnum">F3</span> Why the equity skew slopes down <span class="level medium">medium</span></h3>
+      <p class="q">Why is implied volatility higher for low strikes than high strikes on equity indices?</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>What kind of move does a low-strike put protect against, and how does volatility behave then?</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>Three reinforcing reasons. (1) <strong>Crash risk:</strong> large downward jumps (8.1) fatten the left tail, so low-strike options are worth more than a lognormal allows (10.1). (2) <strong>Leverage effect:</strong> volatility tends to rise when prices fall ($\rho &lt; 0$ in Heston, 10.2), which also fattens the left tail. (3) <strong>Demand:</strong> investors pay up for downside protection.</p>
+<p><strong>Follow-up:</strong> jump models produce steep short-dated skews that flatten with maturity. Stochastic volatility produces more persistent skews. Real markets need both.</p>
+        <p class="ref">Related: <a href="../volatility/index.html#implied">10.1 Implied Volatility</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+from math import erf, exp, log, sqrt
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+def bs(S, K, T, r, s):
+    d1 = (log(S / K) + (r + s * s / 2) * T) / (s * sqrt(T)); return S * N(d1) - K * exp(-r * T) * N(d1 - s * sqrt(T))
+def iv(p, S, K, T, r, lo=1e-4, hi=3.0):
+    for _ in range(80):
+        m = (lo + hi) / 2; lo, hi = (m, hi) if bs(S, K, T, r, m) &lt; p else (lo, m)
+    return (lo + hi) / 2
+rng, n, S0, T, r, s = np.random.default_rng(129), 2_000_000, 100.0, 0.5, 0.0, 0.15
+jumps = rng.poisson(1.0 * T, n)                             # one crash-like jump a year, -10% on average
+logJ = -0.10 * jumps + 0.10 * np.sqrt(jumps) * rng.normal(size=n)
+k = exp(-0.10 + 0.005) - 1
+ST = S0 * np.exp((r - 1.0 * k - s * s / 2) * T + s * sqrt(T) * rng.normal(size=n) + logJ)
+for K in (85, 100, 115):
+    print(f"K = {K}: implied vol {iv(np.maximum(ST - K, 0).mean(), S0, K, T, r):.4f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>K = 85: implied vol 0.2221
+K = 100: implied vol 0.1957
+K = 115: implied vol 0.1818</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q29"> I solved this without the solution</label>
+    </article>
+    <article class="question" id="q30">
+      <h3><span class="qnum">F4</span> The variance swap strike <span class="level hard">hard</span></h3>
+      <p class="q">Show that under Black–Scholes the fair variance-swap strike is $\sigma^2$, using a log contract.</p>
+      <details class="drawer">
+        <summary>Hint</summary>
+        <p>Itô on $\ln S$: $d\ln S = dS/S - \tfrac12\sigma^2dt$.</p>
+      </details>
+      <details class="drawer">
+        <summary>Solution</summary>
+<p>Integrating, $\tfrac1T\int_0^T\sigma^2dt = \tfrac2T\big(\int_0^T dS/S - \ln(S_T/S_0)\big)$. With $r = 0$, $\int dS/S$ is a martingale with mean 0, and $\mathbb E_Q[\ln(S_T/S_0)] = -\tfrac12\sigma^2T$. So the fair strike is $\boxed{\sigma^2}$.</p>
+<p><strong>Follow-up:</strong> with stochastic volatility the same identity holds pathwise. The log contract is replicated by options weighted by $1/K^2$ (10.3), which is the model-free VIX formula.</p>
+        <p class="ref">Related: <a href="../volatility/index.html#varswap">10.3 Variance Swaps</a></p>
+      </details>
+      <details class="drawer">
+        <summary>Show the code (Python + NumPy)</summary>
+        <pre><code>import numpy as np
+from math import sqrt
+rng, sigma, T, days, n = np.random.default_rng(130), 0.25, 1.0, 252, 200_000
+dt = T / days
+lnS = np.cumsum(-sigma ** 2 / 2 * dt + sigma * sqrt(dt) * rng.normal(size=(n, days)), axis=1)   # r = 0
+log_contract = 2 / T * (np.exp(lnS[:, -1]) - 1 - lnS[:, -1])   # 2/T (S_T/S0 - 1 - ln(S_T/S0))
+print(f"fair variance from the log contract {log_contract.mean():.5f}   sigma^2 = {sigma ** 2:.5f}")</code></pre>
+        <p class="ref">Output when we ran it:</p>
+        <pre><code>fair variance from the log contract 0.06254   sigma^2 = 0.06250</code></pre>
+      </details>
+      <label class="solved"><input type="checkbox" data-q="q30"> I solved this without the solution</label>
+    </article>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../rates/index.html">← Chapter 11: Rates, Control &amp; Data</a>
+    <a href="../index.html">Back to all chapters</a>
+  </nav>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Ngoc Minh Nguyen · Text <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Code MIT</span>
+  <span><a href="../about/index.html">About &amp; how to cite</a> · <a href="https://github.com/nnm-psd/visual_stochastic_calculus/issues/new?template=error-report.yml">Report an error</a></span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/interview.js"></script>
+<script src="../assets/js/runner.js"></script>
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>

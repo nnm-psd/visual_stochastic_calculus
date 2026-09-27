@@ -13,6 +13,9 @@
     'applications': ['hedge', 'girsanov', 'fk'],
     'diffusion-models': ['forward', 'score', 'reverse', 'langevin'],
     'beyond': ['jumps', 'kalman'],
+    'pricing': ['mc', 'greeks', 'barrier', 'american'],
+    'volatility': ['implied', 'heston', 'varswap'],
+    'rates': ['shortrate', 'merton', 'data'],
   };
   const KEY = 'progress';
 

@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Volatility · Visual Stochastic Calculus</title>
+<meta name="description" content="Implied volatility and the smile, the Heston stochastic-volatility model with exact Fourier pricing, and variance swaps replicated by a strip of options.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/volatility/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Volatility · Visual Stochastic Calculus">
+<meta property="og:description" content="Implied volatility and the smile, the Heston stochastic-volatility model with exact Fourier pricing, and variance swaps replicated by a strip of options.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/volatility/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 10 · Volatility</span><a class="pdf-link" href="../pdf/volatility.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+</header>
+<main>
+  <h1>Volatility</h1>
+  <p class="lede">Black–Scholes assumes one constant volatility. Markets disagree: options at different strikes trade as if volatility were different. This chapter reads volatility off option prices, builds a model where volatility itself is random, and prices a contract on volatility directly.</p>
+
+  <section id="implied" class="section">
+    <h2><span class="num">10.1</span>Implied Volatility &amp; the Smile</h2>
+    <p>Traders quote options not by price but by <em>implied volatility</em>: the volatility that, plugged into Black–Scholes, reproduces the market price. If Black–Scholes were right, every strike would give the same number. In real markets it doesn't: plotted against strike, implied volatility forms a <em>smile</em> or a downward-sloping <em>skew</em>. Here the "market" is Merton's jump model (section 8.1), and you can see which shapes jumps produce.</p>
+    <div class="predict" data-answer="a" data-explain="Occasional downward jumps make big falls more likely than a bell curve allows, which makes low-strike puts more valuable. Expressed through Black–Scholes, that means a higher implied volatility at low strikes: a downward skew.">
+      <p><strong>Predict first:</strong> In a model with occasional <em>downward</em> jumps, implied volatility at low strikes, compared with high strikes, will be…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Higher (a downward-sloping skew)</button>
+        <button type="button" data-choice="b">Lower</button>
+        <button type="button" data-choice="c">The same</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Set the jump intensity, the average jump size and its spread. Left: implied volatility against strike. Right: the probability distribution of the stock at maturity that the option prices imply, against the lognormal curve Black–Scholes would use.</p>
+    <div class="formula">$$C_{\text{market}}(K) = C_{\text{BS}}\big(S_0, K, T, r, \sigma_{\text{imp}}(K)\big), \qquad q(K) = e^{rT}\,\frac{\partial^2 C}{\partial K^2}$$</div>
+    <dl class="symbols">
+      <dt>$C_{\text{market}}(K)$</dt><dd>The observed call price at strike $K$: here computed from the jump model.</dd>
+      <dt>$\sigma_{\text{imp}}(K)$</dt><dd>Implied volatility: the unique $\sigma$ that makes the Black–Scholes price match. It is found numerically, because Black–Scholes can't be solved for $\sigma$ in closed form.</dd>
+      <dt>smile, skew</dt><dd>The shape of $\sigma_{\text{imp}}$ against $K$. Equity markets show a downward skew: low strikes (crash protection) have higher implied volatility.</dd>
+      <dt>$q(K)$</dt><dd>The <em>risk-neutral density</em> of $S_T$: how likely each final price is, as priced by the market. The second derivative of call prices in the strike recovers it (Breeden–Litzenberger).</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> implied volatility is a unit of price. It lets you compare options across strikes on one scale. A flat line would mean the market agrees with Black–Scholes' bell-curve world. A skew means the market's distribution of future prices has a fatter left tail than the lognormal: you can see it directly on the right. Every shape of the smile corresponds to a shape of the distribution, and the second derivative of prices across strikes turns one into the other. Try positive jumps: the skew flips. Try symmetric jumps (mean 0): the skew becomes a smile.</p>
+    <div class="viz">
+      <canvas class="iv-canvas" role="img" aria-label="Implied volatility smile across strikes and the implied distribution of the final stock price"></canvas>
+    </div>
+    <div class="controls">
+      <label>Jumps per year λ <input type="range" name="lam" min="0" max="3" step="0.1" value="1"><output></output></label>
+      <label>Average jump <input type="range" name="mu" min="-0.3" max="0.3" step="0.01" value="-0.1"><output></output></label>
+      <label>Jump spread <input type="range" name="dj" min="0.02" max="0.3" step="0.01" value="0.1"><output></output></label>
+    </div>
+    <p class="stats iv-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>The smile is how the market says "Black–Scholes is wrong" while still using its formula as a quoting convention. Downward jumps give a skew, symmetric jumps a smile, and the size of the effect fades with maturity, because many jumps average out (section 8.1). Real equity skews are also steep at long maturities, which pure jump models struggle with. That is one reason stochastic volatility (next section) is needed too.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Breeden–Litzenberger.</strong> Since $C(K) = e^{-rT}\mathbb E^Q[(S_T - K)^+]$, differentiating twice in $K$ gives $\partial_{KK}C = e^{-rT}q(K)$. Call prices across all strikes therefore determine the entire risk-neutral distribution at that maturity.</p>
+<p><strong>Local volatility (Dupire).</strong> Given call prices across strikes <em>and</em> maturities, there is exactly one diffusion $dS = rS\,dt + \sigma_{\text{loc}}(S, t)S\,dW$ that reproduces all of them: $\sigma_{\text{loc}}^2(K, T) = \dfrac{2\,(\partial_T C + rK\,\partial_K C)}{K^2\,\partial_{KK}C}$. It fits today's smile exactly, but it tends to predict future smiles that flatten, unlike real markets.</p>
+<p><strong>Arbitrage bounds.</strong> A smile must keep call prices decreasing and convex in $K$ (no butterfly arbitrage) and increasing in $T$ (no calendar arbitrage). Otherwise $q$ would be negative somewhere.</p>
+<p class="ref">References: D. Breeden &amp; R. Litzenberger, "Prices of state-contingent claims implicit in option prices", <em>J. Business</em> 51 (1978), 621–651. B. Dupire, "Pricing with a smile", <em>Risk</em> 7 (1994), 18–20. J. Gatheral, <em>The Volatility Surface</em> (Wiley, 2006).</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import erf, exp, log, sqrt, factorial
+N = lambda x: 0.5 * (1 + erf(x / sqrt(2)))
+def bs_call(S, K, T, r, s):
+    d1 = (log(S / K) + (r + s * s / 2) * T) / (s * sqrt(T))
+    return S * N(d1) - K * exp(-r * T) * N(d1 - s * sqrt(T))
+def merton_call(S, K, T, r, s, lam, mu, dj):                 # average of BS prices over the number of jumps
+    k = exp(mu + dj * dj / 2) - 1
+    return sum(exp(-lam * (1 + k) * T) * (lam * (1 + k) * T) ** n / factorial(n)
+               * bs_call(S, K, T, r - lam * k + n * log(1 + k) / T, sqrt(s * s + n * dj * dj / T)) for n in range(60))
+def implied_vol(price, S, K, T, r, lo=1e-4, hi=3.0):
+    for _ in range(80):                                       # bisection: call prices rise with volatility
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if bs_call(S, K, T, r, mid) &lt; price else (lo, mid)
+    return (lo + hi) / 2
+S, T, r, s, lam, mu, dj = 100.0, 0.5, 0.02, 0.15, 1.0, -0.10, 0.10   # one jump a year, 10% down on average
+for K in (80, 90, 100, 110, 120):
+    print(f"K = {K}: implied volatility {implied_vol(merton_call(S, K, T, r, s, lam, mu, dj), S, K, T, r):.4f}")
+Ks = np.arange(40, 201, 0.5)                                  # Breeden-Litzenberger: density = e^{rT} C''(K)
+C = np.array([merton_call(S, K, T, r, s, lam, mu, dj) for K in Ks])
+density = exp(r * T) * np.diff(C, 2) / 0.5 ** 2
+print(f"density integrates to {density.sum() * 0.5:.4f}")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>K = 80: implied volatility 0.2333
+K = 90: implied volatility 0.2134
+K = 100: implied volatility 0.1968
+K = 110: implied volatility 0.1858
+K = 120: implied volatility 0.1796
+density integrates to 1.0000</code></pre>
+    </details>
+  </section>
+
+  <section id="heston" class="section">
+    <h2><span class="num">10.2</span>Stochastic Volatility (Heston)</h2>
+    <p>Real volatility changes over time: calm stretches, then turbulent ones (you saw this "volatility clustering" in real data, section 11.3). The Heston model lets the variance $v$ follow its own random process (a CIR process, section 5.2), correlated with the stock. It is the most widely used stochastic-volatility model because, despite being random, it still has an almost-closed-form price.</p>
+    <div class="predict" data-answer="a" data-explain="With strongly negative correlation, volatility tends to rise when the price falls. Falls then become more violent than rises, the left tail fattens, and low-strike implied volatility rises: a downward skew, as in equity markets.">
+      <p><strong>Predict first:</strong> Make the correlation ρ between the price and its volatility strongly negative. The smile will…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Tilt down: low strikes get higher implied volatility</button>
+        <button type="button" data-choice="b">Tilt up: high strikes get higher implied volatility</button>
+        <button type="button" data-choice="c">Stay flat</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Drag the correlation ρ and the volatility of volatility ξ. Left: one simulated price path and its volatility. Right: the implied-volatility smile from the exact Fourier price (line), confirmed by 20,000 simulated paths (dots).</p>
+    <div class="formula">$$dS_t = rS_t\,dt + \sqrt{v_t}\,S_t\,dW^{(1)}_t, \qquad dv_t = \kappa(\theta - v_t)\,dt + \xi\sqrt{v_t}\,dW^{(2)}_t, \qquad dW^{(1)}dW^{(2)} = \rho\,dt$$</div>
+    <dl class="symbols">
+      <dt>$v_t$</dt><dd>The instantaneous variance. Its square root is the volatility. Here it starts at $v_0 = 0.04$ (20% volatility).</dd>
+      <dt>$\kappa,\ \theta$</dt><dd>Variance is pulled back toward its long-run level $\theta = 0.04$ at speed $\kappa = 2$ (half-life about 4 months).</dd>
+      <dt>$\xi$</dt><dd>The volatility of volatility: how wildly $v$ itself moves. It curves the smile.</dd>
+      <dt>$\rho$</dt><dd>The correlation between price and variance moves (section 4.4). It tilts the smile.</dd>
+      <dt>Fourier price</dt><dd>Heston's model has a known <em>characteristic function</em> for $\ln S_T$. An integral of it gives the exact call price, with no simulation needed.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> two random processes, tied together. When ρ is negative, bad days for the stock tend to be days when volatility jumps. That is the <em>leverage effect</em> seen in equity markets. The result is a distribution with a fat left tail, and the market prices that as a skew. The volatility of volatility ξ decides how fat both tails get, so it controls the smile's curvature. Heston reproduces the qualitative shape of equity skews with five parameters, and it prices vanilla options in milliseconds, which is why it is a standard first model to calibrate.</p>
+    <div class="viz">
+      <canvas class="hs-canvas" role="img" aria-label="A Heston price path and its volatility, and the implied volatility smile from exact and Monte Carlo prices"></canvas>
+    </div>
+    <div class="controls">
+      <label>Correlation ρ <input type="range" name="rho" min="-0.95" max="0.95" step="0.05" value="-0.7"><output></output></label>
+      <label>Vol of vol ξ <input type="range" name="xi" min="0.05" max="1" step="0.05" value="0.5"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats hs-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>ρ sets the skew and ξ the curvature. Stochastic volatility explains skews that persist at long maturities, where jumps have averaged out. Real desks go further: <em>stochastic local volatility</em> combines Heston with Dupire's local volatility so that the model fits today's smile exactly and still has realistic dynamics.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Pricing PDE.</strong> Itô's lemma for two variables (section 4.4) and a hedge in the stock and one other option give $\partial_tV + \tfrac12vS^2V_{SS} + \rho\xi vSV_{Sv} + \tfrac12\xi^2vV_{vv} + rSV_S + \kappa(\theta - v)V_v - rV = 0$ (with zero market price of volatility risk). Volatility itself can't be traded, so the model is <em>incomplete</em>: the stock alone can't hedge an option.</p>
+<p><strong>Characteristic function.</strong> $\mathbb E[e^{iu\ln S_T}] = \exp\big(C(u,T) + D(u,T)\,v_0 + iu\ln S_0\big)$ with explicit $C$ and $D$. The price is $C = S_0P_1 - Ke^{-rT}P_2$ with $P_j = \tfrac12 + \tfrac1\pi\int_0^\infty \operatorname{Re}[\cdots]\,du$. The "little Heston trap" form, used here, avoids branch-cut errors in the complex logarithm.</p>
+<p><strong>Feller condition.</strong> If $2\kappa\theta \ge \xi^2$, the variance never reaches 0 (section 5.2's CIR result). Calibrated equity parameters often violate it, which is why simulations need careful schemes (full truncation here, or Andersen's QE scheme).</p>
+<p class="ref">References: S. Heston, "A closed-form solution for options with stochastic volatility with applications to bond and currency options", <em>Review of Financial Studies</em> 6 (1993), 327–343. H. Albrecher et al., "The little Heston trap", <em>Wilmott Magazine</em> (2007). Gatheral, <em>The Volatility Surface</em>, ch. 2.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import erf, exp, log, sqrt, pi
+T, r, v0, kap, th, xi, rho, S0, K = 1.0, 0.02, 0.04, 2.0, 0.04, 0.5, -0.7, 100.0, 90.0
+def cf(u):                                                    # characteristic function of ln S_T
+    b = kap - rho * xi * 1j * u
+    d = np.sqrt(b ** 2 + xi ** 2 * (1j * u + u ** 2)); g = (b - d) / (b + d); e = np.exp(-d * T)
+    C = r * 1j * u * T + kap * th / xi ** 2 * ((b - d) * T - 2 * np.log((1 - g * e) / (1 - g)))
+    return np.exp(C + (b - d) / xi ** 2 * (1 - e) / (1 - g * e) * v0 + 1j * u * log(S0))
+u = np.linspace(1e-6, 200, 4001)
+P1 = 0.5 + np.trapz(np.real(np.exp(-1j * u * log(K)) * cf(u - 1j) / (1j * u * cf(-1j))), u) / pi
+P2 = 0.5 + np.trapz(np.real(np.exp(-1j * u * log(K)) * cf(u) / (1j * u)), u) / pi
+exact = S0 * P1 - K * exp(-r * T) * P2
+rng, n, steps = np.random.default_rng(30), 100_000, 200      # Monte Carlo, full-truncation Euler
+dt, lnS, v = T / steps, np.full(n, log(S0)), np.full(n, v0)
+for _ in range(steps):
+    z1 = rng.normal(size=n); z2 = rho * z1 + sqrt(1 - rho ** 2) * rng.normal(size=n); vp = np.maximum(v, 0)
+    lnS += (r - vp / 2) * dt + np.sqrt(vp * dt) * z1
+    v += kap * (th - vp) * dt + xi * np.sqrt(vp * dt) * z2
+pay = exp(-r * T) * np.maximum(np.exp(lnS) - K, 0)
+print(f"Heston call K = {K}: Fourier {exact:.4f}   Monte Carlo {pay.mean():.4f} +- {pay.std() / sqrt(n):.4f}")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>Heston call K = 90.0: Fourier 15.0921   Monte Carlo 15.0726 +- 0.0414</code></pre>
+    </details>
+  </section>
+
+  <section id="varswap" class="section">
+    <h2><span class="num">10.3</span>Variance Swaps</h2>
+    <p>A <em>variance swap</em> is a bet on volatility itself: at maturity it pays the realized variance of the stock minus a fixed strike agreed today. What is the fair strike? Remarkably, it can be replicated with ordinary options, a strip of puts and calls at every strike, each held in proportion to $1/K^2$. The reason is Itô's lemma applied to $\ln S$.</p>
+    <div class="predict" data-answer="b" data-explain="The replicating portfolio holds options in proportion to 1/K². That weighting makes the portfolio's value sensitive to variance but not to where the stock is, which is exactly what a variance swap needs.">
+      <p><strong>Predict first:</strong> In the strip of options that replicates a variance swap, each option is held in proportion to…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">1 (equal amounts)</button>
+        <button type="button" data-choice="b">1/K²</button>
+        <button type="button" data-choice="c">K</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Change the number of options in the strip and today's volatility. Left: what each option contributes (puts below the current price, calls above). Right: realized variance over 4,000 simulated years of the Heston model, against the fair strike and the strip's value.</p>
+    <div class="formula">$$\frac1T\int_0^T\!\sigma_t^2\,dt \;=\; \frac2T\Big(\int_0^T\!\frac{dS_t}{S_t} - \ln\frac{S_T}{S_0}\Big), \qquad K_{\text{var}} = \frac2T\Big(\int_0^{S_0}\!\frac{P(K)}{K^2}\,dK + \int_{S_0}^{\infty}\!\frac{C(K)}{K^2}\,dK\Big)$$</div>
+    <dl class="symbols">
+      <dt>$\frac1T\int_0^T\sigma_t^2\,dt$</dt><dd>Realized variance: the average squared volatility over the life of the swap. In practice it is measured as the average squared daily log return, which is section 2.1's quadratic variation.</dd>
+      <dt>$\int_0^T dS_t/S_t$</dt><dd>The gains from continuously holding one dollar's worth of stock: a trading strategy with zero value under risk-neutral pricing (when $r = 0$).</dd>
+      <dt>$\ln(S_T/S_0)$</dt><dd>A "log contract": a payoff that can be built from a strip of options.</dd>
+      <dt>$P(K),\ C(K)$</dt><dd>Put and call prices at strike $K$ today. Out-of-the-money options are used: puts below today's price, calls above.</dd>
+      <dt>$K_{\text{var}}$</dt><dd>The fair variance strike: the value that makes the swap worth zero today.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> Itô's lemma says $d\ln S = dS/S - \tfrac12\sigma^2dt$. The "$-\tfrac12\sigma^2dt$" correction is exactly the variance you want. So variance is twice the difference between holding the stock dynamically and holding a log contract statically. The log contract's payoff is curved, and any curved payoff can be built from options with weights equal to its curvature. For $\ln K$ that curvature is $1/K^2$. So one static basket of options plus simple stock trading locks in realized variance, whatever the volatility does, in any diffusion model. More strikes make the strip more accurate. Any single year's realized variance is highly uncertain (right panel), but the average matches the strike.</p>
+    <div class="viz">
+      <canvas class="vs-canvas" role="img" aria-label="Contributions of each option to the replicating strip, and a histogram of realized variance with the fair strike"></canvas>
+    </div>
+    <div class="controls">
+      <label>Options in the strip <input type="range" name="n" min="4" max="120" step="1" value="12"><output></output></label>
+      <label>Today's volatility <input type="range" name="v0" min="0.1" max="0.4" step="0.01" value="0.2"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats vs-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>Variance can be bought and sold like any asset, and its fair price is a weighted sum of option prices. That makes volatility tradable and gives a model-free benchmark, the idea behind the VIX index, which is computed from exactly this 1/K² strip of S&amp;P 500 options. The replication needs continuous paths: jumps add an error term, one reason variance swaps were capped after the 2008 crash.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Spanning formula.</strong> Any twice-differentiable payoff $f(S_T)$ can be written, for any $F$, as $f(F) + f'(F)(S_T - F) + \int_0^F f''(K)(K - S_T)^+dK + \int_F^\infty f''(K)(S_T - K)^+dK$ (Carr &amp; Madan). With $f = -\ln$, $f''(K) = 1/K^2$.</p>
+<p><strong>Assumptions.</strong> The replication holds exactly for continuous price paths with any stochastic volatility. With jumps, realized variance differs from the log-contract value by a term of order $\sum_{\text{jumps}}\big(J^2 - 2(e^J - 1 - J)\big)$, which is positive for crashes: realized variance then exceeds what the strip pays, so the strip underprices the swap. Discretely sampled realized variance and interest rates add small corrections.</p>
+<p><strong>Volatility swaps.</strong> A swap on volatility $\sqrt{\text{variance}}$ is not replicable by a static strip. By Jensen's inequality its fair strike is below $\sqrt{K_{\text{var}}}$: a <em>convexity adjustment</em>.</p>
+<p class="ref">References: K. Demeterfi, E. Derman, M. Kamal &amp; J. Zou, "A guide to volatility and variance swaps", <em>J. Derivatives</em> 6 (1999), 9–32. P. Carr &amp; D. Madan, "Towards a theory of volatility trading", in <em>Volatility</em> (Risk Books, 1998). Gatheral, <em>The Volatility Surface</em>, ch. 11.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import exp, sqrt
+T, v0, kap, th, xi, rho = 1.0, 0.04, 2.0, 0.04, 0.5, -0.7     # Heston, r = 0
+fair = th + (v0 - th) * (1 - exp(-kap * T)) / (kap * T)      # E[(1/T) * integral of v dt]
+rng, n, days = np.random.default_rng(31), 20_000, 252
+dt, v, realized = T / days, np.full(n, v0), np.zeros(n)
+for _ in range(days):
+    z1 = rng.normal(size=n); z2 = rho * z1 + sqrt(1 - rho ** 2) * rng.normal(size=n); vp = np.maximum(v, 0)
+    ret = -vp / 2 * dt + np.sqrt(vp * dt) * z1                # daily log return
+    realized += ret ** 2
+    v += kap * (th - vp) * dt + xi * np.sqrt(vp * dt) * z2
+realized /= T
+print(f"fair variance strike {fair:.5f}   average realized {realized.mean():.5f} +- {realized.std() / sqrt(n):.5f}")
+print(f"realized variance ranges from {np.percentile(realized, 5):.4f} to {np.percentile(realized, 95):.4f} (5th-95th percentile)")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>fair variance strike 0.04000   average realized 0.03973 +- 0.00022
+realized variance ranges from 0.0094 to 0.1019 (5th-95th percentile)</code></pre>
+    </details>
+  </section>
+
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="b" data-explain="It is a way of quoting a price: the unique σ that makes the Black–Scholes formula match the observed option price.">
+      <p><strong>1.</strong> Implied volatility is…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The stock&#x27;s historical volatility</button>
+        <button type="button" data-choice="b">The volatility that makes Black–Scholes reproduce the market price</button>
+        <button type="button" data-choice="c">The average of future volatility</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="a" data-explain="ρ &lt; 0 makes volatility rise when the price falls, fattening the left tail: a downward skew. ξ controls the curvature.">
+      <p><strong>2.</strong> In the Heston model, which parameter mainly tilts the smile into a skew?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The correlation ρ</button>
+        <button type="button" data-choice="b">The mean-reversion speed κ</button>
+        <button type="button" data-choice="c">The long-run variance θ</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="a" data-explain="The log contract&#x27;s curvature is 1/K², and Itô&#x27;s lemma links the log contract to realized variance.">
+      <p><strong>3.</strong> A variance swap can be replicated by holding options at every strike in proportion to…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">1/K²</button>
+        <button type="button" data-choice="b">K</button>
+        <button type="button" data-choice="c">1</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../pricing/index.html">← Chapter 9: Pricing Lab</a>
+    <a href="../rates/index.html">Chapter 11: Rates, Control &amp; Data →</a>
+  </nav>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Ngoc Minh Nguyen · Text <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Code MIT</span>
+  <span><a href="../about/index.html">About &amp; how to cite</a> · <a href="https://github.com/nnm-psd/visual_stochastic_calculus/issues/new?template=error-report.yml">Report an error</a></span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/finance.js"></script>
+<script src="../assets/js/implied-vol.js"></script>
+<script src="../assets/js/heston.js"></script>
+<script src="../assets/js/varswap.js"></script>
+<script src="../assets/js/runner.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>

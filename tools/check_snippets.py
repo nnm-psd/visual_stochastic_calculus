@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGES = ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models', 'beyond']
+PAGES = ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models', 'beyond', 'pricing', 'volatility', 'rates', 'interview']
 BLOCK = re.compile(
     r'(<summary>Show the code \(Python \+ NumPy\)</summary>\s*<pre><code>)(.*?)(</code></pre>\s*'
     r'<p class="ref">Output when we ran it:</p>\s*<pre><code>)(.*?)(</code></pre>)', re.S)
@@ -80,4 +80,5 @@ def main(update):
 
 
 if __name__ == '__main__':
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')  # Windows consoles default to cp1252
     sys.exit(main('--update' in sys.argv))

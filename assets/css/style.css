@@ -317,3 +317,26 @@ h2 .done { font-size: 13px; font-weight: 600; color: var(--accent-2); margin-lef
 .about ul { padding-left: 20px; }
 .about li { margin-bottom: 8px; }
 @media print { .site-footer { border: none; } .site-footer a { color: inherit; } }
+
+/* Interview practice. */
+.practice-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin: 8px 0 24px; position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 8px 0; }
+.practice-bar .solved-count { font-weight: 600; margin-right: 8px; }
+.practice-bar button {
+  font: inherit; font-size: 14px; padding: 4px 12px; border: 1px solid var(--border); border-radius: 6px;
+  background: var(--card); color: var(--fg); cursor: pointer;
+}
+.practice-bar button.random { border-color: var(--accent); }
+.question { border-top: 1px solid var(--border); padding: 18px 0 8px; scroll-margin-top: 56px; transition: background 0.4s; }
+.question:first-of-type { border-top: none; }
+.question h3 { margin: 0 0 6px; font-size: 1.1rem; }
+.question .qnum { color: var(--muted); font-weight: 400; margin-right: 6px; }
+.question .q { margin-bottom: 6px !important; }
+.question.flash { background: color-mix(in srgb, var(--accent) 12%, transparent); }
+.question.is-solved h3 { color: var(--muted); }
+.level { font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 999px; margin-left: 6px; vertical-align: middle; border: 1px solid var(--border); }
+.level.easy { color: var(--accent-2); }
+.level.medium { color: var(--accent); }
+.level.hard { color: var(--accent-3); }
+.solved { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); margin-top: 8px; }
+.solved input { accent-color: var(--accent); }
+@media print { .practice-bar, .solved { display: none !important; } }

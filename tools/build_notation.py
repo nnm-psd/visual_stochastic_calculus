@@ -16,6 +16,9 @@ CHAPTERS = [
     ('applications', 'Chapter 6 · Applications'),
     ('diffusion-models', 'Chapter 7 · Diffusion Models'),
     ('beyond', 'Chapter 8 · Beyond Brownian Motion'),
+    ('pricing', 'Chapter 9 · Pricing Lab'),
+    ('volatility', 'Chapter 10 · Volatility'),
+    ('rates', 'Chapter 11 · Rates, Control & Data'),
 ]
 SECTION = re.compile(r'<section id="([^"]+)" class="section">\s*<h2>(.*?)</h2>(.*?)</section>', re.S)
 SYMBOLS = re.compile(r'<dl class="symbols">(.*?)</dl>', re.S)

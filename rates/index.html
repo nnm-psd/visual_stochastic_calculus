@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rates, Control &amp; Data · Visual Stochastic Calculus</title>
+<meta name="description" content="Vasicek short rates and yield curves, Merton&#x27;s optimal portfolio problem, and a real-data case study testing the models on exchange rates and Treasury yields.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/rates/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Rates, Control &amp; Data · Visual Stochastic Calculus">
+<meta property="og:description" content="Vasicek short rates and yield curves, Merton&#x27;s optimal portfolio problem, and a real-data case study testing the models on exchange rates and Treasury yields.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/rates/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 11 · Rates, Control &amp; Data</span><a class="pdf-link" href="../pdf/rates.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+</header>
+<main>
+  <h1>Rates, Control &amp; Data</h1>
+  <p class="lede">Three more jobs for stochastic calculus: pricing bonds when the interest rate itself is random, choosing an investment strategy optimally, and confronting the models with real market data.</p>
+
+  <section id="shortrate" class="section">
+    <h2><span class="num">11.1</span>Short-Rate Models (Vasicek)</h2>
+    <p>Until now the interest rate has been a constant. In reality it moves, and every bond price depends on how. The simplest serious model makes the short-term interest rate an Ornstein–Uhlenbeck process (section 5.2), pulled toward a long-run level. It then has something remarkable: a closed-form price for every bond, and therefore a whole <em>yield curve</em> from three parameters.</p>
+    <div class="predict" data-answer="a" data-explain="Rates are expected to drift up toward the long-run level, so locking money away for longer earns more on average: an upward-sloping yield curve. At very long maturities the curve bends slightly down again, because of a convexity effect.">
+      <p><strong>Predict first:</strong> Today's short rate is below its long-run level. The yield curve will slope…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Upward (long yields above short ones)</button>
+        <button type="button" data-choice="b">Downward</button>
+        <button type="button" data-choice="c">Flat</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Move today's rate, the speed of mean reversion and the rate volatility. Left: short-rate paths over 10 years. Right: the yield curve from the exact formula, with Monte Carlo bond prices as dots.</p>
+    <div class="formula">$$dr_t = a(b - r_t)\,dt + \sigma\,dW_t, \qquad P(0, T) = \mathbb E^Q\Big[e^{-\int_0^T r_t\,dt}\Big] = A(T)\,e^{-B(T)\,r_0}, \qquad B(T) = \frac{1 - e^{-aT}}{a}$$</div>
+    <dl class="symbols">
+      <dt>$r_t$</dt><dd>The short rate: the interest rate for borrowing over the next instant.</dd>
+      <dt>$a,\ b,\ \sigma$</dt><dd>Mean-reversion speed, long-run level (5%) and volatility of the rate.</dd>
+      <dt>$P(0, T)$</dt><dd>Today's price of one dollar paid at time $T$ (a zero-coupon bond): the average, under risk-neutral probabilities, of discounting at the realized path of rates.</dd>
+      <dt>$A(T),\ B(T)$</dt><dd>Explicit functions of the parameters. $B$ is the bond's sensitivity to today's rate (its "duration" in this model).</dd>
+      <dt>yield $y(T)$</dt><dd>The constant rate that gives the same price: $y(T) = -\ln P(0, T)/T$. Plotted against $T$ it is the yield curve.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> a bond's price averages the discount factor over every path the rate might take. Because the Vasicek rate is normally distributed, so is $\int r\,dt$, and the average of $e^{-\text{normal}}$ has a formula. That is where $A$ and $B$ come from. Rates below the long-run level mean an upward-sloping curve, and above it a downward one (inverted, as before recessions). Volatility pulls long yields down through <em>convexity</em>: $e^{-x}$ is curved, so uncertainty makes bonds more valuable. The flaw: a normally distributed rate can go negative. At the starting settings the chance is under 1%, but it grows quickly when today's rate is near zero or volatility is high (the stats line shows it). Once seen as absurd, negative rates happened in Europe and Japan in the 2010s.</p>
+    <div class="viz">
+      <canvas class="sr-canvas" role="img" aria-label="Vasicek short-rate paths and the resulting yield curve with Monte Carlo checks"></canvas>
+    </div>
+    <div class="controls">
+      <label>Rate today <input type="range" name="r0" min="-0.01" max="0.1" step="0.0025" value="0.02"><output></output></label>
+      <label>Mean reversion <em>a</em> <input type="range" name="a" min="0.05" max="2" step="0.05" value="0.5"><output></output></label>
+      <label>Volatility σ <input type="range" name="sigma" min="0.002" max="0.04" step="0.001" value="0.02"><output></output></label>
+    </div>
+    <p class="stats sr-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>One SDE for the short rate gives prices for bonds of every maturity. Vasicek is <em>affine</em>: yields are linear in today's rate, which makes calibration and risk simple. CIR (section 5.2) keeps rates positive with a similar formula. Modern desks model the whole curve at once (Heath–Jarrow–Morton, or LIBOR/SOFR market models) so they can match today's curve exactly.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Bond price.</strong> Under $Q$, $\int_0^T r_t\,dt$ is normal with mean $bT + (r_0 - b)B(T)$ and a known variance, so $P = e^{-\text{mean} + \text{variance}/2}$. This gives $\ln A(T) = \big(B(T) - T\big)\frac{a^2b - \sigma^2/2}{a^2} - \frac{\sigma^2B(T)^2}{4a}$. Equivalently, $P(t, T)$ solves the PDE $\partial_tP + a(b - r)\partial_rP + \tfrac12\sigma^2\partial_{rr}P - rP = 0$ (Feynman–Kac with discounting, section 6.3).</p>
+<p><strong>Affine models.</strong> Whenever drift and variance are affine in $r$ (Vasicek, CIR), bond prices are exponential-affine, $P = e^{A(T) - B(T)r}$, with $A$ and $B$ solving Riccati ODEs (the same equation type as the Kalman filter in section 8.2).</p>
+<p><strong>Market price of risk.</strong> The parameters here are risk-neutral. Real-world rates can drift differently, and the gap is the term premium.</p>
+<p class="ref">References: O. Vasicek, "An equilibrium characterization of the term structure", <em>J. Financial Economics</em> 5 (1977), 177–188. D. Brigo &amp; F. Mercurio, <em>Interest Rate Models: Theory and Practice</em> (2nd ed., Springer, 2006), ch. 3. Shreve, <em>Stochastic Calculus for Finance II</em>, §10.2.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import exp, log, sqrt
+a, b, sigma, r0, T = 0.5, 0.05, 0.02, 0.02, 5.0              # Vasicek: dr = a(b - r)dt + sigma dW
+B = (1 - exp(-a * T)) / a
+lnA = (B - T) * (a * a * b - sigma ** 2 / 2) / a ** 2 - sigma ** 2 * B ** 2 / (4 * a)
+exact = exp(lnA - B * r0)                                    # closed-form zero-coupon bond price
+rng, n, steps = np.random.default_rng(32), 20_000, 500
+dt, r, integral = T / steps, np.full(n, r0), np.zeros(n)
+for _ in range(steps):
+    integral += r * dt                                       # accumulate the integral of r dt
+    r += a * (b - r) * dt + sigma * sqrt(dt) * rng.normal(size=n)
+mc = np.exp(-integral)
+print(f"5-year bond: closed form {exact:.5f}   Monte Carlo {mc.mean():.5f} +- {mc.std() / sqrt(n):.5f}")
+print(f"5-year yield {-log(exact) / T * 100:.3f}%  (short rate today {r0 * 100:.1f}%, long-run level {b * 100:.1f}%)")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>5-year bond: closed form 0.82443   Monte Carlo 0.82477 +- 0.00036
+5-year yield 3.861%  (short rate today 2.0%, long-run level 5.0%)</code></pre>
+    </details>
+  </section>
+
+  <section id="merton" class="section">
+    <h2><span class="num">11.2</span>Merton's Portfolio Problem</h2>
+    <p>How much of your wealth should be in stocks? Merton answered it in 1969 with stochastic calculus. Suppose you rebalance continuously, keeping a fixed fraction π in the stock and the rest in cash, and judge outcomes with a utility function that dislikes risk to a degree γ. Then the best fraction has a one-line formula.</p>
+    <div class="predict" data-answer="b" data-explain="The optimal fraction is (μ − r)/(γσ²): inversely proportional to risk aversion γ. Double γ and the stock share halves.">
+      <p><strong>Predict first:</strong> If an investor becomes twice as risk-averse (γ doubles), the optimal fraction in stocks will…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Fall slightly</button>
+        <button type="button" data-choice="b">Halve</button>
+        <button type="button" data-choice="c">Fall to zero</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Choose the stock fraction and the risk aversion. Left: 40 possible 10-year wealth paths for that fraction (log scale). Right: the <em>certainty-equivalent</em> growth rate for every fraction. The dashed line marks Merton's optimum.</p>
+    <div class="formula">$$dX_t = X_t\big[(r + \pi(\mu - r))\,dt + \pi\sigma\,dW_t\big], \qquad \pi^* = \frac{\mu - r}{\gamma\,\sigma^2}$$</div>
+    <dl class="symbols">
+      <dt>$X_t$</dt><dd>Your wealth at time $t$.</dd>
+      <dt>$\pi$</dt><dd>The fraction of wealth kept in the stock (above 100% means borrowing to invest more).</dd>
+      <dt>$\mu,\ \sigma,\ r$</dt><dd>The stock's expected return (8%) and volatility (20%), and the cash rate (2%).</dd>
+      <dt>$\gamma$</dt><dd>Relative risk aversion, in the utility $U(x) = x^{1-\gamma}/(1-\gamma)$. Larger means more afraid of losses.</dd>
+      <dt>certainty equivalent</dt><dd>The guaranteed growth rate you would accept instead of the risky strategy: $r + \pi(\mu - r) - \tfrac12\gamma\pi^2\sigma^2$.</dd>
+      <dt>$\pi^*$</dt><dd>The fraction that maximizes it: the risk premium $\mu - r$ divided by the risk ($\sigma^2$) times the aversion ($\gamma$).</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> more stock adds expected return in a straight line, $\pi(\mu - r)$, but adds risk as a square, $\tfrac12\gamma\pi^2\sigma^2$. A straight line minus a parabola peaks where the two slopes balance: at $\pi^* = (\mu - r)/(\gamma\sigma^2)$. Too little stock leaves return on the table. Too much, and the volatility eats the growth: the typical path of an over-leveraged portfolio falls <em>even though its average rises</em>. That's the $-\tfrac12\pi^2\sigma^2$ Itô term. With log utility ($\gamma = 1$) this is the Kelly criterion, which maximizes long-run growth.</p>
+    <div class="viz">
+      <canvas class="mp-canvas" role="img" aria-label="Wealth paths for a chosen stock fraction and the certainty-equivalent growth curve with the optimum"></canvas>
+    </div>
+    <div class="controls">
+      <label>Stock fraction π <input type="range" name="pi" min="0" max="2.5" step="0.05" value="0.5"><output></output></label>
+      <label>Risk aversion γ <input type="range" name="gamma" min="0.5" max="10" step="0.5" value="3"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats mp-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>The optimal portfolio keeps a <em>constant</em> fraction in stocks: buy after falls and sell after rises, to rebalance. The fraction is set by the risk premium, the risk and your aversion to it. The same Itô correction that makes $W^2$ drift (section 4.2) is why leverage beyond Kelly lowers long-run growth: a classic trading-interview point.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Hamilton–Jacobi–Bellman equation.</strong> The value function $V(t, x) = \sup_\pi\mathbb E[U(X_T) \mid X_t = x]$ satisfies $\partial_tV + \sup_\pi\big\{x(r + \pi(\mu - r))\partial_xV + \tfrac12\pi^2\sigma^2x^2\partial_{xx}V\big\} = 0$. Maximizing the quadratic in $\pi$ gives $\pi^* = -\frac{(\mu - r)\,\partial_xV}{\sigma^2 x\,\partial_{xx}V}$. For CRRA utility, $V = f(t)\,x^{1-\gamma}$, so $-x\partial_{xx}V/\partial_xV = \gamma$ and $\pi^* = (\mu - r)/(\gamma\sigma^2)$.</p>
+<p><strong>Growth and Kelly.</strong> With log utility, $\mathbb E[\ln X_T] = \ln X_0 + (r + \pi(\mu - r) - \tfrac12\pi^2\sigma^2)T$ is maximized at $\pi = (\mu - r)/\sigma^2$. Twice that leverage gives a long-run growth rate of $r$: the same as holding cash, with far more risk.</p>
+<p><strong>Assumptions.</strong> Constant $\mu$ and $\sigma$, frictionless trading and a known risk premium. In practice $\mu$ is estimated so poorly that fractional Kelly and robust versions are used.</p>
+<p class="ref">References: R. Merton, "Lifetime portfolio selection under uncertainty: the continuous-time case", <em>Review of Economics and Statistics</em> 51 (1969), 247–257. Øksendal, <em>Stochastic Differential Equations</em>, ch. 11.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import sqrt
+mu, r, sigma, gamma, T = 0.08, 0.02, 0.2, 3.0, 1.0
+pi_star = (mu - r) / (gamma * sigma ** 2)                     # Merton's optimal stock fraction
+W = np.random.default_rng(33).normal(size=400_000) * sqrt(T)
+def certainty_equivalent(pi):                                 # wealth level with the same expected utility
+    wealth = np.exp((r + pi * (mu - r) - pi ** 2 * sigma ** 2 / 2) * T + pi * sigma * W)
+    return np.mean(wealth ** (1 - gamma)) ** (1 / (1 - gamma))  # CRRA utility x^(1-gamma)/(1-gamma)
+grid = np.linspace(0, 1.5, 31)
+best = grid[np.argmax([certainty_equivalent(p) for p in grid])]
+print(f"pi* formula {pi_star:.2f}   best on a simulated grid {best:.2f}")
+print(f"certainty equivalent at pi*: {certainty_equivalent(pi_star):.4f}   all cash: {np.exp(r * T):.4f}   all stock: {certainty_equivalent(1.0):.4f}")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>pi* formula 0.50   best on a simulated grid 0.50
+certainty equivalent at pi*: 1.0359   all cash: 1.0202   all stock: 1.0207</code></pre>
+    </details>
+  </section>
+
+  <section id="data" class="section">
+    <h2><span class="num">11.3</span>Models Meet Data</h2>
+    <p>Every model on this site makes testable claims. GBM says daily log returns are independent and normally distributed, and Vasicek says rates revert to a fixed level at a fixed speed. Here are two real daily series from the Federal Reserve: the euro–dollar exchange rate (1999–2025) and the 10-year US Treasury yield (1990–2025). Test the models against them.</p>
+    <div class="predict" data-answer="c" data-explain="Returns are almost uncorrelated from day to day, as GBM says. But their sizes are not: big moves cluster together (volatility clustering), and the correlation of |returns| is still clearly positive 20 days later. GBM misses this entirely, while stochastic-volatility models (section 10.2) capture it.">
+      <p><strong>Predict first:</strong> For daily EUR/USD returns, what do you expect from the correlation between one day and the next?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Returns strongly correlated, sizes uncorrelated</button>
+        <button type="button" data-choice="b">Both near zero, just as GBM says</button>
+        <button type="button" data-choice="c">Returns near zero, but their sizes clearly positive</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Pick a series and a range of years. For EUR/USD: the distribution of daily returns on a log scale against the normal curve (left), and how returns and their sizes correlate with past days (right). For the yield: the series with a fitted Ornstein–Uhlenbeck mean and ±2 standard-deviation band.</p>
+    <div class="formula">$$\text{kurtosis} = \frac{\mathbb E[(r - \bar r)^4]}{\operatorname{sd}(r)^4}\;\;(\text{normal: }3), \qquad y_{t+1} = \alpha + \beta\,y_t + \varepsilon_t \;\Rightarrow\; a = -\frac{\ln\beta}{\Delta t},\;\; \text{half-life} = \frac{\ln 2}{a}$$</div>
+    <dl class="symbols">
+      <dt>$r$</dt><dd>A daily log return, $\ln(S_{t+1}/S_t)$.</dd>
+      <dt>kurtosis</dt><dd>The average fourth power of standardized returns. It measures how heavy the tails are. A bell curve has 3 (section 8.1).</dd>
+      <dt>autocorrelation</dt><dd>The correlation between a quantity today and the same quantity some days later (the lag).</dd>
+      <dt>volatility clustering</dt><dd>Calm days follow calm days and turbulent days follow turbulent ones: the <em>size</em> of moves is predictable even though their direction is not.</dd>
+      <dt>$\alpha,\ \beta,\ \varepsilon$</dt><dd>A regression of tomorrow's yield on today's, which is the discrete-time version of an OU process. $\beta$ close to 1 means slow mean reversion.</dd>
+      <dt>half-life</dt><dd>How long a deviation from the long-run mean takes to shrink by half.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> GBM gets one thing right: the direction of tomorrow's move is unpredictable. It gets two things wrong. Tails are fat (kurtosis about 5.5, and 4-standard-deviation days about 37 times more common than a bell curve allows), and volatility clusters. That is the empirical case for jumps (section 8.1) and stochastic volatility (section 10.2). For the yield, the OU fit changes dramatically with the years you pick: the half-life ranges from months to years. Part of that is real (monetary regimes change). Part is statistics: the "Show the code" panel shows that even on data that truly <em>is</em> OU, this estimator sees too much mean reversion in short samples. Knowing how an estimator misleads is as important as knowing the model.</p>
+    <div class="viz">
+      <canvas class="rd-canvas" role="img" aria-label="Real market data: return distribution and autocorrelations, or the 10-year yield with a fitted mean-reverting model"></canvas>
+    </div>
+    <div class="controls">
+      <span class="radio-group" role="radiogroup" aria-label="Series">
+        <label><input type="radio" name="dataset" value="fx" checked> EUR/USD returns</label>
+        <label><input type="radio" name="dataset" value="yield"> 10-year yield</label>
+      </span>
+      <label>From <input type="range" name="from" min="1990" max="2024" step="1" value="1999"><output></output></label>
+      <label>To <input type="range" name="to" min="1991" max="2025" step="1" value="2025"><output></output></label>
+    </div>
+    <p class="caption">Data: Board of Governors of the Federal Reserve System (US), U.S. Dollars to Euro Spot Exchange Rate [DEXUSEU] and Market Yield on U.S. Treasury Securities at 10-Year Constant Maturity [DGS10], retrieved from FRED, Federal Reserve Bank of St. Louis (public domain).</p>
+    <p class="stats rd-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>Models are maps, not territory. GBM's independence holds for directions but fails for sizes, and its normality fails in the tails. A mean-reversion fit on a few years of data is mostly noise plus a known bias. A quant researcher's job is to know which assumptions matter for the question at hand, and to test them before trusting a price or a strategy.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Stylized facts.</strong> Across asset classes, returns show heavy tails, near-zero autocorrelation of returns, slowly decaying autocorrelation of absolute returns, and a negative correlation between returns and future volatility (the leverage effect, section 10.2's ρ). GARCH models and stochastic volatility reproduce clustering. Jumps and fat-tailed innovations reproduce the tails.</p>
+<p><strong>OU estimation.</strong> The regression estimate of $\beta$ is biased toward zero in finite samples (Kendall's bias, roughly $-(1 + 3\beta)/n$ for $n$ observations), so the mean-reversion speed $a$ is overestimated and the half-life underestimated. The bias matters most for slowly mean-reverting series, where $\beta$ is close to 1. With a unit root ($\beta = 1$) there is no mean reversion at all, and standard confidence intervals fail (Dickey–Fuller).</p>
+<p><strong>Regimes.</strong> A long-run "mean" fitted over 1990–2025 averages over very different monetary policy regimes. Regime-switching models and time-varying parameters address this.</p>
+<p class="ref">References: R. Cont, "Empirical properties of asset returns: stylized facts and statistical issues", <em>Quantitative Finance</em> 1 (2001), 223–236. M. Kendall, "Note on bias in the estimation of autocorrelation", <em>Biometrika</em> 41 (1954), 403–404. Data: FRED, Federal Reserve Bank of St. Louis.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+from math import log, sqrt
+a, mean, sigma, dt = 0.3, 0.04, 0.01, 1 / 252               # a true OU process: half-life 2.3 years
+rng = np.random.default_rng(34)
+def fitted_half_life(years):
+    x = np.empty(int(years / dt)); x[0] = mean
+    shocks = sigma * sqrt(dt) * rng.normal(size=len(x) - 1)
+    for i in range(1, len(x)):
+        x[i] = x[i - 1] + a * (mean - x[i - 1]) * dt + shocks[i - 1]
+    beta, alpha = np.polyfit(x[:-1], x[1:], 1)               # regression x[t+1] = alpha + beta x[t]
+    return log(2) / (-log(beta) / dt) if beta &lt; 1 else np.inf
+for years in (5, 10, 30):
+    hl = np.array([fitted_half_life(years) for _ in range(100)])
+    print(f"{years:2d}-year windows: median fitted half-life {np.median(hl):.1f} y, "
+          f"middle 80% {np.percentile(hl, 10):.1f} to {np.percentile(hl, 90):.1f} y  (true {log(2) / a:.1f} y)")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>5-year windows: median fitted half-life 0.6 y, middle 80% 0.3 to 1.5 y  (true 2.3 y)
+10-year windows: median fitted half-life 1.0 y, middle 80% 0.5 to 3.0 y  (true 2.3 y)
+30-year windows: median fitted half-life 1.6 y, middle 80% 0.9 to 2.6 y  (true 2.3 y)</code></pre>
+    </details>
+  </section>
+
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="b" data-explain="Rates are expected to fall back toward the long-run level, so longer yields are lower: an inverted curve.">
+      <p><strong>1.</strong> In the Vasicek model, today&#x27;s short rate is above its long-run level. The yield curve slopes…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Upward</button>
+        <button type="button" data-choice="b">Downward</button>
+        <button type="button" data-choice="c">Flat</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="π* = (μ − r)/(γσ²): the fraction is inversely proportional to σ², so doubling σ divides it by 4.">
+      <p><strong>2.</strong> In Merton&#x27;s problem, doubling the stock&#x27;s volatility σ changes the optimal stock fraction by a factor of…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">1/2</button>
+        <button type="button" data-choice="b">1/4</button>
+        <button type="button" data-choice="c">2</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="Directions are nearly unpredictable, but volatility clusters and extreme days are far more common than a bell curve allows.">
+      <p><strong>3.</strong> Daily returns of real exchange rates are…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Normal and independent, as GBM says</button>
+        <button type="button" data-choice="b">Uncorrelated in direction but clustered in size, with fat tails</button>
+        <button type="button" data-choice="c">Strongly predictable from yesterday</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../volatility/index.html">← Chapter 10: Volatility</a>
+    <a href="../interview/index.html">Interview practice →</a>
+  </nav>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Ngoc Minh Nguyen · Text <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> · Code MIT</span>
+  <span><a href="../about/index.html">About &amp; how to cite</a> · <a href="https://github.com/nnm-psd/visual_stochastic_calculus/issues/new?template=error-report.yml">Report an error</a></span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/finance.js"></script>
+<script src="../assets/data/fred.js"></script>
+<script src="../assets/js/short-rate.js"></script>
+<script src="../assets/js/merton-portfolio.js"></script>
+<script src="../assets/js/real-data.js"></script>
+<script src="../assets/js/runner.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>
