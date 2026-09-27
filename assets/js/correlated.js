@@ -2,9 +2,9 @@
    Two Brownian motions with correlation ρ, built from independent noise: dW2 = ρ dW1 + √(1-ρ²) dB.
    Panels: both paths over time, the pair as a path in the plane, and the running cross-variation
    Σ ΔW1 ΔW2 against the line ρt. The stats check the product rule d(W1 W2) = W1 dW2 + W2 dW1 + ρ dt. */
-(function () {
+Stoch.lazy('correlated', function () {
   'use strict';
-  const { rng, gaussian, setupCanvas, color, polyline, revealOnInteract } = Stoch;
+  const { rng, gaussian, setupCanvas, color, polyline, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('correlated');
   const pathCanvas = root.querySelector('.cr-paths');
@@ -53,12 +53,7 @@
       ctx.strokeStyle = color('--accent-3');
       polyline(ctx, 0, STEPS, px, (i) => py(W2[i]));
       ctx.font = '12px system-ui, sans-serif';
-      ctx.fillStyle = color('--accent-2');
-      ctx.fillText('W₁', 8, 14);
-      ctx.fillStyle = color('--accent-3');
-      ctx.fillText('W₂', 36, 14);
-      ctx.fillStyle = color('--muted');
-      ctx.fillText('both over time', 64, 14);
+      legend(ctx, [['W₁', '--accent-2'], ['W₂', '--accent-3'], ['both over time', '--muted']], 8, 14, w - 16);
     }
 
     {
@@ -111,11 +106,11 @@
   function layout() {
     pathView = setupCanvas(pathCanvas, 0.6);
     planeView = setupCanvas(planeCanvas, 1);
-    crossView = setupCanvas(crossCanvas, 0.28);
+    crossView = setupCanvas(crossCanvas, 0.28, 150);
     render();
   }
   window.addEventListener('resize', layout);
   revealOnInteract(root);
   simulate();
   layout();
-})();
+});

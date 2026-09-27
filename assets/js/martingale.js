@@ -2,7 +2,7 @@
    Freeze one path at time s, fan out many possible futures from there, and plot their average.
    The process shown can be W_t, W_t^2 or W_t^2 - t. The futures reuse one random stream, so
    dragging s moves the fan smoothly instead of reshuffling it. */
-(function () {
+Stoch.lazy('martingale', function () {
   'use strict';
   const { rng, gaussian, brownianPath, setupCanvas, color } = Stoch;
 
@@ -104,4 +104,4 @@
   hero = brownianPath(STEPS, rng(seed));
   view = setupCanvas(canvas, 0.5);
   render();
-})();
+});

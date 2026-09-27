@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Beyond Brownian Motion · Visual Stochastic Calculus</title>
+<meta name="description" content="Beyond Brownian motion: jump processes and fat tails, and the Kalman–Bucy filter for tracking a hidden signal through noisy measurements.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/beyond/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Beyond Brownian Motion · Visual Stochastic Calculus">
+<meta property="og:description" content="Beyond Brownian motion: jump processes and fat tails, and the Kalman–Bucy filter for tracking a hidden signal through noisy measurements.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/beyond/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<link rel="stylesheet" href="../assets/css/style.css">
+<script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+</head>
+<body>
+<header class="site-header">
+  <a href="../index.html">Visual Stochastic Calculus</a>
+  <span class="links"><span>Chapter 8 · Extensions</span><a class="pdf-link" href="../pdf/beyond.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+</header>
+<main>
+  <h1>Beyond Brownian Motion</h1>
+  <p class="lede">Brownian motion is the backbone of this site, but real randomness also <em>jumps</em>, and real signals are usually seen only through noise. This chapter covers two classic extensions: processes with jumps, and filtering a hidden signal out of noisy measurements.</p>
+
+  <section id="jumps" class="section">
+    <h2><span class="num">8.1</span>Jumps</h2>
+    <p>Brownian paths never jump: over a short time they can only move a little (section 1.3). Market crashes, insurance claims and spikes in neural activity do jump. The simplest fix adds jumps at random moments: a <em>Poisson process</em> decides <em>when</em>, and each jump has a random size.</p>
+    <div class="predict" data-answer="b" data-explain="Rare, big jumps pile most paths near the middle (little happened) while a few land far out (a big jump hit), giving a taller peak and fatter tails than a bell curve with the same variance.">
+      <p><strong>Predict first:</strong> Keep the total variance fixed, but put most of it into rare, big jumps. Compared with a bell curve, the distribution of end values will…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Look the same</button>
+        <button type="button" data-choice="b">Have a taller peak and much fatter tails</button>
+        <button type="button" data-choice="c">Become flat and wide</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>The total variance at $t = 1$ is fixed at 1. The sliders set how often jumps happen and what share of the variance they carry. The right panel uses a <em>log scale</em>, so rare extreme values stay visible next to the bell curve.</p>
+    <div class="formula">$$X_t = \sigma W_t + \sum_{k=1}^{N_t} J_k, \qquad \operatorname{Var}(X_t) = \big(\sigma^2 + \lambda\,\mathbb E[J^2]\big)\,t, \qquad [X]_t = \sigma^2 t + \sum_{k=1}^{N_t} J_k^2$$</div>
+    <dl class="symbols">
+      <dt>$N_t$</dt><dd>A <em>Poisson process</em>: the number of jumps that have happened by time $t$. Jumps arrive at random moments, on average $\lambda$ per unit of time, independently of each other.</dd>
+      <dt>$\lambda$</dt><dd>The jump rate ("lambda"): how many jumps per unit of time on average.</dd>
+      <dt>$J_k$</dt><dd>The size of jump number $k$: here a bell-curve number with mean 0, so jumps go up or down.</dd>
+      <dt>$\sigma W_t$</dt><dd>The ordinary Brownian part, scaled by $\sigma$.</dd>
+      <dt>$\operatorname{Var}(X_t)$</dt><dd>The variance: the Brownian part contributes $\sigma^2 t$ and the jumps contribute $\lambda\,\mathbb E[J^2]\,t$.</dd>
+      <dt>$[X]_t$</dt><dd>The quadratic variation (section 2.1). Now it is <em>random</em>: $\sigma^2 t$ plus the sum of the squared jumps.</dd>
+      <dt>log scale</dt><dd>Each step up the vertical axis multiplies by 10, so a bar ten times shorter is still easy to see.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> a few big jumps and a steady Brownian wobble can have the same variance but look very different. With rare big jumps, most paths are quiet, but the ones that jump land far away. That is a <em>fat tail</em>: extreme outcomes are many times more common than a bell curve predicts. Push the jump rate up while keeping the variance fixed, and the jumps get smaller and more frequent until the process looks Brownian again (the central limit theorem at work). One more change from Brownian motion: the quadratic variation is no longer simply $t$, because each jump adds its square.</p>
+    <div class="viz">
+      <canvas class="jp-canvas" role="img" aria-label="Jump-diffusion paths and a log-scale histogram of end values against the bell curve"></canvas>
+    </div>
+    <div class="controls">
+      <label>Jump rate λ <input type="range" name="lambda" min="0.5" max="50" step="0.5" value="2"><output></output></label>
+      <label>Variance from jumps <input type="range" name="share" min="0.05" max="0.95" step="0.05" value="0.8"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats jp-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>Jumps create fat tails: the same variance, far more extreme outcomes. <em>Kurtosis</em> (the average fourth power, 3 for a bell curve) measures it, and here it equals $3 + 3s^2/\lambda$, where $s$ is the share of variance from jumps. Rare big jumps give high kurtosis, while frequent small ones bring it back toward 3. That is why option markets price crash risk above what Black–Scholes predicts (section 6.1).</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Lévy processes.</strong> Processes with independent, identically distributed increments are called Lévy processes. The Lévy–Itô decomposition splits every one of them into a drift, a Brownian part and a (compensated) sum of jumps, so this section's model is a typical member of the family.</p>
+<p><strong>Itô's formula with jumps.</strong> For $dX = \sigma\,dW + dJ$:
+$$f(X_t) = f(X_0) + \int_0^t f'(X_{s})\,\sigma\,dW_s + \tfrac12\int_0^t f''(X_s)\,\sigma^2\,ds + \sum_{s \le t} \big[f(X_s) - f(X_{s-})\big].$$
+The continuous part follows Chapter 4. Each jump adds its full change in $f$, not a Taylor approximation.</p>
+<p><strong>In finance.</strong> Merton's jump-diffusion model (1976) adds normally distributed log-price jumps to Black–Scholes. The hedging argument of section 6.1 then breaks down, because a jump can't be hedged with the stock alone.</p>
+<p class="ref">References: R. Merton, "Option pricing when underlying stock returns are discontinuous", <em>J. Financial Economics</em> 3 (1976), 125–144. R. Cont &amp; P. Tankov, <em>Financial Modelling with Jump Processes</em> (Chapman &amp; Hall/CRC, 2004). Shreve, <em>Stochastic Calculus for Finance II</em>, ch. 11.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(23)
+lam, share, paths = 2.0, 0.8, 200_000                # 2 jumps per unit time carry 80% of the variance
+sigma, delta = np.sqrt(1 - share), np.sqrt(share / lam)
+n = rng.poisson(lam, paths)                          # number of jumps by t = 1, per path
+X1 = sigma * rng.normal(size=paths) + delta * np.sqrt(n) * rng.normal(size=paths)   # sum of n N(0, delta^2) jumps
+print(f"variance {X1.var():.3f} (1)   kurtosis {np.mean(X1 ** 4) / X1.var() ** 2:.2f} (theory {3 + 3 * share ** 2 / lam:.2f}; bell curve 3)")
+print(f"share of |X1| &gt; 3: {np.mean(np.abs(X1) &gt; 3):.4f}   (bell curve 0.0027)")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>variance 1.006 (1)   kurtosis 3.97 (theory 3.96; bell curve 3)
+share of |X1| &gt; 3: 0.0079   (bell curve 0.0027)</code></pre>
+    </details>
+  </section>
+
+  <section id="kalman" class="section">
+    <h2><span class="num">8.2</span>The Kalman–Bucy Filter</h2>
+    <p>Often the process you care about is <em>hidden</em>: a satellite's true position, a patient's true blood sugar, the "fair" value behind a noisy price. You only get noisy measurements of it. <em>Filtering</em> means estimating the hidden process, as it moves, from everything measured so far. For linear models like this one, the best possible estimate is itself the solution of an SDE: the Kalman–Bucy filter.</p>
+    <div class="predict" data-answer="b" data-explain="Noisier measurements deserve less trust, so the filter leans more on its own prediction: the estimate gets smoother, reacts later, and its uncertainty band widens.">
+      <p><strong>Predict first:</strong> Make the measurement noise r much larger. The filter's estimate will…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Follow the noisy readings more closely</button>
+        <button type="button" data-choice="b">Become smoother and lag behind, with a wider uncertainty band</button>
+        <button type="button" data-choice="c">Stay exactly the same</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>The hidden signal (thick grey) is an Ornstein–Uhlenbeck process (section 5.2). The blue dots are noisy readings of it. The orange line is the filter's running estimate, and the shaded band is its own measure of uncertainty. Drag the measurement noise.</p>
+    <div class="formula">$$dm_t = -\theta\,m_t\,dt + \frac{P_t}{r^2}\big(dY_t - m_t\,dt\big), \qquad \frac{dP_t}{dt} = -2\theta P_t + \sigma^2 - \frac{P_t^2}{r^2}$$</div>
+    <dl class="symbols">
+      <dt>$X_t$</dt><dd>The hidden signal, following $dX = -\theta X\,dt + \sigma\,dW$ with $\theta = \sigma = 1$.</dd>
+      <dt>$dY_t$</dt><dd>What is measured in a tiny time step: $X_t\,dt + r\,dV_t$, the signal plus independent noise $dV$.</dd>
+      <dt>$r$</dt><dd>How noisy the measurements are (the slider).</dd>
+      <dt>$m_t$</dt><dd>The filter's estimate: the best guess of $X_t$ given every measurement up to time $t$.</dd>
+      <dt>$P_t$</dt><dd>The variance of the estimate's error: how unsure the filter is. The band is $m_t \pm 2\sqrt{P_t}$.</dd>
+      <dt>$dY_t - m_t\,dt$</dt><dd>The <em>innovation</em>: the part of the new measurement that the estimate did not predict, the "surprise".</dd>
+      <dt>$P_t / r^2$</dt><dd>The <em>Kalman gain</em>: how much of the surprise to believe. It is large when the filter is unsure ($P$ big) or the data are clean ($r$ small).</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> between measurements, the estimate moves the way the signal is expected to move (the $-\theta m\,dt$ term). When a measurement arrives, the estimate is nudged toward it, by an amount that weighs the filter's own uncertainty against the measurement's noise. The second equation tracks that uncertainty. It grows because the hidden signal keeps getting random kicks ($\sigma^2$), and shrinks because measurements keep arriving ($-P^2/r^2$), until the two balance. The estimate is then more accurate than any single reading, because it combines all of them with the model.</p>
+    <div class="viz">
+      <canvas class="kf-canvas" role="img" aria-label="Hidden signal, noisy readings and the Kalman–Bucy estimate with its uncertainty band"></canvas>
+    </div>
+    <div class="controls">
+      <label>Measurement noise <em>r</em> <input type="range" name="r" min="0.05" max="2" step="0.05" value="0.5"><output></output></label>
+      <button type="button" class="resample">Resample</button>
+    </div>
+    <p class="stats kf-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>The filter beats the raw readings and knows its own uncertainty: the truth stays inside its band about 95% of the time, as a correct $\pm 2$-standard-deviation band should. Kalman filtering runs inside GPS receivers, spacecraft navigation (it flew on Apollo), weather forecasting and economic nowcasting.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Optimality.</strong> For linear signal and observation equations with Gaussian noise, the conditional distribution of $X_t$ given the observations up to $t$ is exactly normal, with mean $m_t$ and variance $P_t$. No other estimator built from the same data has a smaller mean squared error.</p>
+<p><strong>The innovation is Brownian motion.</strong> The scaled innovations $\tfrac1r(dY_t - m_t\,dt)$ form a Brownian motion. The filter extracts everything predictable from the data, and what remains is pure, independent noise.</p>
+<p><strong>Beyond linear models.</strong> For nonlinear models the conditional distribution is no longer normal. It solves a stochastic PDE (the Kushner–Stratonovich or Zakai equation), and in practice it is approximated by the extended Kalman filter or by particle filters.</p>
+<p class="ref">References: R. Kalman, "A new approach to linear filtering and prediction problems", <em>J. Basic Engineering</em> 82 (1960), 35–45. R. Kalman &amp; R. Bucy, "New results in linear filtering and prediction theory", <em>J. Basic Engineering</em> 83 (1961), 95–108. Øksendal, <em>Stochastic Differential Equations</em>, ch. 6.</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(24)
+theta, sigma, r, T, steps = 1.0, 1.0, 0.5, 10.0, 2000
+dt = T / steps
+x = m = 0.0
+P = sigma ** 2 / (2 * theta)                         # no information yet
+err = []
+for _ in range(steps):
+    dY = x * dt + r * np.sqrt(dt) * rng.normal()     # noisy observation of the hidden signal
+    m += -theta * m * dt + (P / r ** 2) * (dY - m * dt)    # Kalman-Bucy update of the estimate
+    P += (-2 * theta * P + sigma ** 2 - P ** 2 / r ** 2) * dt   # Riccati equation for its variance
+    x += -theta * x * dt + sigma * np.sqrt(dt) * rng.normal()   # the hidden signal moves on
+    err.append(m - x)
+p_inf = r ** 2 * (np.sqrt(theta ** 2 + sigma ** 2 / r ** 2) - theta)
+print(f"filter error spread {np.std(err):.3f}   theory sqrt(P_inf) = {np.sqrt(p_inf):.3f}   no-data guess {np.sqrt(0.5):.3f}")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>filter error spread 0.506   theory sqrt(P_inf) = 0.556   no-data guess 0.707</code></pre>
+    </details>
+  </section>
+
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="b" data-explain="Jumps arrive at rate λ per unit of time, so on average λ × t = 3 × 2 = 6.">
+      <p><strong>1.</strong> A Poisson process has rate λ = 3 jumps per year. On average, how many jumps happen in two years?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">3</button>
+        <button type="button" data-choice="b">6</button>
+        <button type="button" data-choice="c">1.5</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="[X]ₜ = σ²t + (sum of squared jumps), and the jumps are random.">
+      <p><strong>2.</strong> Compared with Brownian motion, the quadratic variation of a process with jumps is…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Always exactly t</button>
+        <button type="button" data-choice="b">Random, because every jump adds its square</button>
+        <button type="button" data-choice="c">Zero</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="A large P (unsure) or a small r (clean data) means new measurements deserve more trust.">
+      <p><strong>3.</strong> In the Kalman–Bucy filter, the gain P/r² is large when…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The measurements are noisy and the filter is already sure</button>
+        <button type="button" data-choice="b">The filter is unsure or the measurements are clean</button>
+        <button type="button" data-choice="c">Never: it is a fixed constant</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
+  <nav class="chapter-nav">
+    <a href="../diffusion-models/index.html">← Chapter 7: Diffusion Models</a>
+    <a href="../index.html">Back to all chapters</a>
+  </nav>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<script>
+  renderMathInElement(document.body, {
+    delimiters: [{ left: '$$', right: '$$', display: true }, { left: '$', right: '$', display: false }]
+  });
+</script>
+<script src="../assets/js/engine.js"></script>
+<script src="../assets/js/jumps.js"></script>
+<script src="../assets/js/kalman.js"></script>
+<script src="../assets/js/progress.js"></script>
+<script src="../assets/js/theme.js"></script>
+</body>
+</html>

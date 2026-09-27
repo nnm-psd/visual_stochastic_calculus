@@ -3,9 +3,9 @@
    weights, the average path is flat and the end values follow N(0, 1), as if there were no drift.
    Left: the fan (opacity = weight when reweighting) and the (weighted) average path.
    Right: the (weighted) histogram of end values. */
-(function () {
+Stoch.lazy('girsanov', function () {
   'use strict';
-  const { rng, gaussian, setupCanvas, color, polyline, normalPdf, revealOnInteract } = Stoch;
+  const { rng, gaussian, setupCanvas, color, polyline, normalPdf, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('girsanov');
   const canvas = root.querySelector('.gs-canvas');
@@ -82,10 +82,8 @@
     ctx.restore();
 
     ctx.font = '12px system-ui, sans-serif';
-    ctx.fillStyle = color('--accent');
-    ctx.fillText(reweight ? 'weighted average path' : 'average path', 8, 14);
+    legend(ctx, [[reweight ? 'weighted average path' : 'average path', '--accent'], ['dashed: the drift line λt', '--muted']], 8, 14, pw - 16);
     ctx.fillStyle = color('--muted');
-    ctx.fillText('dashed: the drift line λt', 170, 14);
     ctx.fillText(`values at t = 1`, hx + 2, 14);
 
     stats.textContent = reweight
@@ -101,4 +99,4 @@
   simulate();
   view = setupCanvas(canvas, 0.55);
   render();
-})();
+});

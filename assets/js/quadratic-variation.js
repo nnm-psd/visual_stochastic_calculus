@@ -2,7 +2,7 @@
    One Brownian path on [0, 1] (Lévy construction, 2^16 pieces) measured with n = 2^k equal pieces.
    The same path is reused at every n, so only the ruler changes. Two running sums are plotted:
    sum of |rises| (grows without bound) and sum of squared rises (locks onto the line y = t). */
-(function () {
+Stoch.lazy('qv', function () {
   'use strict';
   const { levyPath, setupCanvas, color } = Stoch;
 
@@ -120,7 +120,7 @@
   resampleBtn.addEventListener('click', () => { seed += 1; simulate(); render(); });
 
   function layout() {
-    pathView = setupCanvas(pathCanvas, 0.36);
+    pathView = setupCanvas(pathCanvas, 0.36, 170);
     tvView = setupCanvas(tvCanvas, 0.62);
     qvView = setupCanvas(qvCanvas, 0.62);
     render();
@@ -128,4 +128,4 @@
   window.addEventListener('resize', layout);
   simulate();
   layout();
-})();
+});

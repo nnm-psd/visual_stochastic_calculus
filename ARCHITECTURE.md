@@ -43,6 +43,8 @@ where it first appears, including in the prose above the formula.
 /sde/                     Ch 5  Dynamics
 /applications/            Ch 6  Applications
 /diffusion-models/        Ch 7  Diffusion models (generative AI)
+/beyond/                  Ch 8  Beyond Brownian motion (jumps, filtering)
+/pdf/                     One exported PDF per chapter
 /notation/                Generated symbol index
 ```
 
@@ -113,7 +115,14 @@ A real model learns the score with a neural network, and the page says so.
 | 7.2 The Score | $s(t,x) = \partial_x \log p(t,x)$ | A noise-level slider. The density is on top; the score curve and arrows below point toward "more likely". |
 | 7.3 Noise to Data | $dX = [-X - 2s(t,X)]\,dt + \sqrt2\,d\overline W$ (backward in time) | Run 3,000 noise samples backward with the reverse SDE, the probability-flow ODE, or the SDE without the score (which fails). The histogram is compared with the data. |
 
-**Still open:** filtering (Kalman–Bucy), Langevin sampling.
+| 7.4 Langevin Sampling | $dX = s(X)\,dt + \sqrt2\,dW \Rightarrow X_t \sim \pi$ | Particles start in one bump or spread out; scrub time. Shapes settle fast, proportions don't: only a handful ever cross the valley (metastability), which is why diffusion models anneal the noise. |
+
+### Ch 8 — Beyond Brownian Motion *(extensions)*
+
+| Section | Formula | Core interaction |
+|---|---|---|
+| 8.1 Jumps | $X_t = \sigma W_t + \sum_{k \le N_t} J_k$, $[X]_t = \sigma^2 t + \sum J_k^2$ | Jump rate and share-of-variance sliders at fixed total variance; a log-scale histogram shows fat tails (kurtosis $3 + 3s^2/\lambda$). |
+| 8.2 The Kalman–Bucy Filter | $dm = -\theta m\,dt + \tfrac{P}{r^2}(dY - m\,dt)$, Riccati for $P$ | Measurement-noise slider: hidden OU signal, noisy readings, the estimate with its ±2√P band (about 95% coverage). |
 
 ## 4. Cross-cutting design decisions
 
@@ -124,6 +133,10 @@ A real model learns the score with a neural network, and the page says so.
 | Accessibility | Every drag or click interaction also works from the keyboard (canvas `tabindex=0`, arrow keys), with the keys named in the caption | Pointer-only charts shut out keyboard users |
 | Notation index | `notation/index.html` is generated from the glossaries by `python tools/build_notation.py` | One lookup page without hand-maintaining a copy. Re-run after editing any glossary |
 | Continuous checks | GitHub Actions runs `tools/check_snippets.py` (snippet output vs published, ±1.5 in the last printed digit, NumPy pinned), `tools/check_pages.py` (headless Chrome: no console output, KaTeX rendered, links resolve) and a notation-freshness diff | Stops a future edit from silently breaking a chart or leaving a published result out of date |
+| Loading | Each section script is wrapped in `Stoch.lazy(id, …)` and runs only when the section is within 600 px of the viewport; `?all` / `?print` run everything at once | Chapter pages became usable in 0.4–0.7 s instead of 1.5–3.5 s on an emulated phone (4× CPU slowdown) |
+| Phones | Charts have a minimum height (`setupCanvas(canvas, aspect, minHeight)`), legends wrap (`Stoch.legend`), wide formulas scroll inside their own box with edge shadows | Tested by emulating a 390 px phone with touch through the DevTools protocol (not a physical device) |
+| Learning aids | Progress per section in `localStorage` (`assets/js/progress.js`, whose chapter list CI checks against the pages), an end-of-chapter recap quiz, and per-chapter PDFs from `tools/build_pdfs.py` | Lets readers track and revisit what they have done; PDFs for offline study |
+| Screen readers | Every stats line and prediction/quiz verdict is an `aria-live="polite"` region | Updated numbers are announced, not silently replaced |
 | Sharing | Each page has a description, canonical URL, Open Graph and Twitter card tags; `assets/og-image.png` (1200×630) and favicons; `sitemap.xml` | Links pasted into chat or social apps show a proper preview card |
 | Math | KaTeX | Fast and static. The Wilmott QF deck uses the same. |
 | Randomness | Seeded RNG per section (`Stoch.rng`), with Resample buttons that bump the seed | Reproducible screenshots and tests. Same-noise comparisons (4.3, 5.1, 5.2, 7.3) reuse one random stream. (A single hero path shared across sections was planned but not built.) |
@@ -132,8 +145,8 @@ A real model learns the score with a neural network, and the page says so.
 
 ## 5. Build order (MVP first)
 
-**Status:** All 7 chapters (22 sections + the Ch 1 opener) are built: `brownian-motion/`,
-`variation/`, `ito-integral/`, `ito-lemma/` (incl. 4.4), `sde/`, `applications/`, `diffusion-models/`. Pages link with a prev/next
+**Status:** All 8 chapters (25 sections + the Ch 1 opener) are built: `brownian-motion/`,
+`variation/`, `ito-integral/`, `ito-lemma/` (incl. 4.4), `sde/`, `applications/`, `diffusion-models/` (incl. 7.4), `beyond/`. Pages link with a prev/next
 chapter nav. Shared helpers live in `assets/js/engine.js`; each section has its own script. The 1.3 zoom uses the Lévy (Brownian-bridge)
 construction in `engine.js` (`levyPath`), which gives one consistent path at any zoom up to ×10⁶.
 

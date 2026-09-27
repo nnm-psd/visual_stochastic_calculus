@@ -2,9 +2,9 @@
    Geometric Brownian motion dS = μS dt + σS dW has an exact solution, so the numerical scheme can be
    checked against it using the same Brownian path. Left: exact vs Euler–Maruyama with N steps.
    Right: average error at t = 1 over 500 paths for N = 2..1024, on log–log axes. */
-(function () {
+Stoch.lazy('euler', function () {
   'use strict';
-  const { rng, brownianPath, setupCanvas, color, polyline, revealOnInteract } = Stoch;
+  const { rng, brownianPath, setupCanvas, color, polyline, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('euler');
   const pathCanvas = root.querySelector('.em-path');
@@ -63,10 +63,7 @@
         for (let i = 0; i <= N; i++) { ctx.beginPath(); ctx.arc(px(i / N), py(approx[i]), 3.5, 0, 2 * Math.PI); ctx.fill(); }
       }
       ctx.font = '12px system-ui, sans-serif';
-      ctx.fillStyle = color('--muted');
-      ctx.fillText('exact solution (thick grey)', 8, 14);
-      ctx.fillStyle = color('--accent');
-      ctx.fillText(`Euler–Maruyama, ${N} steps`, 180, 14);
+      legend(ctx, [['exact solution (thick grey)', '--muted'], [`Euler–Maruyama, ${N} steps`, '--accent']], 8, 14, w - 16);
     }
 
     {
@@ -109,4 +106,4 @@
   revealOnInteract(root);
   simulate();
   layout();
-})();
+});

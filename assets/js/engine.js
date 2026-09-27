@@ -90,11 +90,12 @@
     return x >= 0 ? 0.5 * (1 + erf) : 0.5 * (1 - erf);
   }
 
-  // Size a canvas to its CSS width (height = width * aspect) at device pixel ratio.
-  function setupCanvas(canvas, aspect) {
+  // Size a canvas to its CSS width (height = width * aspect, but at least minHeight so short charts
+  // stay usable on phones) at device pixel ratio.
+  function setupCanvas(canvas, aspect, minHeight = 0) {
     const dpr = window.devicePixelRatio || 1;
     const w = canvas.clientWidth;
-    const h = Math.round(w * aspect);
+    const h = Math.max(Math.round(w * aspect), minHeight);
     canvas.style.height = h + 'px';
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
@@ -106,6 +107,20 @@
   // Read a color token from :root so canvases follow the light/dark theme.
   function color(name) {
     return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  }
+
+  // Draw legend items [text, colorToken] left to right from (x, y), wrapping to a new line when the
+  // next item would pass x + maxWidth, so legends stay readable on narrow (phone) charts.
+  function legend(ctx, items, x, y, maxWidth) {
+    let cx = x, cy = y;
+    for (const [text, token] of items) {
+      const tw = ctx.measureText(text).width;
+      if (cx > x && cx + tw > x + maxWidth) { cx = x; cy += 15; }
+      ctx.fillStyle = color(token);
+      ctx.fillText(text, cx, cy);
+      cx += tw + 14;
+    }
+    return cy;
   }
 
   // Stroke a polyline through points i = from..to, mapped by xAt(i) and yAt(i).
@@ -123,6 +138,19 @@
       if (b >= 0 && b < bins) counts[b]++;
     }
     return { bw, density: counts.map((c) => c / (values.length * bw)) };
+  }
+
+  // Run a section's setup only when it comes near the screen, so a chapter page is usable at once
+  // instead of simulating every section up front. "?all" (or "?print") in the URL runs every section
+  // immediately; the automated checks and the PDF export rely on that.
+  const eager = /[?&](all|print)\b/.test(location.search) || !('IntersectionObserver' in window);
+  function lazy(id, init) {
+    const root = document.getElementById(id);
+    if (eager || !root) { init(); return; }
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { io.disconnect(); init(); }
+    }, { rootMargin: '600px 0px' });
+    io.observe(root);
   }
 
   // Unhide a section's .takeaway after the reader's first interaction with its controls or charts.
@@ -147,6 +175,7 @@
         result.innerHTML = right
           ? `<strong>You predicted it.</strong> ${box.dataset.explain}`
           : `<strong>Not quite:</strong> the answer is "${correct}". ${box.dataset.explain}`;
+        if (global.Progress) global.Progress.mark(section.id);
       };
       buttons.forEach((b) => b.addEventListener('click', () => {
         choice = b.dataset.choice;
@@ -159,9 +188,45 @@
         .observe(takeaway, { attributes: true, attributeFilter: ['hidden'] });
     });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPredictions);
-  else initPredictions();
+  // End-of-chapter recap: each .quiz block (same markup as .predict) gives its verdict immediately,
+  // and the recap's .quiz-score line keeps a running "x of n correct".
+  function initQuizzes() {
+    document.querySelectorAll('.recap').forEach((recap) => {
+      const quizzes = recap.querySelectorAll('.quiz'), score = recap.querySelector('.quiz-score');
+      let answered = 0, correct = 0;
+      quizzes.forEach((box) => {
+        const buttons = box.querySelectorAll('.predict-options button'), result = box.querySelector('.predict-result');
+        buttons.forEach((b) => b.addEventListener('click', () => {
+          const right = b.dataset.choice === box.dataset.answer;
+          const answer = box.querySelector(`[data-choice="${box.dataset.answer}"]`).textContent;
+          buttons.forEach((x) => { x.disabled = true; x.classList.toggle('chosen', x === b); });
+          result.hidden = false;
+          result.innerHTML = right ? `<strong>Correct.</strong> ${box.dataset.explain}`
+            : `<strong>Not quite:</strong> the answer is "${answer}". ${box.dataset.explain}`;
+          answered += 1; correct += right ? 1 : 0;
+          score.textContent = `${correct} of ${answered} correct` + (answered === quizzes.length ? '. Recap complete.' : '.');
+        }));
+      });
+    });
+  }
+
+  // Print mode (?print, used for the PDF export): light theme, every drawer open, every takeaway shown.
+  function initPrint() {
+    if (!/[?&]print\b/.test(location.search)) return;
+    document.documentElement.dataset.theme = 'light';
+    document.querySelectorAll('details').forEach((d) => { d.open = true; });
+    document.querySelectorAll('.takeaway').forEach((t) => { t.hidden = false; });
+    document.querySelectorAll('.predict, .quiz').forEach((box) => {
+      const answer = box.querySelector(`[data-choice="${box.dataset.answer}"]`).textContent, result = box.querySelector('.predict-result');
+      result.hidden = false;
+      result.innerHTML = `<strong>Answer:</strong> "${answer}". ${box.dataset.explain}`;
+    });
+  }
+
+  function initPage() { initPredictions(); initQuizzes(); initPrint(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initPage);
+  else initPage();
 
   global.Stoch = {
-    polyline, histogram, revealOnInteract, rng, gaussian, scaledWalk, scaledWalkEnd, brownianPath, levyPath, normalPdf, normalCdf, setupCanvas, color };
+    polyline, histogram, revealOnInteract, legend, lazy, rng, gaussian, scaledWalk, scaledWalkEnd, brownianPath, levyPath, normalPdf, normalCdf, setupCanvas, color };
 })(window);

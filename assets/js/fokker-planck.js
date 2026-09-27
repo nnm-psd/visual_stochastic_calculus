@@ -2,7 +2,7 @@
    3,000 particles follow the Ornstein–Uhlenbeck SDE dX = -θX dt + σ dW from near x = 2.
    Separately, the Fokker–Planck PDE for their density is solved on a grid by finite differences.
    Scrub time: the particle histogram and the PDE curve should move together. */
-(function () {
+Stoch.lazy('fp', function () {
   'use strict';
   const { rng, gaussian, setupCanvas, color, polyline, histogram, revealOnInteract } = Stoch;
 
@@ -131,4 +131,4 @@
   solvePDE();
   view = setupCanvas(canvas, 0.55);
   render();
-})();
+});

@@ -27,7 +27,7 @@
 <body>
 <header class="site-header">
   <a href="../index.html">Visual Stochastic Calculus</a>
-  <span class="links"><span>Chapter 6 · Applications</span><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+  <span class="links"><span>Chapter 6 · Applications</span><a class="pdf-link" href="../pdf/applications.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
 </header>
 <main>
   <h1>Applications</h1>
@@ -43,7 +43,7 @@
         <button type="button" data-choice="b">About 3.5× tighter</button>
         <button type="button" data-choice="c">No tighter</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Here you sell the option for the Black–Scholes price and hedge it along 1,000 simulated stock paths. Drag how often you rebalance.</p>
     <div class="formula">$$dV_t = \Delta_t\,dS_t, \qquad \Delta_t = \frac{\partial C}{\partial S}(t, S_t) = N(d_1)$$</div>
@@ -65,7 +65,7 @@
       <label>Rebalance <input type="range" name="n" min="0" max="9" step="1" value="2"><output></output></label>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats hd-stats"></p>
+    <p class="stats hd-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>The more often you rebalance, the tighter the profit/loss clusters around 0, and the orange portfolio tracks the grey option value. In the limit, the option's risk is <em>replicated</em> away completely, so its price must be the cost of the hedge: the Black–Scholes formula. This argument earned Scholes and Merton the 1997 Nobel prize in economics (Black had died in 1995).</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -120,7 +120,7 @@ price 7.966, rebalance 252x a year: P&amp;L spread 0.445</code></pre>
         <button type="button" data-choice="b">At 0</button>
         <button type="button" data-choice="c">At −1</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <div class="formula">$$\frac{dQ}{dP} = e^{-\lambda W_1 - \frac12 \lambda^2} \quad\Longrightarrow\quad \text{under } Q,\;\; X_t = W_t + \lambda t \text{ is a Brownian motion}$$</div>
     <dl class="symbols">
@@ -140,7 +140,7 @@ price 7.966, rebalance 252x a year: P&amp;L spread 0.445</code></pre>
       <label><input type="checkbox" name="reweight"> Reweight paths</label>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats gs-stats"></p>
+    <p class="stats gs-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Changing probabilities can remove a drift exactly. In finance this is <em>risk-neutral pricing</em>. Real stocks drift upward, but reweighting the paths so the stock grows only at the risk-free interest rate lets you price an option as a plain weighted average of its payoff. It gives the same answer as the hedging argument of section 6.1, without building a hedge.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -175,7 +175,7 @@ weighted variance 0.983 (1)</code></pre>
         <button type="button" data-choice="b">Small but positive</button>
         <button type="button" data-choice="c">About 1</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <div class="formula">$$u(t, x) = \mathbb{E}\big[\,g(x + W_{1-t})\,\big] \quad\text{solves}\quad \frac{\partial u}{\partial t} + \frac12\,\frac{\partial^2 u}{\partial x^2} = 0, \quad u(1, x) = g(x)$$</div>
     <dl class="symbols">
@@ -194,7 +194,7 @@ weighted variance 0.983 (1)</code></pre>
     <div class="controls">
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats fk-stats"></p>
+    <p class="stats fk-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Wherever you click, the average over random paths converges to the value the PDE gives there. This is the <strong>Feynman–Kac formula</strong>, the reverse of section 5.3. Fokker–Planck turns paths into a density equation. Feynman–Kac turns a PDE into an average over paths. It is how banks price complex derivatives by Monte Carlo simulation, and it ties together everything on this site: Brownian motion (Ch 1), its rough-but-regular behaviour (Ch 2), the Itô integral and lemma (Ch 3–4) and SDEs (Ch 5).</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -225,6 +225,39 @@ print(f&quot;Monte Carlo {monte_carlo:.4f}   PDE {np.interp(x, xs, u):.4f}&quot;
     </details>
   </section>
 
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="b" data-explain="Holding Δ shares cancels the random part of the option&#x27;s change, and with it the drift μ: only σ, K, time and the interest rate remain.">
+      <p><strong>1.</strong> In Black–Scholes hedging, the option&#x27;s price does NOT depend on…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The volatility σ</button>
+        <button type="button" data-choice="b">The stock&#x27;s expected growth μ</button>
+        <button type="button" data-choice="c">The strike K</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="Every path stays the same; each one gets a weight dQ/dP so that, on average, the drift disappears.">
+      <p><strong>2.</strong> Girsanov&#x27;s theorem removes a drift by changing…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The paths themselves</button>
+        <button type="button" data-choice="b">How likely each path is</button>
+        <button type="button" data-choice="c">The time scale</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="a" data-explain="u(t, x) = E[g(x + W₁₋ₜ)]: start random walkers at the point, let them run to the final time, average g where they land.">
+      <p><strong>3.</strong> Feynman–Kac computes the solution u(t, x) of a PDE as…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">An average of g over random paths started at (t, x)</button>
+        <button type="button" data-choice="b">The largest value of g</button>
+        <button type="button" data-choice="c">g along a single straight path</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
   <nav class="chapter-nav">
     <a href="../sde/index.html">← Chapter 5: Stochastic Differential Equations</a>
     <a href="../diffusion-models/index.html">Chapter 7: Diffusion Models →</a>
@@ -242,6 +275,7 @@ print(f&quot;Monte Carlo {monte_carlo:.4f}   PDE {np.interp(x, xs, u):.4f}&quot;
 <script src="../assets/js/hedging.js"></script>
 <script src="../assets/js/girsanov.js"></script>
 <script src="../assets/js/feynman-kac.js"></script>
+<script src="../assets/js/progress.js"></script>
 <script src="../assets/js/theme.js"></script>
 </body>
 </html>

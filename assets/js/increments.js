@@ -2,7 +2,7 @@
    Left: a fan of Brownian paths with two draggable time intervals A and B.
    Right: each path's rise over A plotted against its rise over B, with the theoretical 95% ellipse.
    Interval edges are stored in hundredths of a time unit so lengths display exactly. */
-(function () {
+Stoch.lazy('increments', function () {
   'use strict';
   const { rng, brownianPath, setupCanvas, color } = Stoch;
 
@@ -256,4 +256,4 @@
 
   simulate();
   layout();
-})();
+});

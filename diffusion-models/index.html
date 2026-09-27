@@ -27,7 +27,7 @@
 <body>
 <header class="site-header">
   <a href="../index.html">Visual Stochastic Calculus</a>
-  <span class="links"><span>Chapter 7 · Generative AI</span><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+  <span class="links"><span>Chapter 7 · Generative AI</span><a class="pdf-link" href="../pdf/diffusion-models.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
 </header>
 <main>
   <h1>Diffusion Models</h1>
@@ -43,7 +43,7 @@
         <button type="button" data-choice="b">A single standard bell curve, N(0, 1)</button>
         <button type="button" data-choice="c">Flat</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Scrub the time or press Play. The black curve is the exact distribution of the noised data. The dashed curve is pure noise.</p>
     <div class="formula">$$dX_t = -X_t\,dt + \sqrt2\,dW_t \quad\Longrightarrow\quad X_t = e^{-t}X_0 + \sqrt{1 - e^{-2t}}\;Z$$</div>
@@ -65,7 +65,7 @@
       <button type="button" class="play">Play</button>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats fw-stats"></p>
+    <p class="stats fw-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>The forward process needs no learning: any data, however complicated, becomes the same $N(0,1)$ noise. In an image model this happens to every pixel at once, and the end result looks like TV static.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -102,7 +102,7 @@ t = 3.0: mean +0.014, spread 1.003, share left of the valley 0.397</code></pre>
         <button type="button" data-choice="b">A straight line, −x, pointing everything to the centre</button>
         <button type="button" data-choice="c">More and more jagged</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Drag the noise level. Near $t = 0$ the arrows point into each bump, and the valley between them pushes samples out toward one bump or the other.</p>
     <div class="formula">$$s(t, x) \;=\; \frac{\partial}{\partial x}\log p(t, x) \;=\; \frac{\partial p(t,x)/\partial x}{p(t, x)}$$</div>
@@ -119,7 +119,7 @@ t = 3.0: mean +0.014, spread 1.003, share left of the valley 0.397</code></pre>
     <div class="controls">
       <label>Noise level <em>t</em> <input type="range" name="t" min="0" max="3" step="0.01" value="0.1"><output></output></label>
     </div>
-    <p class="stats sc-stats"></p>
+    <p class="stats sc-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Knowing the score at every noise level is as good as knowing the data distribution itself. And a neural network can learn it from examples alone, by learning to <em>denoise</em>: the Going deeper panel explains why denoising and the score are the same thing.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -158,7 +158,7 @@ pure noise N(0, 1) has score -x: +3, 0, -3</code></pre>
         <button type="button" data-choice="b">One bump in the middle</button>
         <button type="button" data-choice="c">A huge spread, far wider than the data</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Choose a method. The paths run from noise (left, $t = 3$) to generated samples (right, $t = 0$). The histogram shows where all 3,000 particles end, against the true data (black).</p>
     <div class="formula">$$dX_t = \big[-X_t - 2\,s(t, X_t)\big]\,dt + \sqrt2\,d\overline{W}_t \qquad \text{(run with time going backward, } t: 3 \to 0\text{)}$$</div>
@@ -181,7 +181,7 @@ pure noise N(0, 1) has score -x: +3, 0, -3</code></pre>
       </span>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats rv-stats"></p>
+    <p class="stats rv-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>With the score, pure noise becomes new samples with the right bumps, in the right proportions (35% and 65%), at the right places and widths, without copying a single data point. This is how diffusion image generators draw a picture. They start from static and follow the reverse-time SDE (or its ODE) with a neural-network score, in millions of dimensions instead of one.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -215,9 +215,114 @@ widths 0.31, 0.50 (data 0.30, 0.50)</code></pre>
     </details>
   </section>
 
+  <section id="langevin" class="section">
+    <h2><span class="num">7.4</span>Langevin Sampling</h2>
+    <p>The score can do something else: generate samples <em>without</em> the noise schedule. Let particles drift along the score of the data and add random kicks. In the long run their distribution settles on exactly the data distribution. This is <em>Langevin sampling</em>, and diffusion models use it as a building block. But "in the long run" hides a catch.</p>
+    <div class="predict" data-answer="b" data-explain="The valley between the bumps is so deep that particles almost never climb across it in the time shown, so almost none reach the left bump, even though 35% belong there in the long run.">
+      <p><strong>Predict first:</strong> Start every particle in the right-hand bump and run to t = 10. What share will be in the left bump?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">About 35%, the right proportion</button>
+        <button type="button" data-choice="b">Close to 0%</button>
+        <button type="button" data-choice="c">About 50%</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p>Choose where the particles start, then scrub time or press Play. The black curve is the target: the two-bump data. The dashed line marks the valley between the bumps.</p>
+    <div class="formula">$$dX_t = s(X_t)\,dt + \sqrt2\,dW_t, \qquad s(x) = \frac{d}{dx}\log \pi(x) \qquad\Longrightarrow\qquad X_t \text{ is distributed as } \pi \text{ as } t \to \infty$$</div>
+    <dl class="symbols">
+      <dt>$\pi(x)$</dt><dd>The <em>target</em> density to sample from: here the two-bump data of this chapter.</dd>
+      <dt>$s(x)$</dt><dd>Its score: the slope of $\log \pi$, pointing toward more likely places (section 7.2 at noise level 0).</dd>
+      <dt>$\sqrt2\,dW_t$</dt><dd>Random kicks. The $\sqrt2$ balances the drift so that the resting distribution is exactly $\pi$.</dd>
+      <dt>$t \to \infty$</dt><dd>"In the long run". The theorem says nothing about <em>how</em> long, and that turns out to matter.</dd>
+    </dl>
+    <p class="plain"><strong>In plain words:</strong> the drift pushes each particle uphill on $\pi$ and the noise spreads it out. The two balance exactly when the particles are distributed as $\pi$, which the Fokker–Planck equation of section 5.3 confirms. Within a bump this balance arrives quickly. But to move between bumps, a particle must climb against the score through a valley where $\pi$ is almost zero, and that almost never happens. So the particles find the bumps' <em>shapes</em> fast, but keep whatever <em>proportions</em> they started with. Diffusion models avoid this trap by starting at high noise, where the valley is filled in (drag section 7.2's slider up), and lowering the noise gradually.</p>
+    <div class="viz">
+      <canvas class="lg-canvas" role="img" aria-label="Langevin particles over time and their distribution compared with the two-bump target"></canvas>
+    </div>
+    <div class="controls">
+      <span class="radio-group" role="radiogroup" aria-label="Where particles start">
+        <label><input type="radio" name="start" value="right" checked> Start in the right bump</label>
+        <label><input type="radio" name="start" value="spread"> Start spread out</label>
+      </span>
+      <label>Time <em>t</em> <input type="range" name="t" min="0" max="10" step="0.05" value="0"><output></output></label>
+      <button type="button" class="play">Play</button>
+    </div>
+    <p class="stats lg-stats" aria-live="polite"></p>
+    <p class="takeaway" hidden>Langevin sampling reaches the right distribution eventually, but separated bumps can make "eventually" astronomically long: the bump shapes come out right, the proportions stay wrong. Running Langevin at a sequence of decreasing noise levels (<em>annealed</em> Langevin) fixes this, and it is the same idea as the reverse-time SDE of section 7.3.</p>
+    <details class="drawer">
+      <summary>Going deeper: the precise statement</summary>
+<p><strong>Why $\pi$ is the resting distribution.</strong> For $dX = s(X)\,dt + \sqrt2\,dW$ the Fokker–Planck equation can be written $\partial_t p = \partial_x\big(p\,\partial_x \log(p/\pi)\big)$, which is zero exactly when $p = \pi$. Under mild conditions $p_t \to \pi$ from any start. The speed is governed by constants such as the spectral gap or a log-Sobolev constant.</p>
+<p><strong>Metastability.</strong> With $U = -\log\pi$, the expected time to cross from one bump to the other grows like $e^{\Delta U}$, where $\Delta U$ is the height of the barrier between them (the Eyring–Kramers law). A deep valley means an exponentially long wait.</p>
+<p><strong>In practice.</strong> The discrete update $x \leftarrow x + h\,s(x) + \sqrt{2h}\,z$ (the "unadjusted Langevin algorithm") is slightly biased for $h &gt; 0$. Adding a Metropolis accept/reject step removes the bias (MALA). Song &amp; Ermon (2019) generated images with Langevin steps at a decreasing sequence of noise levels, the idea behind section 7.3.</p>
+<p class="ref">References: G. Roberts &amp; R. Tweedie, "Exponential convergence of Langevin distributions and their discrete approximations", <em>Bernoulli</em> 2 (1996), 341–363. A. Bovier et al., "Metastability in reversible diffusion processes I", <em>J. Eur. Math. Soc.</em> 6 (2004), 399–424. Y. Song &amp; S. Ermon, "Generative Modeling by Estimating Gradients of the Data Distribution", <em>NeurIPS</em> (2019).</p>
+    </details>
+    <details class="drawer">
+      <summary>Show the code (Python + NumPy)</summary>
+      <pre><code>import numpy as np
+rng = np.random.default_rng(22)
+w, m, s = np.array([0.35, 0.65]), np.array([-2.0, 1.5]), np.array([0.3, 0.5])   # target: the two bumps
+
+def score(x):                                        # d/dx log pi(x), for many x at once
+    dens = w * np.exp(-(x[:, None] - m) ** 2 / (2 * s ** 2)) / s
+    return np.sum(dens * -(x[:, None] - m) / s ** 2, axis=1) / np.sum(dens, axis=1)
+
+dt, steps = 0.005, 2000                              # run to t = 10
+for start, x in (("all in the right bump", 1.5 + 0.5 * rng.normal(size=5000)),
+                 ("spread over [-4, 4]", rng.uniform(-4, 4, 5000))):
+    for _ in range(steps):
+        x = x + dt * score(x) + np.sqrt(2 * dt) * rng.normal(size=x.size)   # Langevin step
+    print(f"start {start}: share in left bump at t = 10 is {np.mean(x &lt; -0.25):.3f} (target 0.35)")</code></pre>
+      <p class="ref">Output when we ran it:</p>
+      <pre><code>start all in the right bump: share in left bump at t = 10 is 0.004 (target 0.35)
+start spread over [-4, 4]: share in left bump at t = 10 is 0.414 (target 0.35)</code></pre>
+    </details>
+  </section>
+
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="b" data-explain="The drift shrinks the data by e^(−t) while the noise tops the spread up to 1, so every dataset ends as the same N(0, 1).">
+      <p><strong>1.</strong> After a long time, the forward noising process turns any data into…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The average of the data</button>
+        <button type="button" data-choice="b">Standard bell-curve noise, N(0, 1)</button>
+        <button type="button" data-choice="c">Exactly 0</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="a" data-explain="The score is the slope of log p: it points uphill on the density. Only for pure noise does &#x27;uphill&#x27; mean &#x27;toward 0&#x27;.">
+      <p><strong>2.</strong> At a noise level t and a position x, the score points…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Toward where samples are more likely</button>
+        <button type="button" data-choice="b">Always toward x = 0</button>
+        <button type="button" data-choice="c">Along the time axis</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="Anderson&#x27;s theorem: the backward process has an extra drift term, −g² × score. Without it, noise stays noise.">
+      <p><strong>3.</strong> What does the reverse-time SDE need that the forward process does not?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">More noise</button>
+        <button type="button" data-choice="b">The score</button>
+        <button type="button" data-choice="c">A larger time step</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="The deep valley between the bumps is almost never crossed, so the proportions stay wrong. Diffusion models avoid this by starting from heavy noise, where the valley is filled in.">
+      <p><strong>4.</strong> Langevin sampling starts with every particle in the right-hand bump. Within the simulated time, what does it fail to do?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Find the shape of the right-hand bump</button>
+        <button type="button" data-choice="b">Move a fair share of particles into the other bump</button>
+        <button type="button" data-choice="c">Keep particles near any bump</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
   <nav class="chapter-nav">
     <a href="../applications/index.html">← Chapter 6: Applications</a>
-    <a href="../index.html">Back to all chapters</a>
+    <a href="../beyond/index.html">Chapter 8: Beyond Brownian Motion →</a>
   </nav>
 </main>
 
@@ -233,6 +338,8 @@ widths 0.31, 0.50 (data 0.30, 0.50)</code></pre>
 <script src="../assets/js/forward-noise.js"></script>
 <script src="../assets/js/score.js"></script>
 <script src="../assets/js/reverse-sde.js"></script>
+<script src="../assets/js/langevin.js"></script>
+<script src="../assets/js/progress.js"></script>
 <script src="../assets/js/theme.js"></script>
 </body>
 </html>

@@ -1,7 +1,7 @@
 /* Section 7.2 — The Score.
    At a chosen noise level t: top, the noised density p(t, x); bottom, its score d/dx log p(t, x),
    drawn as a curve and as arrows along the axis showing which way is "more likely". */
-(function () {
+Stoch.lazy('score', function () {
   'use strict';
   const { setupCanvas, color, polyline, normalPdf, revealOnInteract } = Stoch;
   const { density, scoreAt } = Diffusion;
@@ -84,4 +84,4 @@
   revealOnInteract(root);
   view = setupCanvas(canvas, 0.62);
   render();
-})();
+});

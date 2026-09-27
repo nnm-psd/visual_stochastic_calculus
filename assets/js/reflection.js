@@ -2,7 +2,7 @@
    3,000 Brownian paths on [0, 1]. Drag the level a: count paths whose maximum reaches a and
    compare with twice the paths that end above a. The orange path (the drawn path that climbs
    highest, so it reaches most levels) is mirrored in the level after it first touches it. Paths are simulated once per seed; moving a only recounts. */
-(function () {
+Stoch.lazy('reflection', function () {
   'use strict';
   const { rng, gaussian, setupCanvas, color, normalCdf } = Stoch;
 
@@ -111,4 +111,4 @@
   simulate();
   view = setupCanvas(canvas, 0.5);
   render();
-})();
+});

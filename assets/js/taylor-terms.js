@@ -2,7 +2,7 @@
    Split the change f(W_1) - f(W_0) along one path into Taylor terms summed over n pieces:
    first order f'ΔW, second order ½f''ΔW², third order ⅙f'''ΔW³. As n grows the third-order
    total vanishes, while the second-order total settles to ½∫f''(W)dt instead of 0. */
-(function () {
+Stoch.lazy('taylor', function () {
   'use strict';
   const { levyPath, setupCanvas, color, revealOnInteract } = Stoch;
 
@@ -85,4 +85,4 @@
   simulate();
   view = setupCanvas(canvas, 0.42);
   render();
-})();
+});

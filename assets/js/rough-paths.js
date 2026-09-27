@@ -1,7 +1,7 @@
 /* Section 1.3 — Rough Paths.
    Two panels zoom toward the same moment t = 0.5: a smooth curve and a Brownian path.
    Each panel rescales vertically to fit, so the question is only "does it straighten out?". */
-(function () {
+Stoch.lazy('rough', function () {
   'use strict';
   const { levyPath, setupCanvas, color } = Stoch;
 
@@ -105,4 +105,4 @@
   }
   window.addEventListener('resize', layout);
   layout();
-})();
+});

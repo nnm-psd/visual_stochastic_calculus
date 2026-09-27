@@ -2,9 +2,9 @@
    Sell a call option for its Black–Scholes price, then delta-hedge it by holding Δ = N(d1) shares,
    rebalanced N times over the year. 1,000 stock paths (252 trading days, real-world drift μ).
    Left: option value vs hedge portfolio along one path. Right: final profit/loss over all paths. */
-(function () {
+Stoch.lazy('hedge', function () {
   'use strict';
-  const { rng, gaussian, setupCanvas, color, polyline, normalCdf, histogram, revealOnInteract } = Stoch;
+  const { rng, gaussian, setupCanvas, color, polyline, normalCdf, histogram, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('hedge');
   const valCanvas = root.querySelector('.hd-value');
@@ -83,10 +83,7 @@
       ctx.lineWidth = 2;
       polyline(ctx, 0, DAYS, px, (i) => py(V[i]));
       ctx.font = '12px system-ui, sans-serif';
-      ctx.fillStyle = color('--muted');
-      ctx.fillText("option's value (thick grey)", 8, 14);
-      ctx.fillStyle = color('--accent');
-      ctx.fillText('your hedge portfolio', 170, 14);
+      legend(ctx, [["option's value (thick grey)", '--muted'], ['your hedge portfolio', '--accent']], 8, 14, w - 16);
       ctx.fillStyle = color('--muted');
       ctx.fillText('0', 4, py(0) - 3);
     }
@@ -124,4 +121,4 @@
   revealOnInteract(root);
   simulate();
   layout();
-})();
+});

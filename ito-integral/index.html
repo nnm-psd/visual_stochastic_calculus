@@ -27,7 +27,7 @@
 <body>
 <header class="site-header">
   <a href="../index.html">Visual Stochastic Calculus</a>
-  <span class="links"><span>Chapter 3 · Definition of the integral</span><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+  <span class="links"><span>Chapter 3 · Definition of the integral</span><a class="pdf-link" href="../pdf/ito-integral.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
 </header>
 <main>
   <h1>The Itô Integral</h1>
@@ -43,7 +43,7 @@
         <button type="button" data-choice="b">It goes up by t</button>
         <button type="button" data-choice="c">It goes down by t</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Try the same with Brownian motion. In each piece, multiply the path's value $W$ by the piece's rise $\Delta W$, and add everything up. The slider $\theta$ ("theta") chooses where inside each piece $W$ is read: $\theta = 0$ is the left end, $\theta = 1$ the right end. Drag it, then make the pieces finer.</p>
     <div class="formula">$$\sum_{i=1}^{n} W_{t_i^{\theta}}\,\Delta W_i \;\longrightarrow\; \tfrac12 W_t^2 + \big(\theta - \tfrac12\big)\,t \qquad \text{as } n \to \infty$$</div>
@@ -65,7 +65,7 @@
       <label>Pieces <em>n</em> <input type="range" name="k" min="1" max="12" step="1" value="6"><output></output></label>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats ep-stats"></p>
+    <p class="stats ep-stats" aria-live="polite"></p>
     <p class="takeaway" hidden><strong>Itô's rule is $\theta = 0$: always read at the left end.</strong> It is the only choice that never peeks at the future. If $W$ is a price and the height is how much you hold, you must decide your holding <em>before</em> the price moves. With that rule, $\int_0^t W\,dW = \tfrac12 W_t^2 - \tfrac12 t$. That extra $-\tfrac12 t$ is the first glimpse of Itô calculus. (The middle point, $\theta = \tfrac12$, is also used. It is called the <em>Stratonovich</em> integral, and it keeps the ordinary-calculus answer. We return to it in Chapter 4.)</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -103,7 +103,7 @@ theta = 1: sum = 0.627   theory = 0.615</code></pre>
         <button type="button" data-choice="b">Always 0</button>
         <button type="button" data-choice="c">It depends on the bets</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Drag across the bars to set your bets. The orange line shows your running gains along one price path. The histogram shows your final gains across 2,000 different price paths.</p>
     <div class="formula">$$\int_0^1 H_t\,dW_t \;=\; \sum_{j=1}^{8} H_j\,\big(W_{t_{j}} - W_{t_{j-1}}\big)$$</div>
@@ -127,7 +127,7 @@ theta = 1: sum = 0.627   theory = 0.615</code></pre>
       <button type="button" class="reset">All bets = 1</button>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats bt-stats"></p>
+    <p class="stats bt-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Whatever bets you choose, your average gain is 0. Betting on Brownian motion is a fair game (section 2.2), and the Itô integral inherits that: it is a martingale. The spread of your gains depends only on how big your bets are: the variance equals "bet² × time", added up. The next section shows this rule holds even for bets that react to the price.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -159,7 +159,7 @@ print(f&quot;mean {gains.mean():+.4f} (0)   variance {gains.var():.3f} (sum bet^
         <button type="button" data-choice="b">½</button>
         <button type="button" data-choice="c">0</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <div class="formula">$$\mathbb{E}\Big[\Big(\int_0^t H_s\,dW_s\Big)^2\Big] \;=\; \mathbb{E}\Big[\int_0^t H_s^2\,ds\Big], \qquad \mathbb{E}\Big[\int_0^t H_s\,dW_s\Big] = 0$$</div>
     <dl class="symbols">
@@ -183,7 +183,7 @@ print(f&quot;mean {gains.mean():+.4f} (0)   variance {gains.var():.3f} (sum bet^
       </span>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats is-stats"></p>
+    <p class="stats is-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>The squared gains and the accumulated squared holdings converge to the same number, and the gains converge to 0. For $H = W$ that number is $\int_0^1 s\,ds = \tfrac12$, because $W_s^2$ averages $s$. These two facts, "mean zero" and "the isometry", are what make the Itô integral usable: they turn questions about a random integral into ordinary calculus.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -211,6 +211,39 @@ H = sign(W)  E[I] = +0.009   E[I^2] = 0.990   E[int H^2 dt] = 0.995</code></pre>
     </details>
   </section>
 
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="a" data-explain="The left end: the holding is fixed before the move it bets on, so the integral never peeks at the future.">
+      <p><strong>1.</strong> Itô&#x27;s rule reads the integrand at which point of each small time interval?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">The left end</button>
+        <button type="button" data-choice="b">The midpoint</button>
+        <button type="button" data-choice="c">The right end</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="Reading at the left end gives ½W₁² − ½t with t = 1. The ordinary-calculus answer ½W₁² comes from the midpoint rule instead.">
+      <p><strong>2.</strong> The Itô integral of W against dW from 0 to 1 equals…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">½W₁²</button>
+        <button type="button" data-choice="b">½W₁² − ½</button>
+        <button type="button" data-choice="c">W₁²</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="By the Itô isometry, the variance is the integral of H² over time: 2² × 1 = 4.">
+      <p><strong>3.</strong> You hold H = 2 units for the whole time from 0 to 1. What is the variance of your gains?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">2</button>
+        <button type="button" data-choice="b">4</button>
+        <button type="button" data-choice="c">1</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
   <nav class="chapter-nav">
     <a href="../variation/index.html">← Chapter 2: Variation &amp; Martingales</a>
     <a href="../ito-lemma/index.html">Chapter 4: Itô's Lemma →</a>
@@ -228,6 +261,7 @@ H = sign(W)  E[I] = +0.009   E[I^2] = 0.990   E[int H^2 dt] = 0.995</code></pre>
 <script src="../assets/js/evaluation-point.js"></script>
 <script src="../assets/js/betting.js"></script>
 <script src="../assets/js/isometry.js"></script>
+<script src="../assets/js/progress.js"></script>
 <script src="../assets/js/theme.js"></script>
 </body>
 </html>

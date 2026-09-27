@@ -3,7 +3,7 @@
    the reverse-time SDE (uses the score), the probability-flow ODE (uses the score, no noise), or the
    reverse SDE with the score term deleted. Left: paths, with time running backward left to right.
    Right: where the particles end, against the true data density. */
-(function () {
+Stoch.lazy('reverse', function () {
   'use strict';
   const { rng, gaussian, setupCanvas, color, polyline, histogram, revealOnInteract } = Stoch;
   const { density, scoreAt, SPLIT, W, M, S } = Diffusion;
@@ -94,4 +94,4 @@
   revealOnInteract(root);
   view = setupCanvas(canvas, 0.55);
   render();
-})();
+});

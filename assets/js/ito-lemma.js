@@ -2,9 +2,9 @@
    Along one path (16,384 steps), rebuild f(W_t) from its increments two ways:
    Itô: f(0) + Σ f'(W)ΔW + Σ ½f''(W)Δt, and the naive chain rule: f(0) + Σ f'(W)ΔW.
    Itô's version lies on top of the true curve; the naive one drifts away by ½∫f''dt. */
-(function () {
+Stoch.lazy('lemma', function () {
   'use strict';
-  const { rng, brownianPath, setupCanvas, color, polyline, revealOnInteract } = Stoch;
+  const { rng, brownianPath, setupCanvas, color, polyline, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('lemma');
   const canvas = root.querySelector('.lm-canvas');
@@ -53,12 +53,7 @@
     polyline(ctx, 0, STEPS, px, (i) => py(ito[i]));
 
     ctx.font = '12px system-ui, sans-serif';
-    ctx.fillStyle = color('--muted');
-    ctx.fillText(`true f(W) = ${F.name} (thick grey)`, 8, 14);
-    ctx.fillStyle = color('--accent');
-    ctx.fillText('Itô rebuild', 190, 14);
-    ctx.fillStyle = color('--accent-3');
-    ctx.fillText('naive chain rule', 270, 14);
+    legend(ctx, [[`true f(W) = ${F.name} (thick grey)`, '--muted'], ['Itô rebuild', '--accent'], ['naive chain rule', '--accent-3']], 8, 14, w - 16);
 
     stats.textContent =
       `At t = 1: true value ${truth[STEPS].toFixed(3)}, Itô rebuild ${ito[STEPS].toFixed(3)}, naive chain rule ${naive[STEPS].toFixed(3)}. ` +
@@ -72,4 +67,4 @@
   W = brownianPath(STEPS, rng(seed));
   view = setupCanvas(canvas, 0.5);
   render();
-})();
+});

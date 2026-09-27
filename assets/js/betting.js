@@ -2,9 +2,9 @@
    The reader drags 8 bars to set a bet size for each of 8 equal periods. Gains = sum of bet × rise.
    The orange path shows gains along one Brownian path; the histogram shows final gains over 2,000
    paths. With bets fixed per period, each path only needs its 8 period rises. */
-(function () {
+Stoch.lazy('betting', function () {
   'use strict';
-  const { rng, gaussian, brownianPath, setupCanvas, color, polyline, normalPdf, histogram, revealOnInteract } = Stoch;
+  const { rng, gaussian, brownianPath, setupCanvas, color, polyline, normalPdf, histogram, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('betting');
   const barsCanvas = root.querySelector('.bt-bars');
@@ -69,10 +69,7 @@
     ctx.lineWidth = 2.25;
     polyline(ctx, 0, STEPS, px, (i) => py(gains[i]));
     ctx.font = '12px system-ui, sans-serif';
-    ctx.fillStyle = color('--accent-2');
-    ctx.fillText('price W', 8, 14);
-    ctx.fillStyle = color('--accent');
-    ctx.fillText('your gains', 64, 14);
+    legend(ctx, [['price W', '--accent-2'], ['your gains', '--accent']], 8, 14, w - 16);
   }
 
   function drawHist() {
@@ -140,7 +137,7 @@
   resetBtn.addEventListener('click', () => { bets = new Array(PERIODS).fill(1); render(); });
   resampleBtn.addEventListener('click', () => { seed += 1; simulate(); render(); });
   function layout() {
-    barsView = setupCanvas(barsCanvas, 0.22);
+    barsView = setupCanvas(barsCanvas, 0.22, 150);
     lineView = setupCanvas(lineCanvas, 0.6);
     histView = setupCanvas(histCanvas, 0.9);
     render();
@@ -149,4 +146,4 @@
   revealOnInteract(root);
   simulate();
   layout();
-})();
+});

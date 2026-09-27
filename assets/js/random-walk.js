@@ -1,7 +1,7 @@
 /* Section 1.1 — From Random Walk to Brownian Motion.
    Left: rescaled walks W^(n)_t = S_floor(nt) / sqrt(n) on [0, 1].
    Right: sideways histogram of W^(n)_1 over many walks against the N(0, 1) density. */
-(function () {
+Stoch.lazy('random-walk', function () {
   'use strict';
   const { rng, scaledWalk, scaledWalkEnd, normalPdf, setupCanvas, color } = Stoch;
 
@@ -128,4 +128,4 @@
 
   view = setupCanvas(canvas, 0.5);
   update();
-})();
+});

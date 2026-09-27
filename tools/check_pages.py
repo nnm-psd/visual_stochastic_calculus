@@ -15,7 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PAGES = ['index.html', 'notation/index.html'] + [f'{d}/index.html' for d in
-         ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models']]
+         ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models', 'beyond']]
 BENIGN = ('Canvas2D: Multiple readback operations',)  # browser performance hints, not errors
 
 
@@ -32,7 +32,7 @@ def find_chrome():
 
 def console_and_dom(chrome, page):
     r = subprocess.run([chrome, '--headless=new', '--disable-gpu', '--no-sandbox', '--enable-logging=stderr', '--v=0',
-                        '--window-size=900,1200', '--virtual-time-budget=8000', '--dump-dom', page.as_uri()],
+                        '--window-size=900,1200', '--virtual-time-budget=8000', '--dump-dom', page.as_uri() + '?all'],
                        capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=180)
     messages = [re.sub(r'^.*?CONSOLE[^\]]*\] ', '', line) for line in r.stderr.splitlines() if 'CONSOLE' in line]
     return [m for m in messages if not m.strip('"').startswith(BENIGN)], r.stdout
@@ -46,6 +46,18 @@ def broken_links():
         for ref in re.findall(r'(?:href|src)="([^"#:]+)(?:#[^"]*)?"', page.read_text(encoding='utf-8')):
             if not (page.parent / ref).resolve().exists():
                 bad.append(f'{page.relative_to(ROOT)} -> {ref}')
+    return bad
+
+
+def progress_mismatches():
+    """Every section on a chapter page must be listed in progress.js (and vice versa)."""
+    listed = dict(re.findall(r"'([\w-]+)': \[([^\]]*)\]", (ROOT / 'assets/js/progress.js').read_text(encoding='utf-8')))
+    bad = []
+    for slug, ids in listed.items():
+        want = set(re.findall(r"'([\w-]+)'", ids))
+        have = set(re.findall(r'<section id="([^"]+)" class="section">', (ROOT / slug / 'index.html').read_text(encoding='utf-8')))
+        if want != have:
+            bad.append(f'{slug}: progress.js lists {sorted(want)}, page has {sorted(have)}')
     return bad
 
 
@@ -63,6 +75,9 @@ def main():
                 print(f'       {p}')
         else:
             print(f'ok   {rel}')
+    for m in progress_mismatches():
+        print(f'FAIL progress list {m}')
+        failures += 1
     links = broken_links()
     for b in links:
         print(f'FAIL broken link {b}')

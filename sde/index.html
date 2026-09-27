@@ -27,7 +27,7 @@
 <body>
 <header class="site-header">
   <a href="../index.html">Visual Stochastic Calculus</a>
-  <span class="links"><span>Chapter 5 · Dynamics</span><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+  <span class="links"><span>Chapter 5 · Dynamics</span><a class="pdf-link" href="../pdf/sde.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
 </header>
 <main>
   <h1>Stochastic Differential Equations</h1>
@@ -43,7 +43,7 @@
         <button type="button" data-choice="b">4×</button>
         <button type="button" data-choice="c">10×</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Drag the number of steps. Left: the exact solution (thick grey) and the step-by-step one (orange). Right: the average error over 500 paths for every step count.</p>
     <div class="formula">$$X_{k+1} = X_k + a(X_k)\,\Delta t + b(X_k)\,\Delta W_k \qquad \text{here: } a(x) = \mu x,\;\; b(x) = \sigma x$$</div>
@@ -65,7 +65,7 @@
       <label>Steps <em>N</em> <input type="range" name="k" min="1" max="10" step="1" value="3"><output></output></label>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats em-stats"></p>
+    <p class="stats em-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Euler–Maruyama converges to the true solution as the steps shrink, with error proportional to $\sqrt{\Delta t}$ (called "strong order ½"). It is the workhorse behind almost every simulation of an SDE, including every other chart on this page.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -103,7 +103,7 @@ N = 512: average error 0.0203</code></pre>
         <button type="button" data-choice="b">2× narrower</button>
         <button type="button" data-choice="c">Unchanged</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <div class="formula">$$dX_t = a(X_t)\,dt + b(X_t)\,dW_t$$</div>
     <dl class="symbols">
@@ -128,7 +128,7 @@ N = 512: average error 0.0203</code></pre>
       <label><span class="p1-label"></span> <input type="range" name="p1"><output></output></label>
       <label><span class="p2-label"></span> <input type="range" name="p2"><output></output></label>
     </div>
-    <p class="stats zoo-stats"></p>
+    <p class="stats zoo-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Three one-line equations give three very different kinds of randomness: exploding (GBM), settling (OU) and positive-with-a-floor (CIR). Choosing $a$ and $b$ to match what you are modelling is most of the art of applied stochastic calculus.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -170,7 +170,7 @@ CIR: mean at t = 2 is 1.000, spread 0.350</code></pre>
         <button type="button" data-choice="b">A wide bell curve centred near 0</button>
         <button type="button" data-choice="c">Flat, spread out everywhere</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <div class="formula">$$\frac{\partial p}{\partial t} \;=\; -\frac{\partial}{\partial x}\big(a(x)\,p\big) \;+\; \frac12\,\frac{\partial^2}{\partial x^2}\big(b(x)^2\,p\big)$$</div>
     <dl class="symbols">
@@ -189,7 +189,7 @@ CIR: mean at t = 2 is 1.000, spread 0.350</code></pre>
       <button type="button" class="play">Play</button>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats fp-stats"></p>
+    <p class="stats fp-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Random paths and a smooth equation tell the same story from two sides. This bridge between probability and differential equations runs through all of applied mathematics. The last section of this site, Feynman–Kac, crosses it in the opposite direction.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -217,6 +217,39 @@ print(f&quot;t = 1: particle mean {X.mean():.3f}, PDE mean {np.sum(x * p) * dx:.
     </details>
   </section>
 
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="a" data-explain="Four times as many steps makes Δt four times smaller, and √4 = 2.">
+      <p><strong>1.</strong> Euler–Maruyama&#x27;s average error shrinks like √Δt. Going from 100 to 400 steps, the error…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">Halves</button>
+        <button type="button" data-choice="b">Falls to a quarter</button>
+        <button type="button" data-choice="c">Stays the same</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="a" data-explain="The long-run spread is σ/√(2θ), which is proportional to σ.">
+      <p><strong>2.</strong> In the Ornstein–Uhlenbeck model, what happens to the long-run spread if the noise σ doubles?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">It doubles</button>
+        <button type="button" data-choice="b">It quadruples</button>
+        <button type="button" data-choice="c">It halves</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="It is a deterministic equation for the density p(t, x) of the crowd of paths, with a drift term and a spreading term.">
+      <p><strong>3.</strong> What does the Fokker–Planck equation describe?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">One particular random path</button>
+        <button type="button" data-choice="b">How the density of many paths changes over time</button>
+        <button type="button" data-choice="c">Only the drift, without the noise</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
   <nav class="chapter-nav">
     <a href="../ito-lemma/index.html">← Chapter 4: Itô's Lemma</a>
     <a href="../applications/index.html">Chapter 6: Applications →</a>
@@ -234,6 +267,7 @@ print(f&quot;t = 1: particle mean {X.mean():.3f}, PDE mean {np.sum(x * p) * dx:.
 <script src="../assets/js/euler-maruyama.js"></script>
 <script src="../assets/js/diffusion-zoo.js"></script>
 <script src="../assets/js/fokker-planck.js"></script>
+<script src="../assets/js/progress.js"></script>
 <script src="../assets/js/theme.js"></script>
 </body>
 </html>

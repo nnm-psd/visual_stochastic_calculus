@@ -14,7 +14,7 @@ import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-PAGES = ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models']
+PAGES = ['brownian-motion', 'variation', 'ito-integral', 'ito-lemma', 'sde', 'applications', 'diffusion-models', 'beyond']
 BLOCK = re.compile(
     r'(<summary>Show the code \(Python \+ NumPy\)</summary>\s*<pre><code>)(.*?)(</code></pre>\s*'
     r'<p class="ref">Output when we ran it:</p>\s*<pre><code>)(.*?)(</code></pre>)', re.S)

@@ -226,3 +226,49 @@ details.drawer pre {
 }
 .theme-toggle:hover { border-color: var(--accent); }
 .site-header .links { align-items: center; }
+
+/* Wide formulas scroll sideways; edge shadows show there is more (they vanish at either end). */
+.formula {
+  background:
+    linear-gradient(to right, var(--card) 40%, transparent) left / 32px 100% no-repeat local,
+    linear-gradient(to left, var(--card) 40%, transparent) right / 32px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(0, 0, 0, 0.22), transparent) left / 12px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(0, 0, 0, 0.22), transparent) right / 12px 100% no-repeat scroll;
+}
+@media (max-width: 560px) {
+  .formula { font-size: 0.86em; }
+  .symbols dt { white-space: normal; overflow-x: auto; max-width: 100%; }
+}
+.katex-display { overflow-x: auto; overflow-y: hidden; padding: 2px 0; }
+
+/* Progress: finished-section badge, home-page bars and summary. */
+h2 .done { font-size: 13px; font-weight: 600; color: var(--accent-2); margin-left: 6px; white-space: nowrap; }
+.progress { display: flex; align-items: center; gap: 8px; margin-top: 8px; font-size: 13px; color: var(--muted); }
+.progress .bar { flex: 1; height: 6px; border-radius: 3px; background: var(--viz-bg); overflow: hidden; }
+.progress .bar > span { display: block; height: 100%; width: 0; background: var(--accent-2); }
+.progress-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; margin: 0 0 16px; color: var(--muted); font-size: 15px; }
+.progress-summary button, .pdf-link {
+  font: inherit; font-size: 13px; padding: 2px 10px; border: 1px solid var(--border); border-radius: 999px;
+  background: var(--card); color: var(--fg); cursor: pointer; text-decoration: none;
+}
+
+/* End-of-chapter recap. */
+.recap h2 { margin-bottom: 4px; }
+.recap .quiz { margin: 16px 0 0; }
+.quiz-score { font-weight: 600; margin-top: 16px !important; }
+
+/* Printing and PDF export: paper-friendly, no controls. */
+@page { margin: 14mm 14mm 16mm; }
+@media print {
+  :root { --bg: #fff; --card: #fff; }
+  body { font-size: 12pt; }
+  .site-header .links, .controls, .chapter-nav, .pdf-link, .theme-toggle, .quiz-score { display: none !important; }
+  .predict, .quiz { break-inside: avoid; }
+  .section { border: none; padding: 0; margin-bottom: 24pt; }
+  .viz, .formula, .symbols, canvas, pre { break-inside: avoid; }
+  details.drawer summary { list-style: none; color: var(--fg); }
+  details.drawer summary::-webkit-details-marker { display: none; }
+  a { color: inherit; }
+  pre { white-space: pre-wrap; overflow: visible; }
+  .formula { background: none; }
+}

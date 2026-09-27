@@ -2,7 +2,7 @@
    Elastic hard-disk collisions between the particle and each molecule; molecules do not collide
    with each other. They start with Gaussian (Maxwell–Boltzmann) velocities, so the gas is already
    in equilibrium. */
-(function () {
+Stoch.lazy('particle', function () {
   'use strict';
   const { rng, gaussian, setupCanvas, color } = Stoch;
 
@@ -144,7 +144,7 @@
 
   function layout() {
     boxView = setupCanvas(box, H / W);
-    stripView = setupCanvas(strip, 0.18);
+    stripView = setupCanvas(strip, 0.18, 90);
     drawBox();
     drawStrip();
   }
@@ -180,5 +180,13 @@
   big.m = massFromSlider();
   massIn.nextElementSibling.value = big.m;
   reset();
+  // Printing (PDF export) captures a single frame: run ~15 simulated seconds first so the trail shows.
+  if (/[?&]print\b/.test(location.search)) {
+    for (let f = 0; f < 900; f++) {
+      for (let k = 0; k < SUBSTEPS; k++) step();
+      trail.push([big.x, big.y]);
+      series.push(big.x);
+    }
+  }
   layout();
-})();
+});

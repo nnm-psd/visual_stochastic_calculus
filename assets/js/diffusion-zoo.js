@@ -2,7 +2,7 @@
    Three classic SDEs share one fixed stream of Gaussian noise (200 paths × 400 steps on [0, 2]),
    so moving a slider changes the model, not the luck. Left: the fan of paths. Right: the spread
    of end values, with the exact density where one is simple (GBM: log-normal, OU: normal). */
-(function () {
+Stoch.lazy('zoo', function () {
   'use strict';
   const { rng, gaussian, setupCanvas, color, polyline, normalPdf, histogram, revealOnInteract } = Stoch;
 
@@ -144,4 +144,4 @@
   makeNoise();
   view = setupCanvas(canvas, 0.55);
   render();
-})();
+});

@@ -27,7 +27,7 @@
 <body>
 <header class="site-header">
   <a href="../index.html">Visual Stochastic Calculus</a>
-  <span class="links"><span>Chapter 1 · Definition</span><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+  <span class="links"><span>Chapter 1 · Definition</span><a class="pdf-link" href="../pdf/brownian-motion.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
 </header>
 <main>
   <h1>Brownian Motion</h1>
@@ -43,7 +43,7 @@
         <button type="button" data-choice="b">It moves more sluggishly but keeps wandering</button>
         <button type="button" data-choice="c">It moves faster</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Raise the energy, make the particle heavier, then reveal the molecules. The strip below the box tracks only the particle's horizontal position.</p>
     <div class="formula">$$\langle \Delta x^2 \rangle = 2Dt$$</div>
@@ -101,7 +101,7 @@ t = 4 s: &lt;dx^2&gt; = 0.3985</code></pre>
         <button type="button" data-choice="b">It shrinks to zero</button>
         <button type="button" data-choice="c">It settles at a fixed width</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>How much should each step shrink? After <em>n</em> flips the walk is typically about $\sqrt n$ steps from where it started, not <em>n</em>, because heads and tails partly cancel. So we divide by $\sqrt n$. The typical distance then stays about 1 whatever <em>n</em> is. Divide by <em>n</em> instead and the path flattens to a straight line at 0. Don't divide at all and it flies off the screen.</p>
     <p>Drag <em>n</em> up. The staircases turn into rough curves, and the places where the walks end up (the bars on the right) pile into a bell shape.</p>
@@ -124,7 +124,7 @@ t = 4 s: &lt;dx^2&gt; = 0.3985</code></pre>
       <label>Steps <em>n</em> <input type="range" name="n" min="1" max="4" step="0.01" value="1"><output></output></label>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats rw-stats"></p>
+    <p class="stats rw-stats" aria-live="polite"></p>
     <p class="caption">The <em>mean</em> is the average ending point. The <em>variance</em> is the average squared distance from that mean, the same "average of squares" as in Einstein's formula above.</p>
     <p class="takeaway" hidden>Shrink the steps by $1/\sqrt n$ and the random walk turns into Brownian motion. Mathematicians call this Donsker's theorem. The coin doesn't matter: any fair random steps (ones that average out to zero) give Brownian motion too, at most stretched vertically. That is why Brownian motion turns up everywhere, from pollen grains to stock prices.</p>
     <details class="drawer">
@@ -159,7 +159,7 @@ n =  10000: mean +0.011, variance 1.025</code></pre>
         <button type="button" data-choice="b">It tilts upward</button>
         <button type="button" data-choice="c">It tilts downward</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>The chart on the left shows 100 of 500 simulated paths, with one in orange. Each shaded band is a stretch of time. For every path, the scatter plot on the right puts one dot at (its rise over A, its rise over B). Stretch a band by dragging its edge and watch the cloud widen in that direction. Then slide one band on top of the other and watch the cloud tilt.</p>
     <div class="formula">$$W_t - W_s \sim N(0,\; t-s) \qquad \text{rises over non-overlapping intervals are independent}$$</div>
@@ -180,7 +180,7 @@ n =  10000: mean +0.011, variance 1.025</code></pre>
     <div class="controls">
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats inc-stats"></p>
+    <p class="stats inc-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Longer interval, bigger spread: the variance of the rise equals the interval's length. Separate intervals give an untilted cloud, because the path has no memory. Overlap them and the cloud tilts, since both rises now share the overlapping piece of path. In fact the correlation equals the overlap divided by $\sqrt{|A|\cdot|B|}$, where $|A|$ and $|B|$ are the two bands' lengths.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -217,7 +217,7 @@ corr(A, C) 0.816 (theory 0.816)</code></pre>
         <button type="button" data-choice="b">A smooth, gentle curve</button>
         <button type="button" data-choice="c">Just as rough as before</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Drag the zoom slider, or press Play. Both panels zoom toward the same moment, $t = 0.5$ (the thin vertical line), up to a million times. Each panel stretches vertically so the curve always fills the frame. Watch which one straightens out.</p>
     <div class="formula">$$\lvert W_{t+h} - W_t \rvert \approx \sqrt h \quad\Longrightarrow\quad \left\lvert \frac{W_{t+h} - W_t}{h} \right\rvert \approx \frac{1}{\sqrt h} \;\longrightarrow\; \infty \ \text{ as } h \to 0$$</div>
@@ -264,6 +264,39 @@ h = 1e-06: smooth slope 5.82, Brownian slope 787 (0.8/sqrt(h) = 800)</code></pre
     </details>
   </section>
 
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="b" data-explain="After n steps a walk is typically about √n steps from where it started, so dividing by √n keeps the typical distance near 1. Dividing by n squashes everything to 0.">
+      <p><strong>1.</strong> A random walk takes n steps of size 1/√n in one unit of time. Why 1/√n and not 1/n?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">With 1/n the path would be too rough</button>
+        <button type="button" data-choice="b">With 1/n the path flattens to 0; with 1/√n its spread stays fixed</button>
+        <button type="button" data-choice="c">It keeps every step positive</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="a" data-explain="A rise is normal with mean 0 and variance equal to the interval&#x27;s length: 0.7 − 0.2 = 0.5.">
+      <p><strong>2.</strong> The rise of a Brownian path over the interval from 0.2 to 0.7 follows which distribution?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">N(0, 0.5)</button>
+        <button type="button" data-choice="b">N(0, 0.7)</button>
+        <button type="button" data-choice="c">N(0.5, 1)</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="Over a window of width h the path moves about √h, so the slope is about 1/√h. Shrinking h by 100 makes that √100 = 10 times larger.">
+      <p><strong>3.</strong> Zoom into a Brownian path 100 times. Roughly how much steeper does its slope get?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">100 times</button>
+        <button type="button" data-choice="b">10 times</button>
+        <button type="button" data-choice="c">It stays the same</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
   <nav class="chapter-nav">
     <span></span>
     <a href="../variation/index.html">Chapter 2: Variation &amp; Martingales →</a>
@@ -282,6 +315,7 @@ h = 1e-06: smooth slope 5.82, Brownian slope 787 (0.8/sqrt(h) = 800)</code></pre
 <script src="../assets/js/random-walk.js"></script>
 <script src="../assets/js/increments.js"></script>
 <script src="../assets/js/rough-paths.js"></script>
+<script src="../assets/js/progress.js"></script>
 <script src="../assets/js/theme.js"></script>
 </body>
 </html>

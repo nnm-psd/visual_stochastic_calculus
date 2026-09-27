@@ -171,6 +171,25 @@
       <tr><td>$-2\,s(t, X_t)\,dt$</td><td>The score correction. Because $dt$ is negative, it moves each particle <em>along</em> the score arrows of section 7.2, toward more likely places.</td><td><a href="../diffusion-models/index.html#reverse">7.3 Noise to Data: the Reverse-Time SDE</a></td></tr>
       <tr><td>$d\overline{W}_t$</td><td>Fresh random kicks for the backward run.</td><td><a href="../diffusion-models/index.html#reverse">7.3 Noise to Data: the Reverse-Time SDE</a></td></tr>
       <tr><td>probability-flow ODE</td><td>The same equation with half the score term and no noise: $dX = [-X - s(t, X)]\,dt$. Each noise sample then maps to one data sample, with no randomness along the way.</td><td><a href="../diffusion-models/index.html#reverse">7.3 Noise to Data: the Reverse-Time SDE</a></td></tr>
+      <tr><td>$\pi(x)$</td><td>The <em>target</em> density to sample from: here the two-bump data of this chapter.</td><td><a href="../diffusion-models/index.html#langevin">7.4 Langevin Sampling</a></td></tr>
+      <tr><td>$s(x)$</td><td>Its score: the slope of $\log \pi$, pointing toward more likely places (section 7.2 at noise level 0).</td><td><a href="../diffusion-models/index.html#langevin">7.4 Langevin Sampling</a></td></tr>
+      <tr><td>$\sqrt2\,dW_t$</td><td>Random kicks. The $\sqrt2$ balances the drift so that the resting distribution is exactly $\pi$.</td><td><a href="../diffusion-models/index.html#langevin">7.4 Langevin Sampling</a></td></tr>
+      <tr><td>$t \to \infty$</td><td>"In the long run". The theorem says nothing about <em>how</em> long, and that turns out to matter.</td><td><a href="../diffusion-models/index.html#langevin">7.4 Langevin Sampling</a></td></tr>
+      <tr class="group"><th colspan="3">Chapter 8 · Beyond Brownian Motion</th></tr>
+      <tr><td>$N_t$</td><td>A <em>Poisson process</em>: the number of jumps that have happened by time $t$. Jumps arrive at random moments, on average $\lambda$ per unit of time, independently of each other.</td><td><a href="../beyond/index.html#jumps">8.1 Jumps</a></td></tr>
+      <tr><td>$\lambda$</td><td>The jump rate ("lambda"): how many jumps per unit of time on average.</td><td><a href="../beyond/index.html#jumps">8.1 Jumps</a></td></tr>
+      <tr><td>$J_k$</td><td>The size of jump number $k$: here a bell-curve number with mean 0, so jumps go up or down.</td><td><a href="../beyond/index.html#jumps">8.1 Jumps</a></td></tr>
+      <tr><td>$\sigma W_t$</td><td>The ordinary Brownian part, scaled by $\sigma$.</td><td><a href="../beyond/index.html#jumps">8.1 Jumps</a></td></tr>
+      <tr><td>$\operatorname{Var}(X_t)$</td><td>The variance: the Brownian part contributes $\sigma^2 t$ and the jumps contribute $\lambda\,\mathbb E[J^2]\,t$.</td><td><a href="../beyond/index.html#jumps">8.1 Jumps</a></td></tr>
+      <tr><td>$[X]_t$</td><td>The quadratic variation (section 2.1). Now it is <em>random</em>: $\sigma^2 t$ plus the sum of the squared jumps.</td><td><a href="../beyond/index.html#jumps">8.1 Jumps</a></td></tr>
+      <tr><td>log scale</td><td>Each step up the vertical axis multiplies by 10, so a bar ten times shorter is still easy to see.</td><td><a href="../beyond/index.html#jumps">8.1 Jumps</a></td></tr>
+      <tr><td>$X_t$</td><td>The hidden signal, following $dX = -\theta X\,dt + \sigma\,dW$ with $\theta = \sigma = 1$.</td><td><a href="../beyond/index.html#kalman">8.2 The Kalman–Bucy Filter</a></td></tr>
+      <tr><td>$dY_t$</td><td>What is measured in a tiny time step: $X_t\,dt + r\,dV_t$, the signal plus independent noise $dV$.</td><td><a href="../beyond/index.html#kalman">8.2 The Kalman–Bucy Filter</a></td></tr>
+      <tr><td>$r$</td><td>How noisy the measurements are (the slider).</td><td><a href="../beyond/index.html#kalman">8.2 The Kalman–Bucy Filter</a></td></tr>
+      <tr><td>$m_t$</td><td>The filter's estimate: the best guess of $X_t$ given every measurement up to time $t$.</td><td><a href="../beyond/index.html#kalman">8.2 The Kalman–Bucy Filter</a></td></tr>
+      <tr><td>$P_t$</td><td>The variance of the estimate's error: how unsure the filter is. The band is $m_t \pm 2\sqrt{P_t}$.</td><td><a href="../beyond/index.html#kalman">8.2 The Kalman–Bucy Filter</a></td></tr>
+      <tr><td>$dY_t - m_t\,dt$</td><td>The <em>innovation</em>: the part of the new measurement that the estimate did not predict, the "surprise".</td><td><a href="../beyond/index.html#kalman">8.2 The Kalman–Bucy Filter</a></td></tr>
+      <tr><td>$P_t / r^2$</td><td>The <em>Kalman gain</em>: how much of the surprise to believe. It is large when the filter is unsure ($P$ big) or the data are clean ($r$ small).</td><td><a href="../beyond/index.html#kalman">8.2 The Kalman–Bucy Filter</a></td></tr>
     </tbody>
   </table>
 </main>

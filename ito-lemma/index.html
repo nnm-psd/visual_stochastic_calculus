@@ -27,7 +27,7 @@
 <body>
 <header class="site-header">
   <a href="../index.html">Visual Stochastic Calculus</a>
-  <span class="links"><span>Chapter 4 · The calculus</span><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
+  <span class="links"><span>Chapter 4 · The calculus</span><a class="pdf-link" href="../pdf/ito-lemma.pdf" download>PDF</a><a href="../notation/index.html">Notation</a><button type="button" class="theme-toggle">Dark mode</button></span>
 </header>
 <main>
   <h1>Itô's Lemma</h1>
@@ -43,7 +43,7 @@
         <button type="button" data-choice="b">The third-order total</button>
         <button type="button" data-choice="c">Both will shrink to 0</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Drag $n$ up. In ordinary calculus, every term beyond the first would shrink to nothing. Watch which ones do here.</p>
     <div class="formula">$$f(W_{t+\Delta t}) - f(W_t) \;=\; f'(W_t)\,\Delta W \;+\; \tfrac12 f''(W_t)\,(\Delta W)^2 \;+\; \tfrac16 f'''(W_t)\,(\Delta W)^3 \;+\; \cdots$$</div>
@@ -67,7 +67,7 @@
       </span>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats ty-stats"></p>
+    <p class="stats ty-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>As the pieces shrink, the third-order bar disappears. The second-order bar settles to $\tfrac12\int_0^1 f''(W_t)\,dt$ (the dashed tick), and "first + second" matches the exact change. Replacing $(\Delta W)^2$ by $\Delta t$, the rule $(dW)^2 = dt$, is all it takes to turn the second-order term into an ordinary time integral.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -109,7 +109,7 @@ half the integral of f&#x27;&#x27; dt = 0.267</code></pre>
         <button type="button" data-choice="b">Above it</button>
         <button type="button" data-choice="c">Below it</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <div class="formula">$$df(W_t) \;=\; f'(W_t)\,dW_t \;+\; \tfrac12 f''(W_t)\,dt$$</div>
     <dl class="symbols">
@@ -130,7 +130,7 @@ half the integral of f&#x27;&#x27; dt = 0.267</code></pre>
       </span>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats lm-stats"></p>
+    <p class="stats lm-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Itô's rebuild lies right on top of the truth, while the naive chain rule drifts away by exactly $\tfrac12\int f''(W)\,dt$. This is <strong>Itô's lemma</strong>, the central tool of stochastic calculus. Everything that follows (solving random equations, pricing options) is Itô's lemma applied to the right function.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -166,7 +166,7 @@ print(f&quot;true W_1^2 = {W[-1] ** 2:.3f}   Ito = {ito:.3f}   naive = {naive:.3
         <button type="button" data-choice="b">Stratonovich</button>
         <button type="button" data-choice="c">They will coincide</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <div class="formula">$$dX_t = X_t \circ dW_t \quad\Longleftrightarrow\quad dX_t = \tfrac12 X_t\,dt + X_t\,dW_t$$</div>
     <dl class="symbols">
@@ -184,7 +184,7 @@ print(f&quot;true W_1^2 = {W[-1] ** 2:.3f}   Ito = {ito:.3f}   naive = {naive:.3
       <label><input type="checkbox" name="drift"> Add the conversion drift ½X dt to Itô</label>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats st-stats"></p>
+    <p class="stats st-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Same noise, same-looking equation, different answers, until the conversion drift is added. Physicists often prefer Stratonovich, because the ordinary chain rule works for it. Finance uses Itô, because you can't trade on a price you haven't seen yet. The rest of this site uses Itô.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -225,7 +225,7 @@ print(f&quot;Ito {ito:.3f} (e^(W - 1/2) = {np.exp(W1 - 0.5):.3f})   Ito + drift 
         <button type="button" data-choice="b">Settle near 0.8</button>
         <button type="button" data-choice="c">Grow forever</button>
       </div>
-      <p class="predict-result" hidden></p>
+      <p class="predict-result" aria-live="polite" hidden></p>
     </div>
     <p>Drag $\rho$ from −1 to 1. Watch the paths, their shape in the plane, and the running sum at the bottom.</p>
     <div class="formula">$$dW^{(1)}_t\,dW^{(2)}_t = \rho\,dt \qquad\Longrightarrow\qquad d(XY) = X\,dY + Y\,dX + dX\,dY$$</div>
@@ -250,7 +250,7 @@ print(f&quot;Ito {ito:.3f} (e^(W - 1/2) = {np.exp(W1 - 0.5):.3f})   Ito + drift 
       <label>Correlation ρ <input type="range" name="rho" min="-1" max="1" step="0.05" value="0.6"><output></output></label>
       <button type="button" class="resample">Resample</button>
     </div>
-    <p class="stats cr-stats"></p>
+    <p class="stats cr-stats" aria-live="polite"></p>
     <p class="takeaway" hidden>Two correlated Brownian motions have a <em>cross-variation</em> $\rho t$, and it adds the extra $\rho\,dt$ to the product rule. With this, Itô's lemma extends to any number of Brownian motions. That is what pricing an option on two assets, or a stock whose volatility is itself random (the Heston model), requires.</p>
     <details class="drawer">
       <summary>Going deeper: the precise statement</summary>
@@ -281,6 +281,39 @@ W1 * W2 = -0.063   integrals = -0.660   integrals + rho = -0.060</code></pre>
     </details>
   </section>
 
+  <section id="recap" class="section recap">
+    <h2>Chapter recap</h2>
+    <p>Quick questions on this chapter's big ideas. Each answer is explained as soon as you choose.</p>
+    <div class="quiz" data-answer="b" data-explain="f(x) = x² has f′ = 2x and f″ = 2, so df = 2W dW + ½·2 dt = 2W dW + dt.">
+      <p><strong>1.</strong> By Itô&#x27;s lemma, the tiny change d(W²) equals…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">2W dW</button>
+        <button type="button" data-choice="b">2W dW + dt</button>
+        <button type="button" data-choice="c">2W dW − dt</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="a" data-explain="Squared rises of Brownian motion add up to t instead of 0 (quadratic variation), so ½f″(dW)² becomes ½f″ dt.">
+      <p><strong>2.</strong> Why does a second-order term survive in stochastic calculus but not in ordinary calculus?</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">(dW)² behaves like dt, and those add up to the elapsed time</button>
+        <button type="button" data-choice="b">Brownian motion is differentiable</button>
+        <button type="button" data-choice="c">The third-order terms cancel it</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <div class="quiz" data-answer="b" data-explain="Their cross-variation is ρt = −0.5 × 1.">
+      <p><strong>3.</strong> Two Brownian motions have correlation ρ = −0.5. Over time 0 to 1, the sum of products of their rises approaches…</p>
+      <div class="predict-options">
+        <button type="button" data-choice="a">0</button>
+        <button type="button" data-choice="b">−0.5</button>
+        <button type="button" data-choice="c">0.25</button>
+      </div>
+      <p class="predict-result" aria-live="polite" hidden></p>
+    </div>
+    <p class="quiz-score" aria-live="polite"></p>
+  </section>
+
   <nav class="chapter-nav">
     <a href="../ito-integral/index.html">← Chapter 3: The Itô Integral</a>
     <a href="../sde/index.html">Chapter 5: Stochastic Differential Equations →</a>
@@ -299,6 +332,7 @@ W1 * W2 = -0.063   integrals = -0.660   integrals + rho = -0.060</code></pre>
 <script src="../assets/js/ito-lemma.js"></script>
 <script src="../assets/js/ito-stratonovich.js"></script>
 <script src="../assets/js/correlated.js"></script>
+<script src="../assets/js/progress.js"></script>
 <script src="../assets/js/theme.js"></script>
 </body>
 </html>

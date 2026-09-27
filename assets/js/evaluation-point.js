@@ -2,9 +2,9 @@
    Approximate the integral of W against dW by sums of W(evaluation point) × rise, where the evaluation
    point sits a fraction θ of the way through each piece. One Lévy path (2^16 pieces) is reused, so
    θ can take any value k/16 even at the finest ruler of 2^12 pieces. */
-(function () {
+Stoch.lazy('eval-point', function () {
   'use strict';
-  const { levyPath, setupCanvas, color, polyline, revealOnInteract } = Stoch;
+  const { levyPath, setupCanvas, color, polyline, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('eval-point');
   const pathCanvas = root.querySelector('.ep-path');
@@ -87,12 +87,7 @@
       polyline(ctx, 0, n, (i) => px(i / n), (i) => py(S[i]));
 
       ctx.font = '12px system-ui, sans-serif';
-      ctx.fillStyle = color('--accent');
-      ctx.fillText('your sum', 8, 14);
-      ctx.fillStyle = color('--accent-2');
-      ctx.fillText('···· Itô: ½W² − ½t', 80, 14);
-      ctx.fillStyle = color('--accent-3');
-      ctx.fillText('— — ordinary calculus: ½W²', 206, 14);
+      legend(ctx, [['your sum', '--accent'], ['···· Itô: ½W² − ½t', '--accent-2'], ['— — ordinary calculus: ½W²', '--accent-3']], 8, 14, w - 16);
     }
 
     const w1 = W[FINE];
@@ -106,9 +101,9 @@
   thetaIn.addEventListener('input', render);
   kIn.addEventListener('input', render);
   resampleBtn.addEventListener('click', () => { seed += 1; simulate(); render(); });
-  function layout() { pathView = setupCanvas(pathCanvas, 0.32); sumView = setupCanvas(sumCanvas, 0.42); render(); }
+  function layout() { pathView = setupCanvas(pathCanvas, 0.32, 170); sumView = setupCanvas(sumCanvas, 0.42, 210); render(); }
   window.addEventListener('resize', layout);
   revealOnInteract(root);
   simulate();
   layout();
-})();
+});

@@ -2,7 +2,7 @@
    Heat equation ∂u/∂t + ½∂²u/∂x² = 0 on [0, 1] with final condition u(1, x) = g(x), g a tent.
    The heatmap is the equation's exact solution (Gaussian quadrature). Click a point (t, x):
    Brownian paths start there, and the running average of g at their end values converges to u(t, x). */
-(function () {
+Stoch.lazy('fk', function () {
   'use strict';
   const { rng, gaussian, setupCanvas, color, polyline, normalPdf, revealOnInteract } = Stoch;
 
@@ -149,4 +149,4 @@
   revealOnInteract(root);
   computeGrid();
   layout();
-})();
+});

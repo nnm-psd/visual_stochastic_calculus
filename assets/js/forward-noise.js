@@ -2,7 +2,7 @@
    3,000 samples of the two-bump "data" follow dX = -X dt + √2 dW for 3 time units.
    Left: 40 of the paths up to the current time. Right: histogram now, the exact noised density
    (black) and pure noise N(0, 1) (dashed). */
-(function () {
+Stoch.lazy('forward', function () {
   'use strict';
   const { rng, gaussian, setupCanvas, color, polyline, histogram, normalPdf, revealOnInteract } = Stoch;
   const { density, sampleData, SPLIT } = Diffusion;
@@ -108,4 +108,4 @@
   simulate();
   view = setupCanvas(canvas, 0.55);
   render();
-})();
+});

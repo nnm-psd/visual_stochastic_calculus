@@ -2,9 +2,9 @@
    For a betting rule H (a function of the current value of W), simulate 10,000 paths and compute
    I = sum H(W_left) × rise and Q = sum H(W_left)² × dt. Plot the running averages of I, I² and Q as
    more paths are included (log scale): I → 0, and I² and Q converge to the same number. */
-(function () {
+Stoch.lazy('isometry', function () {
   'use strict';
-  const { rng, gaussian, setupCanvas, color, polyline, revealOnInteract } = Stoch;
+  const { rng, gaussian, setupCanvas, color, polyline, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('isometry');
   const canvas = root.querySelector('.is-canvas');
@@ -62,12 +62,7 @@
       ctx.lineWidth = 2;
       polyline(ctx, FIRST - 1, PATHS - 1, px, (k) => py(m[k]));
     }
-    ctx.fillStyle = color('--accent');
-    ctx.fillText('average of (gains)²', 48, 16);
-    ctx.fillStyle = color('--accent-2');
-    ctx.fillText('average of ∫H² dt', 172, 16);
-    ctx.fillStyle = color('--accent-3');
-    ctx.fillText('average gains', 286, 16);
+    legend(ctx, [['average of (gains)²', '--accent'], ['average of ∫H² dt', '--accent-2'], ['average gains', '--accent-3']], 48, 16, w - 60);
 
     stats.textContent =
       `${rule.name}, after ${PATHS.toLocaleString()} paths: average gains ${mI[PATHS - 1].toFixed(3)} (theory 0). ` +
@@ -80,4 +75,4 @@
   revealOnInteract(root);
   view = setupCanvas(canvas, 0.5);
   render();
-})();
+});

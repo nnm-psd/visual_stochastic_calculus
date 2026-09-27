@@ -2,9 +2,9 @@
    The same noise drives dX = X dW read two ways: Itô (left-end rule, Euler steps) and Stratonovich
    (midpoint rule, Heun steps). A toggle adds the conversion drift ½X dt to the Itô equation,
    after which the two paths coincide. Exact solutions: Itô e^{W - t/2}, Stratonovich e^{W}. */
-(function () {
+Stoch.lazy('strat', function () {
   'use strict';
-  const { rng, brownianPath, setupCanvas, color, polyline, revealOnInteract } = Stoch;
+  const { rng, brownianPath, setupCanvas, color, polyline, revealOnInteract, legend } = Stoch;
 
   const root = document.getElementById('strat');
   const canvas = root.querySelector('.st-canvas');
@@ -46,10 +46,7 @@
     polyline(ctx, 0, STEPS, px, (i) => py(ito[i]));
 
     ctx.font = '12px system-ui, sans-serif';
-    ctx.fillStyle = color('--accent-3');
-    ctx.fillText('Stratonovich: dX = X ∘ dW (thick)', 8, 14);
-    ctx.fillStyle = color('--accent');
-    ctx.fillText(addDrift ? 'Itô: dX = ½X dt + X dW' : 'Itô: dX = X dW', 230, 14);
+    legend(ctx, [['Stratonovich: dX = X ∘ dW (thick)', '--accent-3'], [addDrift ? 'Itô: dX = ½X dt + X dW' : 'Itô: dX = X dW', '--accent']], 8, 14, w - 16);
     ctx.fillStyle = color('--muted');
     ctx.fillText('X = 1', w - 40, py(1) - 4);
 
@@ -66,4 +63,4 @@
   W = brownianPath(STEPS, rng(seed));
   view = setupCanvas(canvas, 0.45);
   render();
-})();
+});

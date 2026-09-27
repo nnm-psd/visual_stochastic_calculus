@@ -16,7 +16,11 @@ references, and a short Python version you can run yourself.
 4. **Itô's Lemma:** the surviving second-order term, the lemma in action, Itô vs Stratonovich, correlated Brownian motions
 5. **Stochastic Differential Equations:** Euler–Maruyama, GBM / OU / CIR, Fokker–Planck
 6. **Applications:** Black–Scholes by hedging, Girsanov, Feynman–Kac
-7. **Diffusion Models:** data to noise, the score, the reverse-time SDE
+7. **Diffusion Models:** data to noise, the score, the reverse-time SDE, Langevin sampling
+8. **Beyond Brownian Motion:** jumps and fat tails, the Kalman–Bucy filter
+
+Every chapter ends with a short recap quiz and can be downloaded as a PDF (`pdf/`). Progress (sections whose
+prediction you answered and whose chart you tried) is kept in your browser and shown on the home page.
 
 ## Run locally
 
@@ -38,3 +42,4 @@ Every push runs `.github/workflows/checks.yml`, which you can also run locally:
 - `python tools/check_snippets.py` runs all Python snippets and confirms they still print their published output (`--update` rewrites the outputs after an intentional change).
 - `python tools/check_pages.py` loads every page in headless Chrome and fails on console errors, unrendered math or broken links.
 - `python tools/build_notation.py` regenerates the notation page. CI fails if it is out of date.
+- `python tools/build_pdfs.py` re-exports the chapter PDFs in `pdf/` (not run in CI; re-run after editing a chapter).
