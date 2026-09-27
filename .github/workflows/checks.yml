@@ -1,0 +1,30 @@
+name: Site checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install NumPy (pinned so snippet outputs are reproducible)
+        run: pip install numpy==1.26.4
+
+      - name: Python snippets still print their published output
+        run: python tools/check_snippets.py
+
+      - name: Notation page is up to date with the glossaries
+        run: |
+          python tools/build_notation.py
+          git diff --exit-code -- notation/
+
+      - name: Pages load without console errors, math renders, links resolve
+        run: python tools/check_pages.py

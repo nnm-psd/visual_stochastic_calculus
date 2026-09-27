@@ -4,6 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Applications · Visual Stochastic Calculus</title>
+<meta name="description" content="Stochastic calculus at work: Black–Scholes option pricing by delta hedging, Girsanov&#x27;s change of measure, and the Feynman–Kac formula.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/applications/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Applications · Visual Stochastic Calculus">
+<meta property="og:description" content="Stochastic calculus at work: Black–Scholes option pricing by delta hedging, Girsanov&#x27;s change of measure, and the Feynman–Kac formula.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/applications/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <link rel="stylesheet" href="../assets/css/style.css">
 <script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
@@ -57,7 +73,7 @@
 $$\partial_t C + \tfrac12\sigma^2 S^2\,\partial_{SS} C + rS\,\partial_S C - rC = 0, \qquad C(T, S) = \max(S - K, 0).$$
 Its solution is $C = S\,N(d_1) - K e^{-r\tau} N(d_2)$, with $d_{1,2} = \big[\ln(S/K) + (r \pm \tfrac12\sigma^2)\tau\big] / (\sigma\sqrt\tau)$. The drift $\mu$ has disappeared.</p>
 <p><strong>Discrete hedging.</strong> With $N$ rebalances, the standard deviation of the hedging error shrinks like $1/\sqrt N$ (Boyle &amp; Emanuel, 1980), matching the chart.</p>
-<p class="ref">References: F. Black &amp; M. Scholes, <em>J. Political Economy</em> 81 (1973). R. Merton, <em>Bell J. Economics</em> 4 (1973). Shreve, <em>Stochastic Calculus for Finance II</em>, §4.5.</p>
+<p class="ref">References: F. Black &amp; M. Scholes, <em>J. Political Economy</em> 81 (1973), 637–654. R. Merton, <em>Bell J. Economics and Management Science</em> 4 (1973), 141–183. P. Boyle &amp; D. Emanuel, "Discretely adjusted option hedges", <em>J. Financial Economics</em> 8 (1980), 259–282. Shreve, <em>Stochastic Calculus for Finance II</em>, §4.5.</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>
@@ -130,7 +146,7 @@ price 7.966, rebalance 252x a year: P&amp;L spread 0.445</code></pre>
       <summary>Going deeper: the precise statement</summary>
 <p><strong>Girsanov's theorem (1960).</strong> Let $\theta_t$ use only past information and satisfy Novikov's condition $\mathbb E\,e^{\frac12\int_0^T \theta_s^2\,ds} &lt; \infty$. Define $Z_T = \exp\big(-\int_0^T \theta_s\,dW_s - \tfrac12\int_0^T \theta_s^2\,ds\big)$ and new probabilities by $Q(A) = \mathbb E[Z_T\,\mathbf 1_A]$. Under $Q$, the process $\widetilde W_t = W_t + \int_0^t \theta_s\,ds$ is a Brownian motion. This section is the constant case $\theta = \lambda$, $T = 1$.</p>
 <p><strong>In finance.</strong> Choose $\theta = (\mu - r)/\sigma$, the <em>market price of risk</em>. Under $Q$ the stock grows at the risk-free rate $r$, and every price is a discounted $Q$-average of the payoff. This gives the same answer as the hedging argument in section 6.1.</p>
-<p class="ref">References: I. Girsanov, <em>Theory Probab. Appl.</em> 5 (1960), 285–301. Shreve, <em>Stochastic Calculus for Finance II</em>, §5.2.</p>
+<p class="ref">References: I. Girsanov, <em>Theory Probab. Appl.</em> 5 (1960), 285–301 (English translation). Shreve, <em>Stochastic Calculus for Finance II</em>, §5.2.</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>
@@ -187,7 +203,7 @@ $$u(t, x) = \mathbb E\Big[e^{-\int_t^T r(X_s)\,ds}\, g(X_T) \,\Big|\, X_t = x\Bi
 solves $\partial_t u + a\,\partial_x u + \tfrac12 b^2\,\partial_{xx} u - r\,u = 0$ with $u(T, x) = g(x)$. This section is the case $a = 0$, $b = 1$, $r = 0$.</p>
 <p><strong>Proof idea.</strong> Apply Itô's lemma to $u(s, X_s)$. The PDE makes the $ds$ terms cancel, so $u(s, X_s)$ is a martingale (section 2.2). Averaging from $s = t$ to $s = T$ gives the formula.</p>
 <p>Mark Kac proved it in 1949, inspired by Richard Feynman's path integrals in quantum mechanics.</p>
-<p class="ref">References: M. Kac, <em>Trans. Amer. Math. Soc.</em> 65 (1949), 1–13. Shreve, <em>Stochastic Calculus for Finance II</em>, §6.4.</p>
+<p class="ref">References: M. Kac, <em>Trans. Amer. Math. Soc.</em> 65 (1949), 1–13. Shreve, <em>Stochastic Calculus for Finance II</em>, ch. 6 (§6.4, and §6.6 for several dimensions).</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>

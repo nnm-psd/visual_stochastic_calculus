@@ -123,6 +123,8 @@ A real model learns the score with a neural network, and the page says so.
 | Scripts | Classic `<script>` files sharing a `Stoch` global (`assets/js/engine.js`) | Pages open straight from `file://` with no build step. ES modules would need a server. |
 | Accessibility | Every drag or click interaction also works from the keyboard (canvas `tabindex=0`, arrow keys), with the keys named in the caption | Pointer-only charts shut out keyboard users |
 | Notation index | `notation/index.html` is generated from the glossaries by `python tools/build_notation.py` | One lookup page without hand-maintaining a copy. Re-run after editing any glossary |
+| Continuous checks | GitHub Actions runs `tools/check_snippets.py` (snippet output vs published, ±1.5 in the last printed digit, NumPy pinned), `tools/check_pages.py` (headless Chrome: no console output, KaTeX rendered, links resolve) and a notation-freshness diff | Stops a future edit from silently breaking a chart or leaving a published result out of date |
+| Sharing | Each page has a description, canonical URL, Open Graph and Twitter card tags; `assets/og-image.png` (1200×630) and favicons; `sitemap.xml` | Links pasted into chat or social apps show a proper preview card |
 | Math | KaTeX | Fast and static. The Wilmott QF deck uses the same. |
 | Randomness | Seeded RNG per section (`Stoch.rng`), with Resample buttons that bump the seed | Reproducible screenshots and tests. Same-noise comparisons (4.3, 5.1, 5.2, 7.3) reuse one random stream. (A single hero path shared across sections was planned but not built.) |
 | Architecture | Static site, one page per chapter, no backend | All simulation is client-side. It is cheap to host (GitHub Pages) and matches Seeing Theory. |

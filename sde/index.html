@@ -4,6 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Stochastic Differential Equations · Visual Stochastic Calculus</title>
+<meta name="description" content="Stochastic differential equations: the Euler–Maruyama method, geometric Brownian motion, Ornstein–Uhlenbeck and CIR models, and the Fokker–Planck equation.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/sde/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Stochastic Differential Equations · Visual Stochastic Calculus">
+<meta property="og:description" content="Stochastic differential equations: the Euler–Maruyama method, geometric Brownian motion, Ornstein–Uhlenbeck and CIR models, and the Fokker–Planck equation.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/sde/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <link rel="stylesheet" href="../assets/css/style.css">
 <script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
@@ -118,7 +134,7 @@ N = 512: average error 0.0203</code></pre>
       <summary>Going deeper: the precise statement</summary>
 <p><strong>Exact solutions.</strong> GBM: $X_t = X_0 \exp\big((\mu - \tfrac12\sigma^2)t + \sigma W_t\big)$ (from Itô's lemma applied to $\log X$). OU: $X_t = X_0 e^{-\theta t} + \sigma\int_0^t e^{-\theta(t-s)}\,dW_s$, which is normally distributed with the mean and variance drawn on the chart. CIR has no elementary formula, but $X_t$ follows a scaled non-central chi-square distribution.</p>
 <p><strong>When does an SDE have a solution?</strong> If $a$ and $b$ are Lipschitz and grow at most linearly, there is exactly one solution (Itô's theorem). CIR's $\sqrt x$ is not Lipschitz at 0, and uniqueness there needs a finer result (Yamada–Watanabe). The Feller condition $2\kappa m \ge \sigma^2$ (here $m = 1$) is exactly what keeps 0 from ever being reached.</p>
-<p class="ref">References: Øksendal, <em>Stochastic Differential Equations</em>, ch. 5. G. Uhlenbeck &amp; L. Ornstein, <em>Phys. Rev.</em> 36 (1930). J. Cox, J. Ingersoll &amp; S. Ross, <em>Econometrica</em> 53 (1985).</p>
+<p class="ref">References: Øksendal, <em>Stochastic Differential Equations</em>, ch. 5. G. Uhlenbeck &amp; L. Ornstein, <em>Phys. Rev.</em> 36 (1930), 823–841. J. Cox, J. Ingersoll &amp; S. Ross, <em>Econometrica</em> 53 (1985), 385–407.</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>
@@ -179,7 +195,7 @@ CIR: mean at t = 2 is 1.000, spread 0.350</code></pre>
       <summary>Going deeper: the precise statement</summary>
 <p><strong>Derivation from Itô's lemma.</strong> For any smooth test function $\varphi$, Itô's lemma and taking averages give $\frac{d}{dt}\mathbb E\,\varphi(X_t) = \mathbb E\big[a(X_t)\varphi'(X_t) + \tfrac12 b(X_t)^2 \varphi''(X_t)\big]$. Write both sides as integrals against the density $p(t, x)$ and integrate by parts. Since $\varphi$ was arbitrary, the Fokker–Planck equation follows. It is also called the <em>forward Kolmogorov equation</em>.</p>
 <p><strong>Steady state.</strong> Setting $\partial_t p = 0$ for OU gives the normal density $N\big(0,\ \sigma^2/2\theta\big)$, the bell curve the crowd settles into. The <em>backward</em> Kolmogorov equation, its mirror image, is the equation behind Feynman–Kac (section 6.3).</p>
-<p class="ref">References: H. Risken, <em>The Fokker–Planck Equation</em> (2nd ed., Springer, 1989). Øksendal, <em>Stochastic Differential Equations</em>, ch. 8.</p>
+<p class="ref">References: H. Risken, <em>The Fokker–Planck Equation</em> (2nd ed., Springer, 1989). Øksendal, <em>Stochastic Differential Equations</em>, ch. 8 (the generator and Kolmogorov's backward equation).</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>

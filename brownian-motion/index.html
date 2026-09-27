@@ -4,6 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Brownian Motion · Visual Stochastic Calculus</title>
+<meta name="description" content="Where Brownian motion comes from: a jittering particle, random walks that turn into Brownian motion, its defining properties, and why its paths are too rough for ordinary calculus.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/brownian-motion/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Brownian Motion · Visual Stochastic Calculus">
+<meta property="og:description" content="Where Brownian motion comes from: a jittering particle, random walks that turn into Brownian motion, its defining properties, and why its paths are too rough for ordinary calculus.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/brownian-motion/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <link rel="stylesheet" href="../assets/css/style.css">
 <script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
@@ -115,7 +131,7 @@ t = 4 s: &lt;dx^2&gt; = 0.3985</code></pre>
       <summary>Going deeper: the precise statement</summary>
 <p><strong>Donsker's invariance principle (1951).</strong> Let $X_1, X_2, \dots$ be independent, identically distributed steps with mean 0 and variance 1, and let $S_k = X_1 + \dots + X_k$. Join the points $(k/n,\, S_k/\sqrt n)$ with straight lines to get a random continuous function $W^{(n)}$ on $[0, 1]$. Then $W^{(n)}$ converges in distribution, as a random <em>function</em>, to standard Brownian motion.</p>
 <p>At a single time $t$ this is just the central limit theorem. Donsker's theorem is stronger: it also covers features of the whole path, such as its maximum, so random-walk answers carry over to Brownian motion (section 2.3 uses this).</p>
-<p class="ref">Reference: P. Mörters &amp; Y. Peres, <em>Brownian Motion</em> (Cambridge, 2010), ch. 5.</p>
+<p class="ref">Reference: P. Mörters &amp; Y. Peres, <em>Brownian Motion</em> (Cambridge, 2010), §5.3.</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>
@@ -171,7 +187,7 @@ n =  10000: mean +0.011, variance 1.025</code></pre>
 <p><strong>Definition.</strong> A standard Brownian motion is a random process $(W_t)_{t \ge 0}$ with (i) $W_0 = 0$; (ii) independent increments: for $t_0 &lt; t_1 &lt; \dots &lt; t_k$, the rises $W_{t_1} - W_{t_0}, \dots, W_{t_k} - W_{t_{k-1}}$ are independent; (iii) $W_t - W_s \sim N(0, t - s)$ for $s &lt; t$; (iv) continuous paths.</p>
 <p><strong>Equivalent form.</strong> Brownian motion is the Gaussian process with mean 0 and covariance $\operatorname{Cov}(W_s, W_t) = \min(s, t)$. The overlap rule in this section follows from it: $\operatorname{Cov}(\text{rise over } A, \text{rise over } B) = \lvert A \cap B \rvert$.</p>
 <p>That such a process exists at all is a theorem (Wiener, 1923). Section 1.3 uses Lévy's construction, which builds the path by repeatedly filling in midpoints.</p>
-<p class="ref">References: S. Shreve, <em>Stochastic Calculus for Finance II</em> (Springer, 2004), §3.3. Mörters &amp; Peres, <em>Brownian Motion</em>, ch. 1.</p>
+<p class="ref">References: S. Shreve, <em>Stochastic Calculus for Finance II</em> (Springer, 2004), §3.3. Mörters &amp; Peres, <em>Brownian Motion</em>, §1.1 (Lévy's construction).</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>
@@ -230,7 +246,7 @@ corr(A, C) 0.816 (theory 0.816)</code></pre>
 <p><strong>Theorem (Paley, Wiener &amp; Zygmund, 1933).</strong> With probability 1, a Brownian path is differentiable at <em>no</em> time $t$.</p>
 <p><strong>Scaling.</strong> For any $c &gt; 0$, the process $c^{-1/2} W_{ct}$ is again a standard Brownian motion. This is the precise meaning of "every zoom level looks the same".</p>
 <p><strong>How rough, exactly?</strong> Lévy's modulus of continuity says that over a short window of width $h$ the largest change is about $\sqrt{2h\log(1/h)}$. That is slightly more than $\sqrt h$, and far more than the $h$ a differentiable function would allow. Brownian paths are Hölder continuous of every order below ½, but not of order ½.</p>
-<p class="ref">Reference: Mörters &amp; Peres, <em>Brownian Motion</em>, ch. 1.</p>
+<p class="ref">Reference: Mörters &amp; Peres, <em>Brownian Motion</em>, §1.2–1.3.</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>

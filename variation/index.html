@@ -4,6 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Variation &amp; Martingales · Visual Stochastic Calculus</title>
+<meta name="description" content="Quadratic variation (dW² = dt), martingales and the reflection principle, each explained with an interactive simulation.">
+<link rel="canonical" href="https://nnm-psd.github.io/visual_stochastic_calculus/variation/">
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../assets/apple-touch-icon.png">
+<meta name="theme-color" content="#fbfaf7">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Visual Stochastic Calculus">
+<meta property="og:title" content="Variation &amp; Martingales · Visual Stochastic Calculus">
+<meta property="og:description" content="Quadratic variation (dW² = dt), martingales and the reflection principle, each explained with an interactive simulation.">
+<meta property="og:url" content="https://nnm-psd.github.io/visual_stochastic_calculus/variation/">
+<meta property="og:image" content="https://nnm-psd.github.io/visual_stochastic_calculus/assets/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Visual Stochastic Calculus: a fan of Brownian paths with one highlighted in orange">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <link rel="stylesheet" href="../assets/css/style.css">
 <script>try { var t = localStorage.getItem('theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
@@ -121,7 +137,7 @@ n =  65536: sum |dW| =   204.54   sum dW^2 = 0.9988</code></pre>
 <p><strong>Definition.</strong> A process $M_t$ is a <em>martingale</em> with respect to the history (filtration) $\mathcal F_t$ if it depends only on the history up to time $t$, has $\mathbb E\lvert M_t \rvert &lt; \infty$, and satisfies $\mathbb E[M_t \mid \mathcal F_s] = M_s$ for all $s \le t$.</p>
 <p><strong>Examples from Brownian motion:</strong> $W_t$, $W_t^2 - t$, and $\exp(\lambda W_t - \tfrac12 \lambda^2 t)$ for any number $\lambda$. The last one reappears as the Girsanov weight in section 6.2.</p>
 <p><strong>Lévy's characterisation.</strong> A continuous martingale $M$ with $M_0 = 0$ for which $M_t^2 - t$ is also a martingale must be a Brownian motion. The two martingales in this section are therefore enough to pin Brownian motion down completely.</p>
-<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, ch. 2–3.</p>
+<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, §2.3 and §3.3; Lévy's characterisation is §4.6.3.</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>
@@ -176,7 +192,7 @@ E[W_1^2 - 1] = -0.311  (W_s^2 - s = -0.310)</code></pre>
 <p><strong>Precise statement.</strong> Let $M_t = \max_{s \le t} W_s$. For $a &gt; 0$ and $b \le a$: $P(M_t \ge a,\ W_t \le b) = P(W_t \ge 2a - b)$. Setting $b = a$ and adding $P(W_t \ge a)$ gives the formula in this section.</p>
 <p><strong>Why it works: the strong Markov property.</strong> At the first hitting time $\tau_a = \min\{t : W_t = a\}$, which is a random time, the future $W_{\tau_a + s} - a$ is a fresh Brownian motion, independent of everything before $\tau_a$. Its mirror image is therefore just as likely.</p>
 <p><strong>A surprising consequence.</strong> $\tau_a$ has density $\dfrac{a}{\sqrt{2\pi t^3}}\, e^{-a^2/2t}$. Every level is reached eventually, with probability 1, yet the <em>average</em> waiting time is infinite.</p>
-<p class="ref">Reference: Shreve, <em>Stochastic Calculus for Finance II</em>, §3.7.</p>
+<p class="ref">References: Shreve, <em>Stochastic Calculus for Finance II</em>, §3.7. Mörters &amp; Peres, <em>Brownian Motion</em>, §2.2.</p>
     </details>
     <details class="drawer">
       <summary>Show the code (Python + NumPy)</summary>
